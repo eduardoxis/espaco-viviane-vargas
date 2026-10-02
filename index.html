@@ -1,0 +1,773 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Espaço Viviane Vargas — Estética e Salão de Beleza</title>
+<meta name="description" content="Espaço Viviane Vargas — estética e salão de beleza. Serviços de estética e bem-estar e catálogo completo de produtos de beleza.">
+
+<!-- Open Graph -->
+<meta property="og:title" content="Espaço Viviane Vargas — Estética e Salão de Beleza">
+<meta property="og:description" content="Realce o que te faz única, todos os dias.">
+<meta property="og:image" content="/assets/images/hero-produtos.jpg">
+<meta property="og:type" content="website">
+<meta name="twitter:card" content="summary_large_image">
+
+<link rel="icon" href="/assets/icons/favicon.ico">
+<link rel="apple-touch-icon" href="/assets/icons/apple-touch-icon.png">
+<link rel="manifest" href="/manifest.json">
+
+<link rel="preload" href="/assets/images/hero-produtos.avif" as="image" type="image/avif" fetchpriority="high">
+
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,500;0,600;1,500;1,600&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="/css/style.css">
+<link rel="stylesheet" href="/css/modal.css">
+<link rel="stylesheet" href="/css/responsive.css">
+</head>
+<body>
+
+<a href="#conteudo" class="skip-link">Pular para o conteúdo</a>
+
+<header class="site-header">
+  <div class="container header-top">
+    <a href="/" class="logo">
+      <img src="/assets/images/logo.webp" alt="Espaço Viviane Vargas" class="logo__mark" width="256" height="256" decoding="async">
+      <span class="logo__text"><span class="logo__t1">Espaço</span><span class="logo__t2">Viviane Vargas</span><span class="logo__t3">Estética e salão de beleza</span></span>
+    </a>
+
+    <form class="search-bar" role="search">
+      <label for="busca-header" class="sr-only">Pesquisar produtos</label>
+      <span class="search-bar__leading" data-icon="search" aria-hidden="true"></span>
+      <input id="busca-header" type="search" placeholder="Buscar por serviços, produtos ou categorias..." autocomplete="off">
+      <button type="submit" class="search-bar__btn" aria-label="Pesquisar"><span data-icon="search"></span></button>
+    </form>
+
+    <div class="header-actions">
+      <button id="btn-entrar" class="header-action" data-modal-target="#modal-login" aria-label="Entrar">
+        <span data-icon="user"></span><span>Entrar</span>
+      </button>
+      <button id="btn-sair" class="header-action" hidden aria-label="Sair">
+        <span data-icon="logOut"></span><span>Sair</span>
+      </button>
+      <button id="btn-minha-conta" class="header-action" hidden data-modal-target="#modal-conta" aria-label="Minha conta">
+        <span data-icon="user"></span><span>Minha conta</span>
+      </button>
+      <button id="abrir-admin" class="header-action" hidden aria-label="Painel Admin">
+        <span data-icon="home"></span><span>Painel Admin</span>
+      </button>
+      <button id="abrir-carrinho" class="icon-btn" aria-label="Abrir carrinho">
+        <span data-icon="cart"></span><span class="cart-badge" data-cart-badge>0</span>
+      </button>
+      <button class="menu-toggle" aria-label="Abrir menu"><span data-icon="menu"></span></button>
+    </div>
+  </div>
+</header>
+
+<main id="conteudo">
+  <section class="hero">
+    <div class="container hero__inner">
+      <div class="hero__content">
+        <span class="hero__eyebrow">Beleza<i aria-hidden="true"></i>Estética<i aria-hidden="true"></i>Bem-estar</span>
+        <h1 class="hero__title">Realce o que te faz <em>única</em>, <span class="hero__title-accent">todos os dias.</span></h1>
+        <p class="hero__subtitle">No Espaço Viviane Vargas, você encontra serviços de estética e bem-estar, além de um catálogo completo de produtos de beleza para cuidar de você por inteiro.</p>
+        <div class="hero__actions">
+          <a href="#produtos" class="btn-primary"><span data-icon="shoppingBag"></span>Ver produtos</a>
+          <a href="#" id="hero-whatsapp" class="btn-whatsapp-lg" target="_blank" rel="noopener"><span data-icon="whatsapp"></span>Falar no WhatsApp</a>
+        </div>
+      </div>
+      <div class="hero__art">
+        <picture>
+          <source srcset="/assets/images/hero-produtos.avif" type="image/avif">
+          <source srcset="/assets/images/hero-produtos.webp" type="image/webp">
+          <img src="/assets/images/hero-produtos.jpg" alt="Produtos de beleza e toalha com a marca Espaço Viviane Vargas" class="hero__art-img" width="924" height="528" fetchpriority="high" decoding="async">
+        </picture>
+      </div>
+      <ul class="hero__features">
+        <li><svg class="icon" viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M12 4.5c1.8 2 2.8 4.2 2.8 6.4S13.8 14.9 12 16.5c-1.8-1.6-2.8-3.6-2.8-5.6S10.2 6.5 12 4.5Z" stroke="currentColor" stroke-width="1.4" stroke-linejoin="round"/><path d="M9.4 14.6C7 14.8 4.7 13.6 3.5 11.1c2.6-.3 4.7.5 6 2M14.6 14.6c2.4.2 4.7-1 5.9-3.5-2.6-.3-4.7.5-6 2M5 18c2.2 1.5 4.6 2 7 2s4.8-.5 7-2" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"/></svg><div><strong>Serviços completos</strong><span>Do cuidado facial ao cabelo, com toda a atenção que você merece.</span></div></li>
+        <li><svg class="icon" viewBox="0 0 24 24" fill="none" aria-hidden="true"><rect x="10" y="2.5" width="4" height="3" rx=".6" stroke="currentColor" stroke-width="1.4"/><path d="M9 8h6l1 2.2V19a2 2 0 0 1-2 2h-4a2 2 0 0 1-2-2v-8.8L9 8Z" stroke="currentColor" stroke-width="1.4" stroke-linejoin="round"/><rect x="9.6" y="12.2" width="4.8" height="4" rx=".6" stroke="currentColor" stroke-width="1.2"/></svg><div><strong>Produtos de qualidade</strong><span>As melhores marcas para realçar ainda mais sua beleza.</span></div></li>
+        <li><span data-icon="shieldCheck"></span><div><strong>Atendimento especializado</strong><span>Profissionais preparados para cuidar de você.</span></div></li>
+        <li><span data-icon="heart"></span><div><strong>Seu bem-estar em primeiro lugar</strong><span>Mais do que estética, é autoestima.</span></div></li>
+      </ul>
+    </div>
+  </section>
+
+  <ul class="mobile-benefits container" aria-label="Diferenciais do Espaço Viviane Vargas">
+    <li><span class="mobile-benefits__icon"><svg class="icon" viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M12 4.5c1.8 2 2.8 4.2 2.8 6.4S13.8 14.9 12 16.5c-1.8-1.6-2.8-3.6-2.8-5.6S10.2 6.5 12 4.5Z" stroke="currentColor" stroke-width="1.4" stroke-linejoin="round"/><path d="M9.4 14.6C7 14.8 4.7 13.6 3.5 11.1c2.6-.3 4.7.5 6 2M14.6 14.6c2.4.2 4.7-1 5.9-3.5-2.6-.3-4.7.5-6 2M5 18c2.2 1.5 4.6 2 7 2s4.8-.5 7-2" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"/></svg></span><div><strong>Serviços completos</strong><span>Do rosto ao cabelo</span></div></li>
+    <li><span class="mobile-benefits__icon"><svg class="icon" viewBox="0 0 24 24" fill="none" aria-hidden="true"><rect x="10" y="2.5" width="4" height="3" rx=".6" stroke="currentColor" stroke-width="1.4"/><path d="M9 8h6l1 2.2V19a2 2 0 0 1-2 2h-4a2 2 0 0 1-2-2v-8.8L9 8Z" stroke="currentColor" stroke-width="1.4" stroke-linejoin="round"/><rect x="9.6" y="12.2" width="4.8" height="4" rx=".6" stroke="currentColor" stroke-width="1.2"/></svg></span><div><strong>Produtos de qualidade</strong><span>As melhores marcas</span></div></li>
+    <li><span class="mobile-benefits__icon" data-icon="shieldCheck"></span><div><strong>Atendimento especializado</strong><span>Profissionais preparados</span></div></li>
+    <li><span class="mobile-benefits__icon" data-icon="heart"></span><div><strong>Seu bem-estar</strong><span>Em primeiro lugar</span></div></li>
+  </ul>
+
+  <section class="section container" id="categorias">
+    <div class="section__head">
+      <h2 class="section__title">Categorias</h2>
+      <a href="#categorias" class="section__link" id="ver-todas-categorias">Ver todas <span data-icon="chevronRight"></span></a>
+    </div>
+    <div class="categories-grid" id="grade-categorias"></div>
+  </section>
+
+  <div class="container">
+    <div class="promo-banner">
+      <div>
+        <span class="promo-banner__eyebrow">Ofertas especiais</span>
+        <h3>Até <strong>40% OFF</strong> em categorias selecionadas</h3>
+        <p>Descontos imperdíveis por tempo limitado.</p>
+        <a href="#destaques" class="btn-primary promo-banner__cta">Aproveitar agora</a>
+      </div>
+    </div>
+  </div>
+
+  <section class="section container" id="destaques">
+    <div class="section__head">
+      <h2 class="section__title">Produtos em destaque</h2>
+      <a href="#produtos" class="section__link">Ver todas <span data-icon="chevronRight"></span></a>
+    </div>
+    <div class="products-grid" id="grade-destaques"></div>
+  </section>
+
+  <section class="section container">
+    <div class="whatsapp-cta">
+      <div class="whatsapp-cta__icon"><span data-icon="whatsapp"></span></div>
+      <div class="whatsapp-cta__content">
+        <h3>Faça seu pedido pelo WhatsApp</h3>
+        <p>É rápido, prático e seguro!</p>
+        <ul>
+          <li><span data-icon="clipboardList"></span>Envie o produto ou serviço que você procura</li>
+          <li><span data-icon="messageSquare"></span>Receba orçamento personalizado</li>
+          <li><span data-icon="shieldCheck"></span>Finalize seu pedido em minutos</li>
+        </ul>
+        <a href="#" id="whatsapp-cta-link" class="btn-whatsapp-lg" target="_blank" rel="noopener"><span data-icon="whatsapp"></span>Chamar no WhatsApp</a>
+      </div>
+    </div>
+  </section>
+
+  <section class="section container">
+    <div class="empresa-cta">
+      <div class="empresa-cta__content">
+        <span class="empresa-cta__eyebrow">Tudo para você!</span>
+        <h2 class="empresa-cta__title">Você empresa?</h2>
+        <p class="empresa-cta__subtitle">Aqui tem <strong>descontos especiais</strong> para você!</p>
+        <p class="empresa-cta__desc">Condições exclusivas para sua empresa economizar mais todos os dias.</p>
+
+        <ul class="empresa-cta__features">
+          <li>
+            <span class="empresa-cta__feature-icon"><span data-icon="tag"></span></span>
+            <div><strong>Descontos</strong><small>exclusivos</small></div>
+          </li>
+          <li>
+            <span class="empresa-cta__feature-icon"><span data-icon="headset"></span></span>
+            <div><strong>Atendimento</strong><small>personalizado</small></div>
+          </li>
+          <li>
+            <span class="empresa-cta__feature-icon"><span data-icon="creditCard"></span></span>
+            <div><strong>Condições</strong><small>especiais</small></div>
+          </li>
+          <li>
+            <span class="empresa-cta__feature-icon"><span data-icon="box"></span></span>
+            <div><strong>Produtos de</strong><small>qualidade</small></div>
+          </li>
+        </ul>
+
+        <div class="empresa-cta__actions">
+          <button type="button" id="btn-solicitar-orcamento" class="btn-whatsapp-lg">
+            <span data-icon="whatsapp"></span>Solicitar um orçamento
+          </button>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section class="section container" id="recentes">
+    <div class="section__head"><h2 class="section__title">Adicionados recentemente</h2></div>
+    <div class="products-grid" id="grade-recentes"></div>
+  </section>
+
+  <section class="section container brands">
+    <div class="section__head"><h2 class="section__title">As melhores marcas você encontra aqui</h2></div>
+    <div class="brands__row" id="marcas-parceiras"></div>
+  </section>
+
+  <section class="section container" id="resultados-busca" hidden>
+    <div class="section__head">
+      <h2 class="section__title" id="resultados-busca-titulo">Resultados</h2>
+      <button type="button" class="btn-secondary" id="limpar-resultados">Limpar</button>
+    </div>
+    <div class="products-grid" id="grade-resultados"></div>
+  </section>
+
+  <section class="section container" id="produtos">
+    <div class="section__head"><h2 class="section__title">Catálogo completo</h2></div>
+    <div class="products-grid products-grid--5col" id="grade-produtos"></div>
+    <div class="section__cta">
+      <a href="/pages/catalogo.html" class="btn-primary">Ver catálogo completo</a>
+    </div>
+  </section>
+</main>
+
+<div class="newsletter">
+  <div class="container newsletter__inner">
+    <div class="newsletter__intro">
+      <span class="newsletter__icon" data-icon="mail"></span>
+      <div>
+        <strong>Receba ofertas e novidades</strong>
+        <p>Cadastre-se e fique por dentro das melhores promoções!</p>
+      </div>
+    </div>
+    <form class="newsletter__form" id="form-newsletter" onsubmit="return false">
+      <input type="email" placeholder="Digite seu melhor e-mail" required autocomplete="email">
+      <button type="submit" class="btn-secondary">Cadastrar</button>
+    </form>
+    <ul class="newsletter__badges">
+      <li><span data-icon="shieldCheck"></span>100% seguro<br><small>Seus dados protegidos</small></li>
+      <li><span data-icon="close"></span>Sem spam<br><small>Enviamos apenas promoções exclusivas</small></li>
+      <li><span data-icon="close"></span>Cancele quando quiser<br><small>Sem burocracia</small></li>
+    </ul>
+  </div>
+</div>
+
+<!-- BOTTOM NAV (mobile) -->
+<nav class="bottom-nav">
+  <a href="#" class="bottom-nav__item is-active" data-scroll-top>
+    <span data-icon="home"></span><span>Início</span>
+  </a>
+  <a href="#categorias" class="bottom-nav__item" data-bottom-nav="categorias">
+    <span data-icon="grid"></span><span>Categorias</span>
+  </a>
+  <a href="/pages/catalogo.html" class="bottom-nav__item" data-bottom-nav="catalogo">
+    <span data-icon="tag"></span><span>Catálogo</span>
+  </a>
+  <button type="button" class="bottom-nav__item" id="bottom-nav-conta" data-bottom-nav="conta">
+    <span data-icon="user"></span><span>Conta</span>
+  </button>
+</nav>
+
+<!-- MODAL CONTA (bottom sheet) -->
+<div class="modal modal--sheet" id="modal-conta">
+  <div class="modal__panel modal__panel--sheet">
+    <div class="sheet__handle"></div>
+    <div class="modal__head">
+      <div>
+        <h2>Meu perfil</h2>
+        <p class="modal__head-sub">Gerencie sua conta e preferências</p>
+      </div>
+      <button class="modal__close" data-modal-close aria-label="Fechar"></button>
+    </div>
+    <div class="modal__body sheet__body">
+      <div class="account-profile" id="btn-abrir-perfil" role="button" tabindex="0">
+        <span class="account-profile__avatar" data-icon="user"></span>
+        <div>
+          <strong id="conta-nome">Olá, Usuário!</strong>
+          <span id="conta-email">usuario@email.com</span>
+        </div>
+        <span class="account-profile__chevron" data-icon="chevronRight"></span>
+      </div>
+      <ul class="account-menu">
+        <li>
+          <button type="button" class="account-menu__item" id="btn-abrir-pedidos">
+            <span class="account-menu__icon" data-icon="shoppingBag"></span>
+            <span><strong>Meus pedidos</strong><small>Acompanhe seus pedidos</small></span>
+            <span class="account-menu__chevron" data-icon="chevronRight"></span>
+          </button>
+        </li>
+        <li>
+          <button type="button" class="account-menu__item" id="btn-abrir-enderecos">
+            <span class="account-menu__icon" data-icon="mapPin"></span>
+            <span><strong>Endereços</strong><small>Gerencie seus endereços de entrega</small></span>
+            <span class="account-menu__chevron" data-icon="chevronRight"></span>
+          </button>
+        </li>
+        <li>
+          <button type="button" class="account-menu__item" id="btn-abrir-pagamento">
+            <span class="account-menu__icon" data-icon="creditCard"></span>
+            <span><strong>Formas de pagamento</strong><small>Cartões e métodos de pagamento</small></span>
+            <span class="account-menu__chevron" data-icon="chevronRight"></span>
+          </button>
+        </li>
+        <li>
+          <button type="button" class="account-menu__item" id="btn-abrir-favoritos">
+            <span class="account-menu__icon" data-icon="heart"></span>
+            <span><strong>Favoritos</strong><small>Produtos que você ama</small></span>
+            <span class="account-menu__chevron" data-icon="chevronRight"></span>
+          </button>
+        </li>
+        <li>
+          <button type="button" class="account-menu__item" id="btn-abrir-configuracoes">
+            <span class="account-menu__icon" data-icon="settings"></span>
+            <span><strong>Configurações</strong><small>Notificações, privacidade e mais</small></span>
+            <span class="account-menu__chevron" data-icon="chevronRight"></span>
+          </button>
+        </li>
+        <li>
+          <button type="button" class="account-menu__item account-menu__item--danger" id="btn-sair-conta">
+            <span class="account-menu__icon" data-icon="logOut"></span>
+            <span><strong>Sair da conta</strong><small>Encerrar sessão com segurança</small></span>
+          </button>
+        </li>
+      </ul>
+    </div>
+  </div>
+</div>
+
+<!-- MODAL MEU PERFIL -->
+<div class="modal modal--sheet modal--profile" id="modal-perfil">
+  <div class="modal__panel modal__panel--sheet modal__panel--profile">
+    <div class="sheet__handle"></div>
+    <div class="modal__head">
+      <div class="modal__head-title">
+        <button type="button" class="modal__back" data-modal-back="#modal-conta" aria-label="Voltar"><span data-icon="chevronLeft"></span></button>
+        <div>
+          <h2>Meu perfil</h2>
+          <p class="modal__head-sub">Gerencie sua conta e preferências</p>
+        </div>
+      </div>
+      <button class="modal__close" data-modal-close aria-label="Fechar"><span data-icon="close"></span></button>
+    </div>
+    <div class="modal__body sheet__body">
+
+      <div class="perfil-hero">
+        <div class="perfil-hero__info">
+          <strong id="perfil-saudacao">Olá!</strong>
+          <span id="perfil-email-hero"></span>
+          <small id="perfil-membro-desde"></small>
+        </div>
+        <button type="button" class="btn-secondary perfil-hero__editar" id="btn-editar-perfil"><span data-icon="pencil"></span>Editar perfil</button>
+      </div>
+
+      <h3 class="perfil-secao__titulo">Informações pessoais</h3>
+      <div class="perfil-lista" id="perfil-visualizacao">
+        <div class="perfil-item">
+          <span class="perfil-item__icon" data-icon="user"></span>
+          <div class="perfil-item__texto"><strong>Nome completo</strong><span id="perfil-view-nome">—</span></div>
+        </div>
+        <div class="perfil-item">
+          <span class="perfil-item__icon" data-icon="mail"></span>
+          <div class="perfil-item__texto"><strong>E-mail</strong><span id="perfil-view-email">—</span></div>
+        </div>
+        <div class="perfil-item">
+          <span class="perfil-item__icon" data-icon="phone"></span>
+          <div class="perfil-item__texto"><strong>Telefone</strong><span id="perfil-view-telefone">—</span></div>
+        </div>
+        <div class="perfil-item">
+          <span class="perfil-item__icon" data-icon="calendar"></span>
+          <div class="perfil-item__texto"><strong>Data de nascimento</strong><span id="perfil-view-nascimento">—</span></div>
+        </div>
+      </div>
+
+      <form id="form-editar-perfil" class="stacked-form" hidden>
+        <label>Nome completo<input name="nome" required autocomplete="name"></label>
+        <label>Telefone<input name="telefone" type="tel" maxlength="16" placeholder="(00) 00000-0000" autocomplete="tel"></label>
+        <label>Data de nascimento<input name="dataNascimento" type="date"></label>
+        <p class="modal__note">O e-mail não pode ser alterado por aqui por segurança.</p>
+        <div class="form-actions">
+          <button type="button" id="btn-cancelar-editar-perfil">Cancelar</button>
+          <button type="submit" class="btn-primary">Salvar alterações</button>
+        </div>
+      </form>
+
+      <h3 class="perfil-secao__titulo">Segurança da conta</h3>
+      <div class="perfil-lista">
+        <div class="perfil-item">
+          <span class="perfil-item__icon" data-icon="lock"></span>
+          <div class="perfil-item__texto"><strong>Senha</strong><span>••••••••</span></div>
+          <button type="button" class="btn-secondary" id="btn-alterar-senha-perfil">Alterar senha</button>
+        </div>
+        <div class="perfil-item">
+          <span class="perfil-item__icon" data-icon="shieldCheck"></span>
+          <div class="perfil-item__texto"><strong>Verificação em duas etapas</strong><span>Proteja ainda mais sua conta</span></div>
+          <button type="button" class="btn-secondary perfil-item__action" disabled aria-disabled="true">Configurar</button>
+        </div>
+      </div>
+
+      <button type="button" class="perfil-sair" id="btn-sair-perfil"><span data-icon="logOut"></span><span><strong>Sair da conta</strong><small>Você será desconectado de todos os dispositivos</small></span></button>
+    </div>
+  </div>
+</div>
+<div class="modal modal--sheet modal--orders" id="modal-pedidos">
+  <div class="modal__panel modal__panel--sheet modal__panel--orders">
+    <div class="sheet__handle"></div>
+    <div class="modal__head modal__head--orders">
+      <div class="modal__head-title">
+        <button type="button" class="modal__back" data-modal-back="#modal-conta" aria-label="Voltar"><span data-icon="chevronLeft"></span></button>
+        <div>
+          <h2>Meus pedidos</h2>
+          <p class="modal__head-sub">Acompanhe seus pedidos</p>
+        </div>
+      </div>
+      <div class="pedidos__acoes">
+        <button type="button" class="pedidos__acao" id="btn-apagar-pedidos-selecionados" disabled><span data-icon="trash"></span><span>Apagar selecionados</span></button>
+        <button type="button" class="pedidos__acao" id="btn-apagar-todos-pedidos" disabled><span data-icon="trash"></span><span>Apagar todos</span></button>
+        <button class="modal__close" data-modal-close aria-label="Fechar"><span data-icon="close"></span></button>
+      </div>
+    </div>
+    <div class="modal__body sheet__body" id="lista-pedidos">
+      <div class="empty-state">Carregando...</div>
+    </div>
+  </div>
+</div>
+
+<!-- MODAL ENDEREÇOS -->
+<div class="modal modal--sheet" id="modal-enderecos">
+  <div class="modal__panel modal__panel--sheet">
+    <div class="sheet__handle"></div>
+    <div class="modal__head">
+      <div class="modal__head-title">
+        <button type="button" class="modal__back" data-modal-back="#modal-conta" aria-label="Voltar"><span data-icon="chevronLeft"></span></button>
+        <div>
+          <h2>Endereços</h2>
+          <p class="modal__head-sub">Gerencie seus endereços de entrega</p>
+        </div>
+      </div>
+      <button class="modal__close" data-modal-close aria-label="Fechar"></button>
+    </div>
+    <div class="modal__body sheet__body">
+      <ul class="chip-list chip-list--enderecos" id="lista-enderecos"></ul>
+      <form id="form-endereco" class="stacked-form">
+        <h3 class="stacked-form__title">Novo endereço</h3>
+        <input name="apelido" placeholder="Apelido (ex: Casa, Trabalho)" required>
+        <div class="stacked-form__row">
+          <input name="rua" placeholder="Rua" required>
+          <input name="numero" placeholder="Número" required>
+        </div>
+        <input name="bairro" placeholder="Bairro" required>
+        <div class="stacked-form__row">
+          <input name="cidade" placeholder="Cidade" required>
+          <input name="cep" placeholder="CEP">
+        </div>
+        <button type="submit" class="btn-primary">Salvar endereço</button>
+      </form>
+    </div>
+  </div>
+</div>
+
+<!-- MODAL FORMAS DE PAGAMENTO -->
+<div class="modal modal--payment" id="modal-pagamento">
+  <div class="modal__panel modal__panel--payment">
+    <div class="payment__handle" aria-hidden="true"></div>
+    <div class="modal__head">
+      <div class="modal__head-title">
+        <button type="button" class="modal__back" data-modal-back="#modal-conta" aria-label="Voltar"><span data-icon="chevronLeft"></span></button>
+        <div>
+          <h2>Formas de pagamento</h2>
+          <p class="modal__head-sub">Sua preferência para os pedidos</p>
+        </div>
+      </div>
+      <button class="modal__close" data-modal-close aria-label="Fechar"></button>
+    </div>
+    <div class="modal__body payment__body">
+      <p class="payment__note">Não processamos pagamentos no site — o pedido é fechado por WhatsApp. Aqui você só define sua preferência, pra já vir junto na mensagem.</p>
+      <form id="form-pagamento" class="payment-options">
+        <label class="payment-option">
+          <input type="radio" name="forma" value="Pix">
+          <span class="payment-option__radio" aria-hidden="true"></span>
+          <span class="payment-option__copy"><strong>Pix</strong><small>Chave enviada na confirmação</small></span>
+          <span class="payment-option__icon" data-icon="grid"></span>
+        </label>
+        <label class="payment-option">
+          <input type="radio" name="forma" value="Cartão na entrega">
+          <span class="payment-option__radio" aria-hidden="true"></span>
+          <span class="payment-option__copy"><strong>Cartão na entrega</strong><small>Maquininha na hora da entrega/retirada</small></span>
+          <span class="payment-option__icon" data-icon="creditCard"></span>
+        </label>
+        <label class="payment-option">
+          <input type="radio" name="forma" value="Dinheiro">
+          <span class="payment-option__radio" aria-hidden="true"></span>
+          <span class="payment-option__copy"><strong>Dinheiro</strong><small>Pagamento em espécie</small></span>
+          <span class="payment-option__icon" data-icon="dollarSign"></span>
+        </label>
+        <button type="submit" class="btn-primary payment-options__save">Salvar preferência</button>
+      </form>
+    </div>
+  </div>
+</div>
+
+<!-- MODAL FAVORITOS -->
+<div class="modal modal--sheet" id="modal-favoritos">
+  <div class="modal__panel modal__panel--sheet">
+    <div class="sheet__handle"></div>
+    <div class="modal__head">
+      <div class="modal__head-title">
+        <button type="button" class="modal__back" data-modal-back="#modal-conta" aria-label="Voltar"><span data-icon="chevronLeft"></span></button>
+        <div>
+          <h2>Favoritos</h2>
+          <p class="modal__head-sub">Produtos que você ama</p>
+        </div>
+      </div>
+      <button class="modal__close" data-modal-close aria-label="Fechar"></button>
+    </div>
+    <div class="modal__body sheet__body" id="lista-favoritos">
+      <div class="empty-state">Carregando...</div>
+    </div>
+  </div>
+</div>
+
+<!-- MODAL CONFIGURAÇÕES -->
+<div class="modal modal--sheet" id="modal-configuracoes">
+  <div class="modal__panel modal__panel--sheet">
+    <div class="sheet__handle"></div>
+    <div class="modal__head">
+      <div class="modal__head-title">
+        <button type="button" class="modal__back" data-modal-back="#modal-conta" aria-label="Voltar"><span data-icon="chevronLeft"></span></button>
+        <div>
+          <h2>Configurações</h2>
+          <p class="modal__head-sub">Notificações, privacidade e mais</p>
+        </div>
+      </div>
+      <button class="modal__close" data-modal-close aria-label="Fechar"></button>
+    </div>
+    <div class="modal__body sheet__body">
+      <label class="switch-option">
+        <span><strong>Notificações de promoções</strong><small>Receber avisos de ofertas por e-mail</small></span>
+        <input type="checkbox" id="toggle-notificacoes">
+      </label>
+      <button type="button" id="btn-alterar-senha" class="account-menu__item">
+        <span class="account-menu__icon" data-icon="settings"></span>
+        <span><strong>Alterar senha</strong><small>Enviaremos um link por e-mail</small></span>
+        <span class="account-menu__chevron" data-icon="chevronRight"></span>
+      </button>
+    </div>
+  </div>
+</div>
+
+<footer class="site-footer">
+  <div class="container footer-grid">
+    <div>
+      <h4>Espaço Viviane Vargas</h4>
+      <p>R. Dr. Ézio Carneiro, 158 - St. Aeroporto, Luziânia - GO, 72800-420</p>
+    </div>
+    <div>
+      <h4>Contato</h4>
+      <a href="https://wa.me/5561999184452" target="_blank" rel="noopener">WhatsApp</a>
+      <p>futuralza@gmail.com</p>
+    </div>
+    <div>
+      <h4>Redes sociais</h4>
+      <div class="social-row">
+        <a href="https://www.instagram.com/futurapapelaria/" aria-label="Instagram" target="_blank" rel="noopener"><span data-icon="instagram"></span></a>
+      </div>
+    </div>
+    <div>
+      <h4>Institucional</h4>
+      <a href="/pages/privacidade.html">Política de Privacidade</a>
+    </div>
+  </div>
+  <div class="footer-bottom">© 2026 Espaço Viviane Vargas. Todos os direitos reservados.<span class="footer-credit">Desenvolvido por <a href="https://www.instagram.com/eduardo_xis" target="_blank" rel="noopener noreferrer">@eduardo_xis</a></span></div>
+</footer>
+
+<!-- CARRINHO -->
+<div class="cart-overlay" id="cart-overlay"></div>
+<aside class="cart-drawer" id="cart-drawer" aria-label="Carrinho de compras">
+  <div class="cart-drawer__head">
+    <h3>Seu carrinho</h3>
+    <button id="fechar-carrinho" class="modal__close" aria-label="Fechar carrinho"></button>
+  </div>
+  <div class="cart-drawer__items" id="itens-carrinho"></div>
+  <div class="cart-drawer__summary">
+    <div class="campo-nome-convidado" id="campo-nome-convidado">
+      <label for="nome-cliente">Seu nome</label>
+      <input id="nome-cliente" type="text" autocomplete="off" placeholder="Como podemos te chamar?">
+    </div>
+    <div class="summary-row"><span>Subtotal</span><span id="subtotal-carrinho">R$ 0,00</span></div>
+    <div class="summary-row summary-row--total"><span>Total</span><span id="total-carrinho">R$ 0,00</span></div>
+    <button class="btn-primary" id="finalizar-pedido">Finalizar pedido no WhatsApp</button>
+  </div>
+</aside>
+
+<!-- MODAL ORÇAMENTO -->
+<div class="modal modal--sheet" id="modal-orcamento">
+  <div class="modal__panel modal__panel--orcamento" data-modal-autofocus tabindex="-1">
+    <div class="modal__head">
+      <div class="modal__head-title"><h2>Solicitar orçamento</h2></div>
+      <button class="modal__close" data-modal-close aria-label="Fechar">✕</button>
+    </div>
+
+    <div class="modal__body modal__body--orcamento">
+
+      <!-- estado 1: escolha das 3 opções -->
+      <div class="orcamento-opcoes" data-orcamento-opcoes>
+        <button type="button" class="orcamento-opcao" data-orcamento-opcao="produtos">
+          <span class="orcamento-opcao__icon" data-icon="clipboardList"></span>
+          <span class="orcamento-opcao__text">
+            <strong>Já escolhi meus produtos</strong>
+            <small>Envie sua lista diretamente para nosso atendimento.</small>
+          </span>
+          <span class="orcamento-opcao__arrow" data-icon="chevronRight"></span>
+        </button>
+
+        <button type="button" class="orcamento-opcao" data-orcamento-opcao="atendente">
+          <span class="orcamento-opcao__icon" data-icon="headset"></span>
+          <span class="orcamento-opcao__text">
+            <strong>Conversar com um atendente</strong>
+            <small>Ainda não sabe exatamente o que precisa? Fale com nossa equipe.</small>
+          </span>
+          <span class="orcamento-opcao__arrow" data-icon="chevronRight"></span>
+        </button>
+
+        <button type="button" class="orcamento-opcao" data-orcamento-opcao="descrever">
+          <span class="orcamento-opcao__icon" data-icon="pencil"></span>
+          <span class="orcamento-opcao__text">
+            <strong>Descrever o que preciso</strong>
+            <small>Conte rapidamente quais produtos você procura.</small>
+          </span>
+          <span class="orcamento-opcao__arrow" data-icon="chevronRight"></span>
+        </button>
+      </div>
+
+      <!-- estado 2: lista de orçamento vazia -->
+      <div class="orcamento-vazio" data-orcamento-vazio hidden>
+        <span class="empty-state__icon" data-icon="gridEmpty"></span>
+        <strong>Você ainda não adicionou nenhum produto.</strong>
+        <p>Adicione itens à sua lista de orçamento ou fale direto com um atendente.</p>
+        <div class="orcamento-vazio__acoes">
+          <button type="button" class="btn-secondary" data-orcamento-continuar>Continuar navegando</button>
+          <button type="button" class="btn-primary" data-orcamento-falar-atendente>Falar com atendente</button>
+        </div>
+      </div>
+
+      <!-- estado 3: descrever a necessidade -->
+      <div class="orcamento-descrever" data-orcamento-descrever hidden>
+        <button type="button" class="modal__back" data-orcamento-voltar aria-label="Voltar"><span data-icon="chevronLeft"></span></button>
+        <label for="orcamento-texto">Conte rapidamente quais produtos você procura</label>
+        <textarea id="orcamento-texto" rows="5" maxlength="600" placeholder="Ex.: Preciso de um kit de produtos para presentear 20 clientes."></textarea>
+        <button type="button" class="btn-whatsapp-lg" data-orcamento-enviar-descricao>
+          <span data-icon="whatsapp"></span>Enviar para WhatsApp
+        </button>
+      </div>
+
+    </div>
+  </div>
+</div>
+
+<!-- MODAL LOGIN -->
+<div class="modal" id="modal-login">
+  <div class="modal__panel" style="max-width:440px">
+    <div class="modal__head"><h2>Entrar</h2><button class="modal__close" data-modal-close>✕</button></div>
+    <div class="tabs-content">
+      <div class="auth-tabs">
+        <button type="button" data-auth-tab="entrar" class="is-active">Entrar</button>
+        <button type="button" data-auth-tab="cadastrar">Criar conta</button>
+      </div>
+
+      <form id="form-entrar-modal">
+        <label>E-mail<input type="email" name="email" required autocomplete="username"></label>
+        <label class="campo-senha">Senha
+          <span class="campo-senha__wrap">
+            <input type="password" name="senha" required autocomplete="current-password">
+            <button type="button" class="campo-senha__toggle" data-toggle-senha aria-label="Mostrar senha"><span data-icon="eye"></span></button>
+          </span>
+        </label>
+        <button type="button" class="link-esqueci-senha" id="link-esqueci-senha">Esqueceu a senha?</button>
+        <label class="checkbox-inline"><input type="checkbox" name="manterLogin" checked> Manter conectado</label>
+        <p class="auth-error" id="erro-entrar-modal"></p>
+        <button type="submit" class="btn-primary" style="width:100%">Entrar</button>
+      </form>
+
+      <form id="form-esqueci-senha" hidden>
+        <p class="auth-info">Digite o e-mail da sua conta. Vamos enviar um link para você criar uma senha nova.</p>
+        <label>E-mail<input type="email" name="email" required autocomplete="username"></label>
+        <p class="auth-error" id="erro-esqueci-senha"></p>
+        <p class="auth-success" id="sucesso-esqueci-senha" hidden></p>
+        <button type="submit" class="btn-primary" style="width:100%">Enviar link de redefinição</button>
+        <button type="button" class="link-esqueci-senha" id="voltar-esqueci-senha">Voltar para o login</button>
+      </form>
+
+      <form id="form-cadastrar-modal" hidden>
+        <div class="auth-tabs auth-tabs--tipo">
+          <button type="button" data-tipo-conta="fisica" class="is-active">Pessoa física</button>
+          <button type="button" data-tipo-conta="empresa">Empresa</button>
+        </div>
+        <input type="hidden" name="tipoConta" value="fisica">
+
+        <div data-campos-tipo="fisica">
+          <label>Nome completo<input type="text" name="nome" required autocomplete="name"></label>
+          <label>CPF<input type="text" name="cpf" inputmode="numeric" maxlength="14" placeholder="000.000.000-00" autocomplete="off"></label>
+          <label>Telefone<input type="tel" name="telefone" maxlength="16" placeholder="(00) 00000-0000" autocomplete="tel"></label>
+        </div>
+
+        <div data-campos-tipo="empresa" hidden>
+          <label>Razão social<input type="text" name="razaoSocial" autocomplete="organization"></label>
+          <label>CNPJ<input type="text" name="cnpj" inputmode="numeric" maxlength="18" placeholder="00.000.000/0000-00" autocomplete="off"></label>
+          <label>Nome do responsável<input type="text" name="responsavel" autocomplete="name"></label>
+          <label>Telefone comercial<input type="tel" name="telefoneEmpresa" maxlength="16" placeholder="(00) 00000-0000" autocomplete="tel"></label>
+        </div>
+
+        <label>E-mail<input type="email" name="email" required autocomplete="username"></label>
+        <label class="campo-senha">Senha
+          <span class="campo-senha__wrap">
+            <input type="password" name="senha" required minlength="6" autocomplete="new-password">
+            <button type="button" class="campo-senha__toggle" data-toggle-senha aria-label="Mostrar senha"><span data-icon="eye"></span></button>
+          </span>
+        </label>
+        <label class="campo-senha">Confirmar senha
+          <span class="campo-senha__wrap">
+            <input type="password" name="confirmarSenha" required minlength="6" autocomplete="new-password">
+            <button type="button" class="campo-senha__toggle" data-toggle-senha aria-label="Mostrar senha"><span data-icon="eye"></span></button>
+          </span>
+        </label>
+        <p class="auth-error" id="erro-cadastrar-modal"></p>
+        <label class="campo-consentimento">
+          <input type="checkbox" name="aceiteTermos" id="aceite-termos-cadastro" required>
+          <span>Li e concordo com a <a href="/pages/privacidade.html" target="_blank" rel="noopener">Política de Privacidade</a>.</span>
+        </label>
+        <button type="submit" class="btn-primary" style="width:100%">Criar conta</button>
+      </form>
+    </div>
+  </div>
+</div>
+
+<!-- MODAL ADMIN -->
+<div class="modal" id="modal-admin">
+  <div class="modal__panel modal__panel--admin">
+    <div class="modal__head">
+      <div class="modal__head-info">
+        <span class="modal__head-logo" id="admin-logo-icon"></span>
+        <div>
+          <h2>Painel Administrativo</h2>
+          <p class="modal__head-sub">Gerencie os produtos da sua loja</p>
+        </div>
+      </div>
+      <button class="modal__close" data-modal-close aria-label="Fechar"></button>
+    </div>
+    <div class="modal__body">
+      <nav class="tabs-nav">
+        <div class="tabs-nav__list">
+          <button data-tab-trigger="dashboard" class="is-active"><span class="nav-icon" data-icon="home"></span><span class="nav-label">Dashboard</span></button>
+          <button data-tab-trigger="produtos"><span class="nav-icon" data-icon="box"></span><span class="nav-label">Produtos</span></button>
+          <button data-tab-trigger="categorias"><span class="nav-icon" data-icon="tag"></span><span class="nav-label">Categorias</span></button>
+          <button data-tab-trigger="marcas"><span class="nav-icon" data-icon="tag"></span><span class="nav-label">Marcas</span></button>
+          <button data-tab-trigger="etiquetas"><span class="nav-icon" data-icon="bookmark"></span><span class="nav-label">Etiquetas</span></button>
+          <button data-tab-trigger="estoque"><span class="nav-icon" data-icon="archive"></span><span class="nav-label">Estoque</span></button>
+          <button data-tab-trigger="pedidos"><span class="nav-icon" data-icon="shoppingBag"></span><span class="nav-label">Pedidos</span></button>
+          <button data-tab-trigger="historico"><span class="nav-icon" data-icon="clipboardList"></span><span class="nav-label">Histórico</span></button>
+          <button data-tab-trigger="usuarios"><span class="nav-icon" data-icon="users"></span><span class="nav-label">Usuários</span></button>
+          <button data-tab-trigger="clientes"><span class="nav-icon" data-icon="userPlus"></span><span class="nav-label">Clientes</span></button>
+          <button data-tab-trigger="leads"><span class="nav-icon" data-icon="userPlus"></span><span class="nav-label">Leads</span></button>
+        </div>
+        <div class="tabs-nav__summary" id="tabs-nav-summary" data-tab-trigger="dashboard">
+          <span class="tabs-nav__summary-icon" data-icon="trendingUp"></span>
+          <strong>Resumo rápido</strong>
+          <p>Acompanhe o desempenho da sua loja em tempo real.</p>
+          <span class="tabs-nav__summary-link">Ver dashboard <span data-icon="chevronRight"></span></span>
+        </div>
+      </nav>
+      <div class="tabs-content">
+        <div data-tab-panel="dashboard" id="painel-dashboard"></div>
+        <div data-tab-panel="produtos" id="painel-produtos" hidden></div>
+        <div data-tab-panel="categorias" id="painel-categorias" hidden></div>
+        <div data-tab-panel="marcas" id="painel-marcas" hidden></div>
+        <div data-tab-panel="etiquetas" id="painel-etiquetas" hidden></div>
+        <div data-tab-panel="estoque" id="painel-estoque" hidden></div>
+        <div data-tab-panel="pedidos" id="painel-pedidos" hidden></div>
+        <div data-tab-panel="historico" id="painel-historico" hidden></div>
+        <div data-tab-panel="usuarios" id="painel-usuarios" hidden></div>
+        <div data-tab-panel="clientes" id="painel-clientes" hidden></div>
+        <div data-tab-panel="leads" id="painel-leads" hidden></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script type="module" src="/js/app.js"></script>
+</body>
+</html>
