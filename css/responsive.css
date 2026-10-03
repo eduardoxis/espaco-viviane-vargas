@@ -276,7 +276,7 @@
 @media (max-width: 760px) {
   .hero {
     background: #f3ebe5 url("/assets/images/hero-mobile-full.webp") right bottom / auto 100% no-repeat;
-    min-height: 76vw; padding: 1.5rem 0 1.4rem;
+    min-height: 76vw; padding: 1.5rem 0 0.6rem;
   }
   .hero::after { display: none; }
   .hero__inner { display: block; min-height: 0; }
@@ -294,7 +294,7 @@
   .hero__actions .btn-whatsapp-lg { display: none; }
 
   .mobile-benefits {
-    grid-template-columns: repeat(4, minmax(0, 1fr)); margin-top: 2.4rem; min-height: 0;
+    grid-template-columns: repeat(4, minmax(0, 1fr)); margin-top: 0.5rem; min-height: 0;
     padding: 1rem 0.2rem; border-radius: 22px; background: #fbf6f2; box-shadow: 0 6px 20px rgba(74, 40, 28, 0.06);
   }
   .mobile-benefits li { flex-direction: column; align-items: center; justify-content: flex-start; gap: 0.4rem; padding: 0 0.25rem; text-align: center; }
