@@ -248,7 +248,7 @@
 }
 
 /* ===== Desktop: foto em largura total atrás do texto (igual à referência) ===== */
-@media (min-width: 981px) {
+@media (min-width: 761px) {
   .hero {
     background: #f1dfd0 url("/assets/images/hero-bg.webp") right top / 100% auto no-repeat;
     padding: 0 0 clamp(2rem, 4vw, 3.5rem);
@@ -260,7 +260,49 @@
     max-width: 48%; padding-block: 2rem;
   }
   .hero__art { display: none; }
-  .hero__title { font-size: clamp(2.8rem, 4.15vw, 4.9rem); line-height: 1.07; }
+  .hero__title { font-size: clamp(2rem, 4.15vw, 4.9rem); line-height: 1.07; }
   .hero__subtitle { max-width: 37ch; font-size: clamp(1rem, 1.1vw, 1.15rem); line-height: 1.6; }
   .hero__features { margin-top: -1.5rem; }
+}
+
+
+/* =====================================================================
+   MOBILE (até 760px) — hero igual à referência: texto à esquerda sobre a
+   foto em largura total, diferenciais em 4 colunas logo abaixo.
+   ===================================================================== */
+@media (max-width: 760px) {
+  .hero {
+    background: #f1dfd0 url("/assets/images/hero-bg.webp") right top / 100% auto no-repeat;
+    min-height: 0; padding: 0 0 1.6rem;
+  }
+  .hero::after { display: none; }
+  .hero__inner { display: block; min-height: 0; }
+  .hero__content {
+    width: auto; max-width: 47%; min-height: 32.8vw; padding: 0.5rem 0;
+    display: grid; align-content: center; gap: 0.45rem;
+  }
+  .hero__art { display: none; }
+  .hero__eyebrow { font-size: 0.45rem; letter-spacing: 0.14em; gap: 0.3rem; }
+  .hero__eyebrow::before { width: 14px; }
+  .hero__title { font-size: clamp(1rem, 4.1vw, 1.8rem); line-height: 1.1; letter-spacing: -0.01em; }
+  .hero__subtitle { font-size: 0.48rem; line-height: 1.4; max-width: none; }
+  .hero__actions { display: block; width: auto; margin-top: 0.1rem; }
+  .hero__actions a { min-height: 0; width: auto; flex: none; display: inline-flex; padding: 0.4rem 0.9rem; font-size: 0.55rem; }
+  .hero__actions .btn-whatsapp-lg { display: none; }
+
+  .mobile-benefits {
+    grid-template-columns: repeat(4, minmax(0, 1fr)); margin-top: -1rem; min-height: 0;
+    padding: 0.7rem 0.3rem; border-radius: 14px; background: #fbf5f0; box-shadow: 0 6px 18px rgba(74, 40, 28, 0.08);
+  }
+  .mobile-benefits li { flex-direction: row; align-items: center; justify-content: flex-start; gap: 0.3rem; padding: 0 0.35rem; text-align: left; }
+  .mobile-benefits li:not(:last-child)::after { top: 0.1rem; bottom: 0.1rem; background: var(--cinza-200); }
+  .mobile-benefits__icon { width: 18px; height: 18px; padding: 0; flex-shrink: 0; color: var(--azul-700); background: transparent; }
+  .mobile-benefits__icon svg { stroke-width: 1.5; }
+  .mobile-benefits strong { font-size: 0.5rem; line-height: 1.15; font-weight: 500; }
+  .mobile-benefits li > div > span { margin-top: 0.1rem; font-size: 0.42rem; line-height: 1.2; text-transform: none; }
+}
+
+@media (min-width: 761px) and (max-width: 1100px) {
+  .hero__eyebrow { letter-spacing: 0.2em; font-size: 0.62rem; white-space: nowrap; }
+  .header-action[aria-label="Início"] span:last-child { display: none; }
 }
