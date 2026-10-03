@@ -5,12 +5,12 @@ import { getAuth } from "https://www.gstatic.com/firebasejs/12.19.0/firebase-aut
 import { getFirestore, initializeFirestore, persistentLocalCache, persistentMultipleTabManager } from "https://www.gstatic.com/firebasejs/12.19.0/firebase-firestore.js";
 
 const firebaseConfig = {
-  apiKey: "AIzaSyBUEeATkY2Hu4k_b8QeI5FZBFVHdpLg3fY",
-  authDomain: "futura-papelaria-2f76e.firebaseapp.com",
-  projectId: "futura-papelaria-2f76e",
-  storageBucket: "futura-papelaria-2f76e.firebasestorage.app",
-  messagingSenderId: "1085584938085",
-  appId: "1:1085584938085:web:9566022868bd0cafa9e28c"
+  apiKey: "AIzaSyCyArltCydqFPwNLvlUEkREuV8PdzAt5kc",
+  authDomain: "espaco-viviane-vargas.firebaseapp.com",
+  projectId: "espaco-viviane-vargas",
+  storageBucket: "espaco-viviane-vargas.firebasestorage.app",
+  messagingSenderId: "738486287061",
+  appId: "1:738486287061:web:a513926f08f786760f405c"
 };
 
 export const app = initializeApp(firebaseConfig);
