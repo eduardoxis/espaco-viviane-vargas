@@ -13,6 +13,7 @@ import { enviarImagemParaCloudinary, migrarImagensAntigas } from "../services/cl
 import { carregarPainelLeads } from "../modules/leads.js";
 import { ICONS, icon } from "../utils/icons.js";
 import { auth } from "../../firebase/firebase-config.js";
+import { carregarAbaServicos } from "./servicos-admin.js";
 
 let cacheProdutos = [];
 let cacheCategorias = [];
@@ -60,6 +61,7 @@ function definirCarregadoresAba(root) {
   return {
     dashboard: () => carregarDashboard(root.querySelector("#painel-dashboard")),
     produtos: () => carregarAbaProdutos(root.querySelector("#painel-produtos")),
+    servicos: () => carregarAbaServicos(root.querySelector("#painel-servicos"), { abrirAjusteEnquadramento, enviarImagem }),
     categorias: () => carregarAbaCategorias(root.querySelector("#painel-categorias")),
     marcas: () => carregarAbaMarcas(root.querySelector("#painel-marcas")),
     etiquetas: () => carregarAbaEtiquetas(root.querySelector("#painel-etiquetas")),
