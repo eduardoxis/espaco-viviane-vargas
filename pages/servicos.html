@@ -12,7 +12,97 @@
 <link rel="stylesheet" href="/css/style.css?v=4">
 <link rel="stylesheet" href="/css/modal.css?v=3">
 <link rel="stylesheet" href="/css/responsive.css?v=3">
-<link rel="stylesheet" href="/css/servicos.css?v=1">
+<style>
+  /* Estilos exclusivos da página de catálogo/busca. */
+  .search-page__layout {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 1.75rem;
+    align-items: start;
+  }
+  @media (min-width: 981px) {
+    .search-page__layout { grid-template-columns: 260px 1fr; }
+  }
+  .search-page__filters {
+    background: var(--branco);
+    border: 1px solid var(--cinza-100);
+    border-radius: var(--raio-md);
+    padding: 1.25rem;
+  }
+  @media (min-width: 981px) {
+    .search-page__filters { position: sticky; top: 1rem; }
+  }
+  .search-page__filters-head {
+    display: flex; align-items: center; justify-content: space-between;
+    margin-bottom: 0.75rem;
+  }
+  .search-page__filters-head h2 { font-size: 1.05rem; }
+  .filter-group { border: none; padding: 0; margin: 0; }
+  .filter-group + .filter-group { border-top: 1px solid var(--cinza-100); }
+  .filter-group legend {
+    display: flex; align-items: center; gap: 0.75rem;
+    width: 100%; font-weight: 600; font-size: 0.95rem; color: var(--cinza-900);
+    padding: 0.95rem 0; cursor: pointer;
+  }
+  .filter-group__icon { width: 18px; height: 18px; color: var(--cinza-500); flex-shrink: 0; }
+  .filter-group__icon svg { width: 100%; height: 100%; display: block; }
+  .filter-group__chevron { width: 15px; height: 15px; margin-left: auto; color: var(--cinza-400); transition: transform var(--transicao); }
+  .filter-group:not(.is-collapsed) .filter-group__chevron { transform: rotate(90deg); }
+  .filter-group.is-collapsed .filter-group__body,
+  .filter-group.is-collapsed .filter-group__ver-mais { display: none; }
+  .filter-group__body { padding: 0 0 1rem; }
+  .filter-option {
+    display: flex; align-items: center; gap: 0.55rem;
+    font-size: 0.87rem; color: var(--cinza-700);
+    padding: 0.3rem 0; cursor: pointer;
+  }
+  .filter-option input { width: 15px; height: 15px; accent-color: var(--azul-700); flex-shrink: 0; }
+  .filter-group__ver-mais {
+    background: none; color: var(--azul-700); font-size: 0.83rem;
+    font-weight: 600; padding: 0.3rem 0 0;
+  }
+  .search-page__limpar {
+    width: 100%; margin-top: 0.25rem;
+    display: flex; align-items: center; justify-content: center; gap: 0.4rem;
+  }
+
+  .search-page__main-head {
+    display: flex; align-items: center; justify-content: space-between;
+    flex-wrap: wrap; gap: 0.75rem; margin-bottom: 1.25rem;
+  }
+  .search-page__contador { color: var(--cinza-500); font-size: 0.9rem; }
+  .search-page__contador strong { color: var(--cinza-900); }
+  .search-page__ordenar {
+    display: flex; align-items: center; gap: 0.5rem; font-size: 0.85rem; color: var(--cinza-700);
+  }
+  .search-page__ordenar select {
+    border: 1px solid var(--cinza-200); border-radius: var(--raio-sm);
+    padding: 0.5rem 0.7rem; font-size: 0.85rem; background: var(--branco);
+  }
+
+  .pagination {
+    display: flex; justify-content: center; align-items: center; gap: 0.75rem;
+    margin-top: 2rem;
+  }
+  .pagination button {
+    min-width: 38px; height: 38px; padding: 0 0.9rem;
+    border: 1px solid var(--cinza-200); border-radius: var(--raio-sm);
+    background: var(--branco); color: var(--cinza-700); font-size: 0.88rem; font-weight: 600;
+  }
+  .pagination button:disabled { opacity: 0.4; cursor: not-allowed; }
+  .pagination__pagina { color: var(--cinza-500); font-size: 0.88rem; }
+
+  .active-chips { display: flex; flex-wrap: wrap; gap: 0.5rem; margin-bottom: 1rem; }
+  .active-chips .chip-list li { margin: 0; }
+
+  /* Botão "Filtrar" só aparece no mobile (ver responsive.css) */
+  .search-page__btn-filtros {
+    display: none; width: 100%; align-items: center; justify-content: center; gap: 0.4rem;
+    margin-bottom: 1rem;
+  }
+
+  .filter-option--sub { padding-left: 1.6rem; font-size: 0.83rem; }
+</style>
 </head>
 <body>
 
@@ -24,41 +114,106 @@
       <img src="/assets/images/logo.webp" alt="Espaço Viviane Vargas" class="logo__mark" width="256" height="256" decoding="async">
       <span class="logo__text"><span class="logo__t1">Espaço</span><span class="logo__t2">Viviane Vargas</span><span class="logo__t3">Estética e salão de beleza</span></span>
     </a>
-    <div class="header-actions" style="margin-left:auto">
+
+    <form class="search-bar" role="search" id="form-busca-servicos">
+      <label for="busca-header" class="sr-only">Pesquisar serviços</label>
+      <input id="busca-header" type="search" placeholder="Buscar serviço..." autocomplete="off">
+      <button type="submit" class="search-bar__btn" aria-label="Pesquisar"><span data-icon="search"></span></button>
+    </form>
+
+    <div class="select-pill">
+      <select id="filtro-categoria" aria-label="Filtrar por categoria">
+        <option value="">Todas as categorias</option>
+      </select>
+      <span class="select-pill__chevron" data-icon="chevronRight"></span>
+    </div>
+
+    <div class="header-actions">
       <a href="/pages/catalogo.html" class="header-action header-action--nav" aria-label="Catálogo"><span data-icon="shoppingBag"></span><span>Catálogo</span></a>
       <a href="/pages/servicos.html" class="header-action header-action--nav is-active" aria-label="Serviços" aria-current="page"><span data-icon="calendar"></span><span>Serviços</span></a>
+      <button id="btn-entrar" class="header-action" data-modal-target="#modal-login" aria-label="Entrar">
+        <span data-icon="user"></span><span>Entrar</span>
+      </button>
+      <button id="btn-sair" class="header-action" hidden aria-label="Sair">
+        <span data-icon="logOut"></span><span>Sair</span>
+      </button>
+      <button id="btn-minha-conta" class="header-action" hidden data-modal-target="#modal-conta" aria-label="Minha conta">
+        <span data-icon="user"></span><span>Minha conta</span>
+      </button>
+      <button id="abrir-admin" class="header-action" hidden aria-label="Painel Admin">
+        <span data-icon="home"></span><span>Painel Admin</span>
+      </button>
+      <button class="menu-toggle" aria-label="Abrir menu"><span data-icon="menu"></span></button>
     </div>
   </div>
 </header>
 
 <main class="container" id="conteudo">
-  <section class="servicos-hero">
-    <span class="servicos-hero__eyebrow">Beleza · Estética · Bem-estar</span>
-    <h1>Nossos <em>serviços</em></h1>
-    <p>No Espaço Viviane Vargas você encontra cuidado completo, do rosto ao cabelo, feito por profissionais preparados para realçar o que te faz única.</p>
-  </section>
+  <nav class="breadcrumb" aria-label="Trilha de navegação">
+    <a href="/">Início</a>
+    <span data-icon="chevronRight"></span>
+    <span class="breadcrumb__atual">Serviços</span>
+  </nav>
 
-  <section class="svc-filtros" aria-label="Filtrar serviços">
-    <label class="svc-busca">
-      <span data-icon="search" aria-hidden="true"></span>
-      <span class="sr-only">Buscar serviço</span>
-      <input type="search" id="svc-busca" placeholder="Buscar serviço..." autocomplete="off">
-    </label>
-    <div class="svc-chips" id="svc-chips-cat" role="group" aria-label="Categorias"></div>
-    <div class="svc-chips svc-chips--sub" id="svc-chips-sub" role="group" aria-label="Subcategorias" hidden></div>
-  </section>
-
-  <div id="svc-lista" aria-live="polite">
-    <div class="svc-vazio">Carregando serviços...</div>
+  <div class="section__head" style="margin-top:0.5rem">
+    <div>
+      <h1 class="section__title" style="font-size:clamp(1.5rem,2.4vw,2rem)">Nossos serviços</h1>
+      <p style="color:var(--cinza-500);margin-top:0.35rem">Do rosto ao cabelo, escolha o serviço e agende pelo WhatsApp.</p>
+    </div>
   </div>
 
-  <section class="servicos-cta">
-    <div>
-      <h2>Não encontrou o que procura?</h2>
-      <p>Fale com a gente pelo WhatsApp e tire suas dúvidas sobre qualquer serviço.</p>
-    </div>
-    <a href="#" id="servicos-whatsapp" class="btn-primary" target="_blank" rel="noopener"><span data-icon="whatsapp"></span>Falar no WhatsApp</a>
-  </section>
+  <div class="search-page__layout">
+    <button type="button" class="btn-secondary search-page__btn-filtros" id="btn-toggle-filtros" aria-expanded="false" aria-controls="painel-filtros">
+      <span data-icon="sort"></span> Filtrar serviços
+    </button>
+
+    <aside class="search-page__filters" id="painel-filtros">
+      <div class="search-page__filters-head">
+        <h2>Filtrar serviços</h2>
+        <span data-icon="sort" class="icon"></span>
+      </div>
+
+      <fieldset class="filter-group is-collapsed" data-grupo="categorias">
+        <legend data-toggle-grupo><span data-icon="tag" class="filter-group__icon"></span> Categorias <span data-icon="chevronRight" class="icon filter-group__chevron"></span></legend>
+        <div class="filter-group__body" id="filtros-categorias"></div>
+      </fieldset>
+
+      <fieldset class="filter-group is-collapsed" data-grupo="preco">
+        <legend data-toggle-grupo><span data-icon="dollarSign" class="filter-group__icon"></span> Faixa de preço <span data-icon="chevronRight" class="icon filter-group__chevron"></span></legend>
+        <div class="filter-group__body" id="filtros-preco">
+          <label class="filter-option"><input type="checkbox" name="preco" value="0-100"><span>Até R$ 100,00</span></label>
+          <label class="filter-option"><input type="checkbox" name="preco" value="100-200"><span>R$ 100,01 a R$ 200,00</span></label>
+          <label class="filter-option"><input type="checkbox" name="preco" value="200-400"><span>R$ 200,01 a R$ 400,00</span></label>
+          <label class="filter-option"><input type="checkbox" name="preco" value="400-"><span>Acima de R$ 400,00</span></label>
+        </div>
+      </fieldset>
+
+      <button type="button" class="btn-secondary search-page__limpar" id="btn-limpar-filtros">
+        <span data-icon="trash"></span> Limpar filtros
+      </button>
+    </aside>
+
+    <section>
+      <div class="active-chips" id="chips-ativos" hidden></div>
+
+      <div class="search-page__main-head">
+        <p class="search-page__contador"><strong id="contador-servicos">0</strong> serviços encontrados</p>
+        <label class="search-page__ordenar">
+          Ordenar por
+          <select id="select-ordenar">
+            <option value="relevancia">Mais relevantes</option>
+            <option value="recentes">Mais recentes</option>
+            <option value="preco_asc">Menor preço</option>
+            <option value="preco_desc">Maior preço</option>
+            <option value="nome">Nome (A-Z)</option>
+          </select>
+        </label>
+      </div>
+
+      <div class="products-grid" id="grade-servicos"></div>
+      <nav class="pagination" id="paginacao" aria-label="Paginação de resultados"></nav>
+    </section>
+  </div>
 </main>
 
 <footer class="site-footer">
@@ -99,20 +254,39 @@
 </nav>
 
 <script type="module">
+import { listarServicosPublico, montarArvoreCategorias, resolverNomesServicos, invalidarCacheServicos } from "../js/services/servicos.js";
+import { escHtml, getQueryParam, toast, debounce, registrarErroCliente } from "../js/utils/utils.js";
+import { renderizarGradeServicos, aplicarFiltrosServicos, ordenarListaServicos } from "../js/modules/servicos-publico.js";
+import { ouvirEstadoAuth, ehAdmin, sair } from "../js/services/auth.js";
 import { ICONS } from "../js/utils/icons.js";
-import { STORE_CONFIG } from "../firebase/firebase-config.js";
-import { escHtml, formatBRL, imgPos, getQueryParam, debounce } from "../js/utils/utils.js";
-import {
-  listarServicosPublico, montarArvoreCategorias, resolverNomesServicos,
-  ordenarServicos, normalizarTexto, invalidarCacheServicos
-} from "../js/services/servicos.js";
+import { iniciarLoadingGlobal } from "../js/utils/loadingUI.js";
 import { observarAtualizacaoPublica } from "../js/services/public-sync.js";
 
-const NOME_SALAO = "Espaço Viviane Vargas";
-const linkZap = (texto) => `https://wa.me/${STORE_CONFIG.whatsapp}?text=${encodeURIComponent(texto)}`;
+iniciarLoadingGlobal();
+let recargaPublicaAgendada = false;
+observarAtualizacaoPublica(() => {
+  if (recargaPublicaAgendada) return;
+  recargaPublicaAgendada = true;
+  invalidarCacheServicos();
+  window.setTimeout(() => window.location.reload(), 500);
+});
 
-function aplicarIcones(raiz = document) {
-  raiz.querySelectorAll("[data-icon]").forEach(el => {
+(function monitorarErrosGlobais() {
+  const jaRegistrados = new Set();
+  function registrar(origem, erro) {
+    const chave = `${origem}:${String(erro?.message || erro)}`;
+    if (jaRegistrados.has(chave)) return;
+    jaRegistrados.add(chave);
+    registrarErroCliente(origem, erro);
+  }
+  window.addEventListener("error", (e) => registrar("erro-js-global", e.error || e.message));
+  window.addEventListener("unhandledrejection", (e) => registrar("promise-rejeitada", e.reason));
+})();
+
+const POR_PAGINA = 20;
+
+function aplicarIconesEstaticos() {
+  document.querySelectorAll("[data-icon]").forEach(el => {
     const nome = el.dataset.icon;
     if (ICONS[nome] && !el.querySelector("svg")) {
       el.innerHTML = ICONS[nome];
@@ -120,147 +294,220 @@ function aplicarIcones(raiz = document) {
     }
   });
 }
-aplicarIcones();
-
-document.querySelector("#servicos-whatsapp").href =
-  linkZap(`Olá! Vim do site do ${NOME_SALAO} e gostaria de tirar uma dúvida sobre os serviços.`);
-
-// Quando o painel altera um serviço, a página recarrega para mostrar a versão nova.
-let recargaAgendada = false;
-observarAtualizacaoPublica(() => {
-  if (recargaAgendada) return;
-  recargaAgendada = true;
-  invalidarCacheServicos();
-  window.setTimeout(() => window.location.reload(), 500);
-});
+aplicarIconesEstaticos();
 
 let CATEGORIAS = [];
 let SERVICOS = [];
-const estado = { termo: "", catId: getQueryParam("categoria") || "", subId: "" };
+let paginaAtual = 1;
 
-const elLista = document.querySelector("#svc-lista");
-const elChipsCat = document.querySelector("#svc-chips-cat");
-const elChipsSub = document.querySelector("#svc-chips-sub");
+const estado = {
+  termo: getQueryParam("q") || "",
+  catId: getQueryParam("categoria") || "",
+  subId: "",
+  faixasPreco: new Set(),
+  ordenar: "relevancia"
+};
 
-function cartao(s) {
-  const img = imgPos(s.imagem || s.imagens?.[0] || "", 560);
-  const rotulo = [s.categoriaNome, s.subcategoriaNome].filter(Boolean).join(" · ");
-  const preco = Number(s.preco) > 0 ? `<span class="svc-card__preco">A partir de ${formatBRL(s.preco)}</span>` : `<span class="svc-card__preco">Sob consulta</span>`;
-  const zap = linkZap(`Olá! Vim do site do ${NOME_SALAO} e gostaria de saber mais sobre o serviço de ${s.nome}.`);
-  return `
-    <article class="svc-card">
-      <a class="svc-card__link" href="/pages/servico.html?id=${encodeURIComponent(s.id)}">
-        <div class="svc-card__img"><img src="${img.src || "/assets/images/placeholder.svg"}" style="object-position:${img.pos}" alt="${escHtml(s.nome)}" loading="lazy" decoding="async"></div>
-        <div class="svc-card__body">
-          ${rotulo ? `<span class="svc-card__cat">${escHtml(rotulo)}</span>` : ""}
-          <h3 class="svc-card__nome">${escHtml(s.nome)}</h3>
-          ${s.descricaoCurta ? `<p class="svc-card__desc">${escHtml(s.descricaoCurta)}</p>` : ""}
-          <div class="svc-card__meta">${s.duracao ? `<span>${escHtml(s.duracao)}</span>` : ""}${preco}</div>
-        </div>
-      </a>
-      <div class="svc-card__acoes">
-        <a href="/pages/servico.html?id=${encodeURIComponent(s.id)}" class="svc-btn-detalhes">Ver detalhes</a>
-        <a href="${zap}" class="svc-btn-zap" target="_blank" rel="noopener"><span class="icon">${ICONS.whatsapp}</span>WhatsApp</a>
-      </div>
-    </article>`;
+const grade = document.querySelector("#grade-servicos");
+const inputBusca = document.querySelector("#busca-header");
+inputBusca.value = estado.termo;
+
+document.querySelectorAll("[data-toggle-grupo]").forEach(legend => {
+  legend.addEventListener("click", () => legend.closest(".filter-group").classList.toggle("is-collapsed"));
+});
+
+const btnToggleFiltros = document.querySelector("#btn-toggle-filtros");
+const painelFiltros = document.querySelector("#painel-filtros");
+btnToggleFiltros?.addEventListener("click", () => {
+  const abrindo = !painelFiltros.classList.contains("is-aberto");
+  painelFiltros.classList.toggle("is-aberto", abrindo);
+  btnToggleFiltros.setAttribute("aria-expanded", String(abrindo));
+});
+
+const buscaDebounced = debounce(() => { paginaAtual = 1; render(); }, 250);
+document.querySelector("#form-busca-servicos").addEventListener("submit", (e) => {
+  e.preventDefault();
+  estado.termo = inputBusca.value;
+  paginaAtual = 1;
+  render();
+});
+inputBusca.addEventListener("input", (e) => {
+  estado.termo = e.target.value;
+  buscaDebounced();
+});
+
+document.querySelector("#select-ordenar").addEventListener("change", (e) => {
+  estado.ordenar = e.target.value;
+  paginaAtual = 1;
+  render();
+});
+
+document.querySelector("#btn-limpar-filtros").addEventListener("click", () => {
+  estado.catId = "";
+  estado.subId = "";
+  estado.faixasPreco.clear();
+  estado.termo = "";
+  inputBusca.value = "";
+  document.querySelector("#filtro-categoria").value = "";
+  paginaAtual = 1;
+  desenharFiltrosLaterais();
+  render();
+});
+
+function principaisComServico() {
+  const comServico = (id, ehSub) => SERVICOS.some(s => (ehSub ? s.subcategoriaId : s.categoriaId) === id);
+  return montarArvoreCategorias(CATEGORIAS)
+    .filter(c => comServico(c.id, false))
+    .map(c => ({ ...c, filhas: c.filhas.filter(f => comServico(f.id, true)) }));
 }
 
-function filtrar() {
-  const termo = normalizarTexto(estado.termo);
-  return SERVICOS.filter(s => {
-    if (estado.catId && s.categoriaId !== estado.catId) return false;
-    if (estado.subId && s.subcategoriaId !== estado.subId) return false;
-    if (!termo) return true;
-    return normalizarTexto([s.nome, s.categoriaNome, s.subcategoriaNome, s.descricaoCurta, s.descricao].join(" ")).includes(termo);
+function sincronizarSelectCategoria() {
+  document.querySelector("#filtro-categoria").value = estado.catId || "";
+}
+
+function desenharFiltrosLaterais() {
+  const principais = principaisComServico();
+  const alvo = document.querySelector("#filtros-categorias");
+
+  alvo.innerHTML = principais.map(c => {
+    const marcada = estado.catId === c.id;
+    const subs = marcada ? c.filhas.map(f => `
+      <label class="filter-option filter-option--sub">
+        <input type="checkbox" name="subcategoria" value="${escHtml(f.id)}" ${estado.subId === f.id ? "checked" : ""}>
+        <span>${escHtml(f.nome)}</span>
+      </label>`).join("") : "";
+    return `
+      <label class="filter-option">
+        <input type="checkbox" name="categoria" value="${escHtml(c.id)}" ${marcada ? "checked" : ""}>
+        <span>${escHtml(c.nome)}</span>
+      </label>${subs}`;
+  }).join("") || `<p style="font-size:0.85rem;color:var(--cinza-400)">Nenhuma categoria cadastrada.</p>`;
+
+  document.querySelectorAll('[name="preco"]').forEach(el => { el.checked = estado.faixasPreco.has(el.value); });
+
+  alvo.querySelectorAll('[name="categoria"]').forEach(el => {
+    el.addEventListener("change", () => {
+      // Uma categoria por vez (bate com o <select> do cabeçalho).
+      estado.catId = el.checked ? el.value : "";
+      estado.subId = "";
+      sincronizarSelectCategoria();
+      paginaAtual = 1;
+      desenharFiltrosLaterais();
+      render();
+    });
+  });
+  alvo.querySelectorAll('[name="subcategoria"]').forEach(el => {
+    el.addEventListener("change", () => {
+      estado.subId = el.checked ? el.value : "";
+      paginaAtual = 1;
+      desenharFiltrosLaterais();
+      render();
+    });
+  });
+  document.querySelectorAll('[name="preco"]').forEach(el => {
+    el.onchange = () => {
+      el.checked ? estado.faixasPreco.add(el.value) : estado.faixasPreco.delete(el.value);
+      paginaAtual = 1;
+      render();
+    };
   });
 }
 
-function desenharChips() {
-  const arvore = montarArvoreCategorias(CATEGORIAS);
-  const comServico = (id, ehSub) => SERVICOS.some(s => (ehSub ? s.subcategoriaId : s.categoriaId) === id);
-  const principais = arvore.filter(c => comServico(c.id, false));
+function desenharPaginacao(totalPaginas) {
+  const nav = document.querySelector("#paginacao");
+  if (totalPaginas <= 1) { nav.innerHTML = ""; return; }
+  nav.innerHTML = `
+    <button type="button" id="btn-pagina-anterior" ${paginaAtual === 1 ? "disabled" : ""} aria-label="Página anterior">‹ Anterior</button>
+    <span class="pagination__pagina">Página ${paginaAtual} de ${totalPaginas}</span>
+    <button type="button" id="btn-pagina-proxima" ${paginaAtual >= totalPaginas ? "disabled" : ""} aria-label="Próxima página">Próxima ›</button>`;
 
-  // Se a categoria da URL não existe mais, volta para "Todos".
-  if (estado.catId && !principais.some(c => c.id === estado.catId)) { estado.catId = ""; estado.subId = ""; }
-
-  elChipsCat.innerHTML = principais.length
-    ? `<button type="button" class="svc-chip ${!estado.catId ? "is-active" : ""}" data-cat="">Todos</button>` +
-      principais.map(c => `<button type="button" class="svc-chip ${estado.catId === c.id ? "is-active" : ""}" data-cat="${c.id}">${escHtml(c.nome)}</button>`).join("")
-    : "";
-  elChipsCat.hidden = !principais.length;
-
-  const atual = arvore.find(c => c.id === estado.catId);
-  const subs = atual ? atual.filhas.filter(f => comServico(f.id, true)) : [];
-  elChipsSub.innerHTML = subs.length
-    ? `<button type="button" class="svc-chip ${!estado.subId ? "is-active" : ""}" data-sub="">Todas</button>` +
-      subs.map(f => `<button type="button" class="svc-chip ${estado.subId === f.id ? "is-active" : ""}" data-sub="${f.id}">${escHtml(f.nome)}</button>`).join("")
-    : "";
-  elChipsSub.hidden = !subs.length;
-}
-
-function desenharLista() {
-  const lista = ordenarServicos(filtrar(), CATEGORIAS);
-  if (!lista.length) {
-    elLista.innerHTML = SERVICOS.length
-      ? `<div class="svc-vazio"><strong>Nenhum serviço encontrado</strong>Tente outra palavra ou escolha outra categoria.</div>`
-      : `<div class="svc-vazio"><strong>Em breve, novos serviços por aqui</strong>Enquanto isso, fale com a gente pelo WhatsApp para saber tudo o que oferecemos.</div>`;
-    return;
-  }
-
-  // agrupa: categoria > (sem subcategoria) + subcategorias
-  const arvore = montarArvoreCategorias(CATEGORIAS);
-  const idsConhecidos = new Set(arvore.map(c => c.id));
-  const grupos = arvore.map(c => ({ id: c.id, nome: c.nome, subs: c.filhas, itens: lista.filter(s => s.categoriaId === c.id) }))
-    .filter(g => g.itens.length);
-  const outros = lista.filter(s => !idsConhecidos.has(s.categoriaId));
-  if (outros.length) grupos.push({ id: "", nome: "Outros serviços", subs: [], itens: outros });
-
-  elLista.innerHTML = grupos.map(g => {
-    const semSub = g.itens.filter(s => !s.subcategoriaId || !g.subs.some(f => f.id === s.subcategoriaId));
-    const blocos = [];
-    if (semSub.length) blocos.push(`<div class="svc-grid">${semSub.map(cartao).join("")}</div>`);
-    g.subs.forEach(f => {
-      const itens = g.itens.filter(s => s.subcategoriaId === f.id);
-      if (itens.length) blocos.push(`<h3 class="svc-grupo__sub">${escHtml(f.nome)}</h3><div class="svc-grid">${itens.map(cartao).join("")}</div>`);
-    });
-    return `<section class="svc-grupo"><h2 class="svc-grupo__titulo">${escHtml(g.nome)}</h2>${blocos.join("")}</section>`;
-  }).join("");
+  const irPara = (n) => {
+    paginaAtual = n;
+    render();
+    document.querySelector(".search-page__main-head").scrollIntoView({ behavior: "smooth", block: "start" });
+  };
+  document.querySelector("#btn-pagina-anterior")?.addEventListener("click", () => irPara(paginaAtual - 1));
+  document.querySelector("#btn-pagina-proxima")?.addEventListener("click", () => irPara(paginaAtual + 1));
 }
 
 function render() {
-  desenharChips();
-  desenharLista();
+  const filtrados = aplicarFiltrosServicos(SERVICOS, {
+    termo: estado.termo, catId: estado.catId, subId: estado.subId, faixasPreco: [...estado.faixasPreco]
+  });
+  const ordenados = ordenarListaServicos(filtrados, estado.ordenar, CATEGORIAS);
+
+  const totalPaginas = Math.max(1, Math.ceil(ordenados.length / POR_PAGINA));
+  if (paginaAtual > totalPaginas) paginaAtual = totalPaginas;
+  const pagina = ordenados.slice((paginaAtual - 1) * POR_PAGINA, paginaAtual * POR_PAGINA);
+
+  document.querySelector("#contador-servicos").textContent = ordenados.length;
+  renderizarGradeServicos(grade, pagina);
+  desenharPaginacao(totalPaginas);
 }
 
-elChipsCat.addEventListener("click", (e) => {
-  const btn = e.target.closest("[data-cat]");
-  if (!btn) return;
-  estado.catId = btn.dataset.cat;
-  estado.subId = "";
-  render();
-});
-elChipsSub.addEventListener("click", (e) => {
-  const btn = e.target.closest("[data-sub]");
-  if (!btn) return;
-  estado.subId = btn.dataset.sub;
-  render();
-});
-document.querySelector("#svc-busca").addEventListener("input", debounce((e) => {
-  estado.termo = e.target.value;
-  desenharLista();
-}, 200));
+function configurarContaUI() {
+  ouvirEstadoAuth((usuario) => {
+    const btnAdmin = document.querySelector("#abrir-admin");
+    const btnEntrar = document.querySelector("#btn-entrar");
+    const btnSair = document.querySelector("#btn-sair");
+    const btnMinhaConta = document.querySelector("#btn-minha-conta");
 
-(async function iniciar() {
+    if (usuario) {
+      btnEntrar?.setAttribute("hidden", "");
+      btnSair?.removeAttribute("hidden");
+      btnMinhaConta?.removeAttribute("hidden");
+      if (ehAdmin()) btnAdmin?.removeAttribute("hidden");
+      else btnAdmin?.setAttribute("hidden", "");
+    } else {
+      btnEntrar?.removeAttribute("hidden");
+      btnSair?.setAttribute("hidden", "");
+      btnMinhaConta?.setAttribute("hidden", "");
+      btnAdmin?.setAttribute("hidden", "");
+    }
+  });
+
+  // "Entrar", "Minha conta" e "Painel Admin" abrem modais que só existem
+  // na página inicial — aqui redireciona pra lá já sinalizando qual abrir.
+  document.querySelector("#btn-entrar")?.addEventListener("click", () => { window.location.href = "/?abrir=login"; });
+  document.querySelector("#btn-minha-conta")?.addEventListener("click", () => { window.location.href = "/?abrir=conta"; });
+  document.querySelector("#abrir-admin")?.addEventListener("click", () => { window.location.href = "/?abrir=admin"; });
+  document.querySelector("#btn-sair")?.addEventListener("click", sair);
+}
+
+async function iniciar() {
+  configurarContaUI();
   try {
     const { categorias, servicos } = await listarServicosPublico();
     CATEGORIAS = categorias;
     SERVICOS = resolverNomesServicos(servicos, categorias);
-    render();
   } catch (erro) {
     console.error("[servicos] falha ao carregar:", erro);
-    elLista.innerHTML = `<div class="svc-vazio"><strong>Não foi possível carregar os serviços</strong>Atualize a página ou fale com a gente pelo WhatsApp.</div>`;
+    grade.innerHTML = `<div class="empty-state">Não foi possível carregar os serviços agora. Tente novamente em instantes.</div>`;
+    toast("Erro ao carregar serviços.", "error");
+    return;
   }
-})();
+
+  const principais = principaisComServico();
+  // Categoria da URL que não existe mais: volta para "Todas".
+  if (estado.catId && !principais.some(c => c.id === estado.catId)) estado.catId = "";
+
+  const select = document.querySelector("#filtro-categoria");
+  select.innerHTML = `<option value="">Todas as categorias</option>` +
+    principais.map(c => `<option value="${escHtml(c.id)}">${escHtml(c.nome)}</option>`).join("");
+  sincronizarSelectCategoria();
+  select.addEventListener("change", () => {
+    estado.catId = select.value;
+    estado.subId = "";
+    paginaAtual = 1;
+    desenharFiltrosLaterais();
+    render();
+  });
+
+  desenharFiltrosLaterais();
+  render();
+}
+
+iniciar();
 </script>
 </body>
 </html>
