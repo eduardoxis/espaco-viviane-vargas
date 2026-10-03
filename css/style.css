@@ -1072,3 +1072,8 @@ body { background: var(--cinza-050); color: var(--cinza-900); font-size: 15px; l
 .hero__subtitle { color: #7a5545; }
 .hero__features { background: rgba(250, 240, 234, 0.96); border-radius: 18px; box-shadow: none; }
 .hero__features strong { font-weight: 500; }
+
+/* ===== Navegação principal no topo (desktop): Catálogo e Serviços ===== */
+.header-action--nav.is-active { color: var(--azul-700); font-weight: 600; }
+/* No celular esses atalhos ficam na barra inferior (bottom-nav). */
+@media (max-width: 760px) { .header-action--nav { display: none; } }
