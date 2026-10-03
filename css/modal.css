@@ -167,7 +167,7 @@
 .modal--profile .perfil-hero {
   display: grid; grid-template-columns: minmax(0, 1fr) auto; align-items: center;
   padding: 1rem 1.1rem; gap: 0.75rem; border-radius: 16px; margin-bottom: 1.35rem;
-  background: linear-gradient(125deg, #f4e8df, #efe2d8);
+  background: #f4e8df;
 }
 .modal--profile .perfil-hero__info small { display: none; }
 .modal--profile .perfil-hero__info { grid-column: 1; grid-row: 1; min-width: 0; gap: 0.28rem; }
@@ -240,7 +240,7 @@
 
 .tabs-nav__summary {
   margin-top: auto;
-  background: linear-gradient(160deg, var(--azul-100), var(--branco));
+  background: var(--azul-100);
   border: 1px solid var(--cinza-100);
   border-radius: var(--raio-md);
   padding: 1rem;
