@@ -1,0 +1,196 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Serviços — Espaço Viviane Vargas</title>
+<meta name="description" content="Conheça os serviços do Espaço Viviane Vargas: cabelo, estética facial e corporal, unhas, maquiagem, sobrancelhas, cílios e depilação.">
+<link rel="icon" href="/assets/icons/favicon.ico">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Figtree:wght@400;500;600&family=Newsreader:ital,opsz,wght@0,6..72,400;0,6..72,500;0,6..72,600;1,6..72,400;1,6..72,500&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="/css/style.css?v=3">
+<link rel="stylesheet" href="/css/modal.css?v=3">
+<link rel="stylesheet" href="/css/responsive.css?v=3">
+<style>
+  /* Estilos exclusivos da página de serviços. */
+  .servicos-hero { padding: clamp(2.5rem, 6vw, 4.5rem) 0 clamp(1.5rem, 3vw, 2.5rem); }
+  .servicos-hero__eyebrow { display: flex; align-items: center; gap: 0.9rem; font-size: 0.74rem; letter-spacing: 0.3em; text-transform: uppercase; color: var(--azul-900); }
+  .servicos-hero__eyebrow::before { content: ""; width: 38px; height: 1px; background: var(--marrom); }
+  .servicos-hero h1 { font-size: clamp(2.4rem, 5vw, 4rem); font-weight: 500; line-height: 1.05; color: var(--azul-700); margin: 1rem 0 0.9rem; }
+  .servicos-hero h1 em { font-style: italic; }
+  .servicos-hero p { max-width: 52ch; color: var(--cinza-700); line-height: 1.65; margin: 0; }
+
+  .services-grid { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 1.4rem; padding-bottom: clamp(2.5rem, 5vw, 4rem); }
+  .service-card { display: flex; flex-direction: column; gap: 0.75rem; padding: 1.7rem 1.5rem 1.5rem; background: var(--branco); border: 1px solid var(--cinza-100); border-radius: 22px; transition: transform var(--transicao), box-shadow var(--transicao), border-color var(--transicao); }
+  .service-card:hover { transform: translateY(-3px); box-shadow: var(--sombra-md); border-color: var(--cinza-200); }
+  .service-card__icon { width: 54px; height: 54px; border-radius: 50%; background: var(--azul-100); color: var(--azul-700); display: grid; place-items: center; }
+  .service-card__icon .icon { width: 26px; height: 26px; }
+  .service-card__title { font-size: 1.6rem; font-weight: 500; color: var(--azul-700); margin-top: 0.25rem; }
+  .service-card__desc { margin: 0; color: var(--cinza-700); font-size: 0.92rem; line-height: 1.55; }
+  .service-card__list { list-style: none; margin: 0.25rem 0 0.5rem; padding: 0; display: grid; gap: 0.45rem; flex: 1; align-content: start; }
+  .service-card__list li { position: relative; padding-left: 1.1rem; font-size: 0.88rem; color: var(--cinza-900); }
+  .service-card__list li::before { content: ""; position: absolute; left: 0; top: 0.55em; width: 5px; height: 5px; border-radius: 50%; background: var(--marrom); }
+  .service-card__cta { display: inline-flex; align-items: center; justify-content: center; gap: 0.5rem; padding: 0.7rem 1.2rem; border: 1px solid var(--azul-700); border-radius: 999px; color: var(--azul-700); font-size: 0.88rem; font-weight: 500; transition: background var(--transicao), color var(--transicao); }
+  .service-card__cta:hover { background: var(--azul-700); color: #fff; }
+  .service-card__cta .icon { width: 16px; height: 16px; }
+
+  .servicos-cta { background: var(--azul-700); color: #fff; border-radius: 28px; padding: clamp(1.8rem, 4vw, 3rem); display: flex; align-items: center; justify-content: space-between; gap: 1.5rem; flex-wrap: wrap; margin-bottom: clamp(2.5rem, 5vw, 4rem); }
+  .servicos-cta h2 { font-size: clamp(1.6rem, 3vw, 2.2rem); font-weight: 500; }
+  .servicos-cta p { margin: 0.4rem 0 0; color: #ead9cf; }
+  .servicos-cta .btn-primary { background: var(--branco); color: var(--azul-700); }
+  .servicos-cta .btn-primary:hover { background: var(--nude); color: var(--azul-900); }
+
+  @media (max-width: 980px) { .services-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
+  @media (max-width: 640px) {
+    .services-grid { grid-template-columns: 1fr; gap: 1rem; }
+    .servicos-hero h1 { font-size: 2.3rem; }
+    .servicos-cta { border-radius: 22px; }
+    .servicos-cta .btn-primary { width: 100%; justify-content: center; }
+  }
+</style>
+</head>
+<body>
+
+<a href="#conteudo" class="skip-link">Pular para o conteúdo</a>
+
+<header class="site-header">
+  <div class="container header-top">
+    <a href="/" class="logo">
+      <img src="/assets/images/logo.webp" alt="Espaço Viviane Vargas" class="logo__mark" width="256" height="256" decoding="async">
+      <span class="logo__text"><span class="logo__t1">Espaço</span><span class="logo__t2">Viviane Vargas</span><span class="logo__t3">Estética e salão de beleza</span></span>
+    </a>
+    <div class="header-actions" style="margin-left:auto">
+      <a href="/" class="header-action" aria-label="Início"><span data-icon="home"></span><span>Início</span></a>
+      <a href="/pages/catalogo.html" class="header-action" aria-label="Catálogo"><span data-icon="shoppingBag"></span><span>Catálogo</span></a>
+    </div>
+  </div>
+</header>
+
+<main class="container" id="conteudo">
+  <section class="servicos-hero">
+    <span class="servicos-hero__eyebrow">Beleza · Estética · Bem-estar</span>
+    <h1>Nossos <em>serviços</em></h1>
+    <p>No Espaço Viviane Vargas você encontra cuidado completo, do rosto ao cabelo, feito por profissionais preparados para realçar o que te faz única.</p>
+  </section>
+
+  <section class="services-grid" aria-label="Serviços do salão">
+      <article class="service-card">
+        <span class="service-card__icon"><svg class="icon" viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M7 4h4v16H8a1 1 0 0 1-1-1V4Z" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"/><path d="M11 6c4 0 7 2 7 6s-3 6-7 6" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"/><path d="M14 9.5c1.5.4 2.5 1.3 2.5 2.5s-1 2.1-2.5 2.5" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"/></svg></span>
+        <h2 class="service-card__title">Cabelo</h2>
+        <p class="service-card__desc">Cuidado completo para os fios, do corte à finalização.</p>
+        <ul class="service-card__list"><li>Corte</li><li>Escova e penteados</li><li>Coloração e mechas</li><li>Hidratação e tratamentos</li></ul>
+        <a href="#" class="service-card__cta" data-servico="Cabelo" target="_blank" rel="noopener"><span data-icon="whatsapp"></span>Falar no WhatsApp</a>
+      </article>
+      <article class="service-card">
+        <span class="service-card__icon"><svg class="icon" viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M12 3.5c3.6 0 6 2.8 6 6.5 0 4.2-2.6 8.5-6 10.5-3.4-2-6-6.300-6-10.500 0-3.700 2.400-6.500 6-6.500Z" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"/><path d="M9 10h.01M15 10h.01M9.500 14.500c1.500 1.200 3.500 1.200 5 0" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"/></svg></span>
+        <h2 class="service-card__title">Estética facial</h2>
+        <p class="service-card__desc">Tratamentos para renovar e cuidar da pele do rosto.</p>
+        <ul class="service-card__list"><li>Limpeza de pele</li><li>Hidratação facial</li><li>Peeling</li><li>Revitalização</li></ul>
+        <a href="#" class="service-card__cta" data-servico="Estética facial" target="_blank" rel="noopener"><span data-icon="whatsapp"></span>Falar no WhatsApp</a>
+      </article>
+      <article class="service-card">
+        <span class="service-card__icon"><svg class="icon" viewBox="0 0 24 24" fill="none" aria-hidden="true"><circle cx="12" cy="5" r="2" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"/><path d="M12 8v5m0 0-3 7m3-7 3 7M7 10.500 12 9l5 1.500" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"/></svg></span>
+        <h2 class="service-card__title">Estética corporal</h2>
+        <p class="service-card__desc">Bem-estar e cuidado para o corpo todo.</p>
+        <ul class="service-card__list"><li>Massagem relaxante</li><li>Drenagem linfática</li><li>Tratamentos corporais</li><li>Esfoliação e hidratação</li></ul>
+        <a href="#" class="service-card__cta" data-servico="Estética corporal" target="_blank" rel="noopener"><span data-icon="whatsapp"></span>Falar no WhatsApp</a>
+      </article>
+      <article class="service-card">
+        <span class="service-card__icon"><svg class="icon" viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M9 21v-7a3 3 0 0 1 6 0v7" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"/><path d="M10 11V6a2 2 0 0 1 4 0v5" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"/><path d="M10.500 17h3" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"/></svg></span>
+        <h2 class="service-card__title">Unhas</h2>
+        <p class="service-card__desc">Mãos e pés cuidados, com acabamento impecável.</p>
+        <ul class="service-card__list"><li>Manicure</li><li>Pedicure</li><li>Esmaltação</li><li>Spa dos pés</li></ul>
+        <a href="#" class="service-card__cta" data-servico="Unhas" target="_blank" rel="noopener"><span data-icon="whatsapp"></span>Falar no WhatsApp</a>
+      </article>
+      <article class="service-card">
+        <span class="service-card__icon"><svg class="icon" viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M14 3l4 4-7.500 7.500-4-4L14 3Z" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"/><path d="M6.500 10.500 5 19l8.500-1.500" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"/></svg></span>
+        <h2 class="service-card__title">Maquiagem</h2>
+        <p class="service-card__desc">Produção para o dia a dia e para ocasiões especiais.</p>
+        <ul class="service-card__list"><li>Maquiagem social</li><li>Maquiagem para eventos</li><li>Noivas e madrinhas</li></ul>
+        <a href="#" class="service-card__cta" data-servico="Maquiagem" target="_blank" rel="noopener"><span data-icon="whatsapp"></span>Falar no WhatsApp</a>
+      </article>
+      <article class="service-card">
+        <span class="service-card__icon"><svg class="icon" viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M3 9.500c3-3 7-3.500 11-2.500s5.500 3 7 4.500" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"/><path d="M3 14.500c2.500 2.700 6 4 9 4s6-1.300 9-4" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"/><circle cx="12" cy="13" r="1.300" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"/></svg></span>
+        <h2 class="service-card__title">Sobrancelhas e cílios</h2>
+        <p class="service-card__desc">Olhar valorizado com técnicas que realçam sua expressão.</p>
+        <ul class="service-card__list"><li>Design de sobrancelhas</li><li>Henna</li><li>Lifting de cílios</li></ul>
+        <a href="#" class="service-card__cta" data-servico="Sobrancelhas e cílios" target="_blank" rel="noopener"><span data-icon="whatsapp"></span>Falar no WhatsApp</a>
+      </article>
+      <article class="service-card">
+        <span class="service-card__icon"><svg class="icon" viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M12 3.500c2 3.300 5 5.500 5 9a5 5 0 0 1-10 0c0-3.500 3-5.700 5-9Z" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"/><path d="M9.500 14c.3 1.500 1.300 2.300 2.500 2.500" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"/></svg></span>
+        <h2 class="service-card__title">Depilação</h2>
+        <p class="service-card__desc">Pele lisa com cuidado e conforto.</p>
+        <ul class="service-card__list"><li>Depilação com cera</li><li>Rosto</li><li>Corpo</li></ul>
+        <a href="#" class="service-card__cta" data-servico="Depilação" target="_blank" rel="noopener"><span data-icon="whatsapp"></span>Falar no WhatsApp</a>
+      </article>
+  </section>
+
+  <section class="servicos-cta">
+    <div>
+      <h2>Não encontrou o que procura?</h2>
+      <p>Fale com a gente pelo WhatsApp e tire suas dúvidas sobre qualquer serviço.</p>
+    </div>
+    <a href="#" id="servicos-whatsapp" class="btn-primary" target="_blank" rel="noopener"><span data-icon="whatsapp"></span>Falar no WhatsApp</a>
+  </section>
+</main>
+
+<footer class="site-footer">
+  <div class="container footer-grid">
+    <div>
+      <h4>Espaço Viviane Vargas</h4>
+      <p>R. Dr. Ézio Carneiro, 158 - St. Aeroporto, Luziânia - GO, 72800-420</p>
+    </div>
+    <div>
+      <h4>Contato</h4>
+      <a href="https://wa.me/5561999184452" target="_blank" rel="noopener">WhatsApp</a>
+      <p>futuralza@gmail.com</p>
+    </div>
+    <div>
+      <h4>Redes sociais</h4>
+      <div class="social-row">
+        <a href="https://www.instagram.com/futurapapelaria/" aria-label="Instagram" target="_blank" rel="noopener"><span data-icon="instagram"></span></a>
+      </div>
+    </div>
+  </div>
+  <div class="footer-bottom">© 2026 Espaço Viviane Vargas. Todos os direitos reservados.<span class="footer-credit">Desenvolvido por <a href="https://www.instagram.com/eduardo_xis" target="_blank" rel="noopener noreferrer">@eduardo_xis</a></span></div>
+</footer>
+
+<!-- BOTTOM NAV (mobile) -->
+<nav class="bottom-nav">
+  <a href="/" class="bottom-nav__item">
+    <span data-icon="home"></span><span>Início</span>
+  </a>
+  <a href="/#categorias" class="bottom-nav__item">
+    <span data-icon="grid"></span><span>Categorias</span>
+  </a>
+  <a href="/pages/servicos.html" class="bottom-nav__item is-active">
+    <svg class="icon" viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M12 4.5c1.8 2 2.8 4.2 2.8 6.4S13.8 14.9 12 16.5c-1.8-1.6-2.8-3.6-2.8-5.6S10.2 6.5 12 4.5Z" stroke="currentColor" stroke-width="1.5" stroke-linejoin="round"/><path d="M9.4 14.6C7 14.8 4.7 13.6 3.5 11.1c2.6-.3 4.7.5 6 2M14.6 14.6c2.4.2 4.7-1 5.9-3.5-2.6-.3-4.7.5-6 2M5 18c2.2 1.5 4.6 2 7 2s4.8-.5 7-2" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg><span>Serviços</span>
+  </a>
+  <a href="/" class="bottom-nav__item">
+    <span data-icon="user"></span><span>Conta</span>
+  </a>
+</nav>
+
+<script type="module">
+import { ICONS } from "../js/utils/icons.js";
+import { STORE_CONFIG } from "../firebase/firebase-config.js";
+
+document.querySelectorAll("[data-icon]").forEach(el => {
+  const nome = el.dataset.icon;
+  if (ICONS[nome] && !el.querySelector("svg")) {
+    el.innerHTML = ICONS[nome];
+    el.classList.add("icon");
+  }
+});
+
+const numero = STORE_CONFIG.whatsapp;
+const link = (texto) => `https://wa.me/${numero}?text=${encodeURIComponent(texto)}`;
+document.querySelectorAll("[data-servico]").forEach(a => {
+  a.href = link(`Olá! Vim do site do ${STORE_CONFIG.nome} e gostaria de saber mais sobre o serviço de ${a.dataset.servico}.`);
+});
+const geral = document.querySelector("#servicos-whatsapp");
+if (geral) geral.href = link(`Olá! Vim do site do ${STORE_CONFIG.nome} e gostaria de tirar uma dúvida sobre os serviços.`);
+</script>
+</body>
+</html>
