@@ -2,17 +2,78 @@
 <html lang="pt-BR">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, viewport-fit=cover">
 <title id="titulo-pagina">Serviço — Espaço Viviane Vargas</title>
 <meta name="description" id="meta-descricao" content="Conheça este serviço do Espaço Viviane Vargas.">
 <link rel="icon" href="/assets/icons/favicon.ico">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Figtree:wght@400;500;600&family=Newsreader:ital,opsz,wght@0,6..72,400;0,6..72,500;0,6..72,600;1,6..72,400;1,6..72,500&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="/css/style.css?v=4">
-<link rel="stylesheet" href="/css/modal.css?v=3">
-<link rel="stylesheet" href="/css/responsive.css?v=3">
-<link rel="stylesheet" href="/css/servicos.css?v=1">
+<link rel="stylesheet" href="/css/style.css">
+<link rel="stylesheet" href="/css/modal.css">
+<link rel="stylesheet" href="/css/responsive.css">
+<style>
+  /* Impede que navegadores móveis alterem a escala ao carregar esta página. */
+  html { -webkit-text-size-adjust: 100%; text-size-adjust: 100%; }
+  .product-detail__color { display: flex; align-items: center; gap: 0.5rem; font-size: 0.88rem; color: var(--cinza-700); }
+  .product-detail__color strong { color: var(--cinza-900); }
+  .color-dot {
+    width: 16px; height: 16px; border-radius: 50%; flex-shrink: 0;
+    border: 1px solid var(--cinza-300); display: inline-block;
+  }
+  .color-variants { display: grid; gap: 0.5rem; margin: 0.25rem 0; }
+  .color-variants__label { font-size: 0.85rem; color: var(--cinza-500); }
+  .color-variants__row { display: flex; flex-wrap: wrap; gap: 0.7rem; }
+  .color-variants__item {
+    width: 34px; height: 34px; border-radius: 50%; flex-shrink: 0;
+    border: 2px solid var(--branco); box-shadow: 0 0 0 1.5px var(--cinza-300);
+    display: inline-block; transition: box-shadow var(--transicao), transform var(--transicao);
+  }
+  .color-variants__item:hover { transform: scale(1.08); }
+  .color-variants__item.is-active { box-shadow: 0 0 0 2px var(--azul-700); }
+
+  .trust-badges {
+    display: grid; grid-template-columns: repeat(2, 1fr); gap: 0.75rem;
+    margin-top: 1.5rem; padding-top: 1.25rem; border-top: 1px solid var(--cinza-100);
+  }
+  @media (min-width: 640px) {
+    .trust-badges { grid-template-columns: repeat(4, 1fr); }
+  }
+  .trust-badges__item { display: flex; align-items: flex-start; gap: 0.5rem; font-size: 0.78rem; color: var(--cinza-500); min-width: 0; }
+  .trust-badges__item .icon { width: 20px; height: 20px; color: var(--azul-700); flex-shrink: 0; margin-top: 1px; }
+  .trust-badges__item strong { display: block; color: var(--cinza-900); font-size: 0.83rem; }
+
+  .product-tabs { margin-top: 2.5rem; display: grid; grid-template-columns: 1fr; gap: 2rem; align-items: start; min-width: 0; }
+  @media (min-width: 900px) {
+    .product-tabs { grid-template-columns: 1fr 300px; }
+  }
+  .product-tabs > div:first-child { min-width: 0; }
+  .product-tabs__nav { display: flex; flex-wrap: wrap; gap: 0.5rem 1.75rem; border-bottom: 1px solid var(--cinza-100); }
+  .product-tabs__btn {
+    display: flex; align-items: center; gap: 0.4rem; padding: 0.9rem 0.1rem;
+    font-size: 0.9rem; font-weight: 600; color: var(--cinza-500); white-space: nowrap;
+    border-bottom: 2px solid transparent; margin-bottom: -1px;
+  }
+  .product-tabs__btn .icon { width: 16px; height: 16px; }
+  .product-tabs__btn.is-active { color: var(--azul-700); border-color: var(--azul-700); }
+  .product-tabs__panel { padding: 1.25rem 0; font-size: 0.92rem; color: var(--cinza-700); line-height: 1.6; }
+  .product-tabs__panel[hidden] { display: none; }
+  .product-tabs__panel ul, .product-tabs__panel ol { margin: 0; padding-left: 1.2rem; display: grid; gap: 0.4rem; }
+  .product-tabs__info-grid { display: grid; gap: 0.5rem; }
+  .product-tabs__info-grid div { display: flex; justify-content: space-between; padding: 0.5rem 0; border-bottom: 1px solid var(--cinza-050); }
+  .product-tabs__info-grid dt { color: var(--cinza-500); }
+  .product-tabs__info-grid dd { font-weight: 600; color: var(--cinza-900); }
+
+  .product-highlights { background: var(--cinza-050); border-radius: var(--raio-md); padding: 1.25rem; }
+  .product-highlights h3 { font-size: 0.95rem; margin-bottom: 0.85rem; }
+  .product-highlights ul { display: grid; gap: 0.6rem; list-style: none; padding: 0; margin: 0; }
+  .product-highlights li { display: flex; align-items: flex-start; gap: 0.5rem; font-size: 0.85rem; color: var(--cinza-700); }
+  .product-highlights li .icon { width: 16px; height: 16px; color: #15803d; flex-shrink: 0; margin-top: 2px; }
+
+  .related-section { padding-block: 1rem 2.5rem; }
+  .related-section__footer { display: flex; justify-content: center; margin-top: 1.5rem; }
+  .related-section__footer .btn-secondary { padding: 0.75rem 1.75rem; }
+</style>
 </head>
 <body>
 
@@ -24,9 +85,29 @@
       <img src="/assets/images/logo.webp" alt="Espaço Viviane Vargas" class="logo__mark" width="256" height="256" decoding="async">
       <span class="logo__text"><span class="logo__t1">Espaço</span><span class="logo__t2">Viviane Vargas</span><span class="logo__t3">Estética e salão de beleza</span></span>
     </a>
-    <div class="header-actions" style="margin-left:auto">
+
+    <form class="search-bar" role="search" id="form-busca-servico">
+      <label for="busca-header" class="sr-only">Pesquisar serviços</label>
+      <input id="busca-header" type="search" placeholder="Buscar serviço..." autocomplete="off">
+      <button type="submit" class="search-bar__btn" aria-label="Pesquisar"><span data-icon="search"></span></button>
+    </form>
+
+    <div class="header-actions">
       <a href="/pages/catalogo.html" class="header-action header-action--nav" aria-label="Catálogo"><span data-icon="shoppingBag"></span><span>Catálogo</span></a>
-      <a href="/pages/servicos.html" class="header-action header-action--nav is-active" aria-label="Serviços"><span data-icon="calendar"></span><span>Serviços</span></a>
+      <a href="/pages/servicos.html" class="header-action header-action--nav is-active" aria-label="Serviços" aria-current="page"><span data-icon="calendar"></span><span>Serviços</span></a>
+      <button id="btn-entrar" class="header-action" data-modal-target="#modal-login" aria-label="Entrar">
+        <span data-icon="user"></span><span>Entrar</span>
+      </button>
+      <button id="btn-sair" class="header-action" hidden aria-label="Sair">
+        <span data-icon="logOut"></span><span>Sair</span>
+      </button>
+      <button id="btn-minha-conta" class="header-action" hidden data-modal-target="#modal-conta" aria-label="Minha conta">
+        <span data-icon="user"></span><span>Minha conta</span>
+      </button>
+      <button id="abrir-admin" class="header-action" hidden aria-label="Painel Admin">
+        <span data-icon="home"></span><span>Painel Admin</span>
+      </button>
+      <button class="menu-toggle" aria-label="Abrir menu"><span data-icon="menu"></span></button>
     </div>
   </div>
 </header>
@@ -41,12 +122,15 @@
   </nav>
 
   <div id="servico-conteudo">
-    <div class="svc-vazio">Carregando serviço...</div>
+    <div class="empty-state">Carregando serviço...</div>
   </div>
 
-  <section class="svc-relacionados" id="secao-relacionados" hidden>
-    <h2>Outros serviços de <span id="nome-categoria-rel"></span></h2>
-    <div class="svc-grid" id="grade-relacionados"></div>
+  <section class="related-section" id="secao-relacionados" hidden>
+    <div class="section__head"><h2 class="section__title">Você também pode gostar</h2></div>
+    <div class="products-grid" id="grade-relacionados"></div>
+    <div class="related-section__footer">
+      <button type="button" class="btn-secondary" id="btn-ver-servicos">Ver todos os serviços</button>
+    </div>
   </section>
 </main>
 
@@ -71,36 +155,41 @@
   <div class="footer-bottom">© 2026 Espaço Viviane Vargas. Todos os direitos reservados.<span class="footer-credit">Desenvolvido por <a href="https://www.instagram.com/eduardo_xis" target="_blank" rel="noopener noreferrer">@eduardo_xis</a></span></div>
 </footer>
 
-<!-- BOTTOM NAV (mobile) -->
-<nav class="bottom-nav">
-  <a href="/" class="bottom-nav__item">
-    <span data-icon="home"></span><span>Início</span>
-  </a>
-  <a href="/pages/catalogo.html" class="bottom-nav__item">
-    <span data-icon="shoppingBag"></span><span>Catálogo</span>
-  </a>
-  <a href="/pages/servicos.html" class="bottom-nav__item is-active">
-    <svg class="icon" viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M12 4.5c1.8 2 2.8 4.2 2.8 6.4S13.8 14.9 12 16.5c-1.8-1.6-2.8-3.6-2.8-5.6S10.2 6.5 12 4.5Z" stroke="currentColor" stroke-width="1.5" stroke-linejoin="round"/><path d="M9.4 14.6C7 14.8 4.7 13.6 3.5 11.1c2.6-.3 4.7.5 6 2M14.6 14.6c2.4.2 4.7-1 5.9-3.5-2.6-.3-4.7.5-6 2M5 18c2.2 1.5 4.6 2 7 2s4.8-.5 7-2" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg><span>Serviços</span>
-  </a>
-  <a href="/" class="bottom-nav__item">
-    <span data-icon="user"></span><span>Conta</span>
-  </a>
-</nav>
-
 <script type="module">
-import { ICONS } from "../js/utils/icons.js";
-import { STORE_CONFIG } from "../firebase/firebase-config.js";
-import { escHtml, formatBRL, imgPos, getQueryParam, toast } from "../js/utils/utils.js";
+import { obterServicoPublico, resolverNomesServicos, ordenarServicos, servicoTemImagem, invalidarCacheServicos } from "../js/services/servicos.js";
+import { escHtml, getQueryParam, formatBRL, toast, imgPos, registrarErroCliente } from "../js/utils/utils.js";
 import {
-  obterServicoPublico, resolverNomesServicos, ordenarServicos, invalidarCacheServicos
-} from "../js/services/servicos.js";
+  renderizarGradeServicos, compartilharServico, obterIdsFavoritosServicos,
+  alternarFavoritoServico, linkAgendarServico, textoPrecoServico
+} from "../js/modules/servicos-publico.js";
+import { ouvirEstadoAuth, ehAdmin, sair } from "../js/services/auth.js";
+import { ICONS, icon } from "../js/utils/icons.js";
+import { iniciarLoadingGlobal } from "../js/utils/loadingUI.js";
 import { observarAtualizacaoPublica } from "../js/services/public-sync.js";
 
-const NOME_SALAO = "Espaço Viviane Vargas";
-const linkZap = (texto) => `https://wa.me/${STORE_CONFIG.whatsapp}?text=${encodeURIComponent(texto)}`;
+iniciarLoadingGlobal();
+let recargaPublicaAgendada = false;
+observarAtualizacaoPublica(() => {
+  if (recargaPublicaAgendada) return;
+  recargaPublicaAgendada = true;
+  invalidarCacheServicos();
+  window.setTimeout(() => window.location.reload(), 500);
+});
 
-function aplicarIcones(raiz = document) {
-  raiz.querySelectorAll("[data-icon]").forEach(el => {
+(function monitorarErrosGlobais() {
+  const jaRegistrados = new Set();
+  function registrar(origem, erro) {
+    const chave = `${origem}:${String(erro?.message || erro)}`;
+    if (jaRegistrados.has(chave)) return;
+    jaRegistrados.add(chave);
+    registrarErroCliente(origem, erro);
+  }
+  window.addEventListener("error", (e) => registrar("erro-js-global", e.error || e.message));
+  window.addEventListener("unhandledrejection", (e) => registrar("promise-rejeitada", e.reason));
+})();
+
+function aplicarIconesEstaticos() {
+  document.querySelectorAll("[data-icon]").forEach(el => {
     const nome = el.dataset.icon;
     if (ICONS[nome] && !el.querySelector("svg")) {
       el.innerHTML = ICONS[nome];
@@ -108,131 +197,216 @@ function aplicarIcones(raiz = document) {
     }
   });
 }
-aplicarIcones();
+aplicarIconesEstaticos();
 
-let recargaAgendada = false;
-observarAtualizacaoPublica(() => {
-  if (recargaAgendada) return;
-  recargaAgendada = true;
-  invalidarCacheServicos();
-  window.setTimeout(() => window.location.reload(), 500);
-});
+const id = getQueryParam("id");
+const container = document.querySelector("#servico-conteudo");
 
-const elConteudo = document.querySelector("#servico-conteudo");
+function renderizarGaleriaHtml(imgs, nome) {
+  return `
+    ${imgs.length > 1 ? `
+    <div class="product-detail__thumbs" id="galeria-thumbs">
+      ${imgs.map((img, i) => `
+        <button type="button" class="product-detail__thumb ${i === 0 ? "is-active" : ""}" data-thumb="${i}">
+          <img src="${imgPos(img, 180).src}" style="object-position:${imgPos(img).pos}" alt="${escHtml(nome)} - imagem ${i + 1}" loading="lazy" decoding="async">
+        </button>`).join("")}
+    </div>` : ""}
+    <div class="product-detail__image">
+      <img id="imagem-principal" src="${imgPos(imgs[0], 960).src || "/assets/images/placeholder.svg"}" style="object-position:${imgPos(imgs[0]).pos}" alt="${escHtml(nome)}" decoding="async" fetchpriority="high">
+    </div>`;
+}
+
+function listaHtml(itens, tag = "ul") {
+  return `<${tag}>${itens.map(i => `<li>${escHtml(i)}</li>`).join("")}</${tag}>`;
+}
+const lista = (v) => (Array.isArray(v) ? v.filter(Boolean) : []);
+
+function renderizarRelacionados(servico, todos) {
+  try {
+    const relacionados = todos
+      .filter(s => s.id !== servico.id && s.categoriaId === servico.categoriaId && servicoTemImagem(s))
+      .slice(0, 6);
+    if (!relacionados.length) return;
+    document.querySelector("#secao-relacionados").hidden = false;
+    renderizarGradeServicos(document.querySelector("#grade-relacionados"), relacionados);
+  } catch { /* silencioso: seção de relacionados é só um bônus */ }
+}
 
 function naoEncontrado() {
-  document.querySelector("#breadcrumb-servico").textContent = "Não encontrado";
-  elConteudo.innerHTML = `<div class="svc-vazio"><strong>Serviço não encontrado</strong>Ele pode ter sido removido ou estar indisponível.<br><br><a href="/pages/servicos.html" class="btn-secondary">Ver todos os serviços</a></div>`;
+  container.innerHTML = `<div class="empty-state">
+    <strong>Serviço não encontrado.</strong>
+    <p>Ele pode ter sido removido ou o link está incorreto.</p>
+    <a href="/pages/servicos.html" class="btn-primary">Ver serviços</a>
+  </div>`;
 }
 
-function lista(titulo, itens, tag = "ul", larga = false) {
-  if (!Array.isArray(itens) || !itens.length) return "";
-  return `<section class="svc-secao ${larga ? "svc-secao--larga" : ""}"><h2>${titulo}</h2><${tag}>${itens.map(i => `<li>${escHtml(i)}</li>`).join("")}</${tag}></section>`;
-}
-function texto(titulo, valor, larga = false) {
-  if (!valor) return "";
-  return `<section class="svc-secao ${larga ? "svc-secao--larga" : ""}"><h2>${titulo}</h2><p>${escHtml(valor)}</p></section>`;
-}
+async function iniciarServico() {
+  if (!id) return naoEncontrado();
 
-function desenhar(s) {
-  const rotulo = [s.categoriaNome, s.subcategoriaNome].filter(Boolean).join(" · ");
-  const urls = (Array.isArray(s.imagens) && s.imagens.length ? s.imagens : (s.imagem ? [s.imagem] : [])).filter(Boolean);
-  const principal = imgPos(urls[0] || "", 900);
-  const zap = linkZap(`Olá! Vim do site do ${NOME_SALAO} e gostaria de agendar o serviço de ${s.nome}.`);
+  let dados;
+  try {
+    dados = await obterServicoPublico(id);
+  } catch (erro) {
+    console.error("[servico] falha ao carregar:", erro);
+    container.innerHTML = `<div class="empty-state"><strong>Não foi possível carregar o serviço.</strong><p>Atualize a página e tente novamente.</p></div>`;
+    return;
+  }
+  if (!dados || !servicoTemImagem(dados.servico)) return naoEncontrado();
 
-  const fatos = [
-    s.duracao ? `<div class="svc-fato"><span>Duração</span><strong>${escHtml(s.duracao)}</strong></div>` : "",
-    s.sessoes ? `<div class="svc-fato"><span>Sessões</span><strong>${escHtml(s.sessoes)}</strong></div>` : "",
-    `<div class="svc-fato"><span>Valor</span><strong>${Number(s.preco) > 0 ? `a partir de ${formatBRL(s.preco)}` : "Sob consulta"}</strong></div>`
-  ].join("");
+  const [servico] = resolverNomesServicos([dados.servico], dados.categorias);
+  const todos = ordenarServicos(resolverNomesServicos(dados.servicos, dados.categorias), dados.categorias);
 
-  elConteudo.innerHTML = `
-    <div class="svc-detalhe">
-      <div class="svc-galeria">
-        <div class="svc-galeria__principal"><img id="svc-img-principal" src="${principal.src || "/assets/images/placeholder.svg"}" style="object-position:${principal.pos}" alt="${escHtml(s.nome)}"></div>
-        ${urls.length > 1 ? `<div class="svc-galeria__thumbs">${urls.map((u, i) => {
-          const t = imgPos(u, 200);
-          return `<button type="button" class="svc-galeria__thumb ${i === 0 ? "is-active" : ""}" data-i="${i}" aria-label="Ver foto ${i + 1}"><img src="${t.src}" style="object-position:${t.pos}" alt="" loading="lazy"></button>`;
-        }).join("")}</div>` : ""}
+  document.querySelector("#titulo-pagina").textContent = `${servico.nome} — Espaço Viviane Vargas`;
+  document.querySelector("#meta-descricao").setAttribute("content", (servico.descricaoCurta || servico.descricao || servico.nome).slice(0, 155));
+  document.querySelector("#breadcrumb-servico").textContent = servico.nome;
+
+  const imagens = (Array.isArray(servico.imagens) && servico.imagens.length ? servico.imagens : [servico.imagem]).filter(Boolean);
+  const favoritado = obterIdsFavoritosServicos().includes(servico.id);
+  const rotulo = [servico.categoriaNome, servico.subcategoriaNome].filter(Boolean).join(" · ");
+  const beneficios = lista(servico.beneficios);
+  const comoFunciona = lista(servico.comoFunciona);
+  const indicadoPara = lista(servico.indicadoPara);
+
+  const abas = [
+    { chave: "descricao", icone: "clipboardList", titulo: "Descrição",
+      html: servico.descricao ? escHtml(servico.descricao) : "Este serviço ainda não tem uma descrição detalhada." },
+    comoFunciona.length ? { chave: "como", icone: "star", titulo: "Como funciona", html: listaHtml(comoFunciona, "ol") } : null,
+    indicadoPara.length ? { chave: "indicado", icone: "heart", titulo: "Indicado para", html: listaHtml(indicadoPara) } : null,
+    { chave: "info", icone: "tag", titulo: "Informações", html: `
+      <dl class="product-tabs__info-grid">
+        ${servico.categoriaNome ? `<div><dt>Categoria</dt><dd>${escHtml(servico.categoriaNome)}</dd></div>` : ""}
+        ${servico.subcategoriaNome ? `<div><dt>Subcategoria</dt><dd>${escHtml(servico.subcategoriaNome)}</dd></div>` : ""}
+        ${servico.duracao ? `<div><dt>Duração</dt><dd>${escHtml(servico.duracao)}</dd></div>` : ""}
+        ${servico.sessoes ? `<div><dt>Sessões</dt><dd>${escHtml(servico.sessoes)}</dd></div>` : ""}
+        <div><dt>Valor</dt><dd>${Number(servico.preco) > 0 ? `a partir de ${formatBRL(servico.preco)}` : "Sob consulta"}</dd></div>
+      </dl>` },
+    servico.cuidados ? { chave: "cuidados", icone: "shieldCheck", titulo: "Cuidados", html: escHtml(servico.cuidados) } : null
+  ].filter(Boolean);
+
+  container.innerHTML = `
+    <div class="product-detail">
+      <div class="product-detail__gallery" id="product-gallery">
+        ${renderizarGaleriaHtml(imagens, servico.nome)}
       </div>
-      <div class="svc-info">
-        ${rotulo ? `<span class="svc-info__cat">${escHtml(rotulo)}</span>` : ""}
-        <h1>${escHtml(s.nome)}</h1>
-        ${s.descricaoCurta ? `<p class="svc-info__curta">${escHtml(s.descricaoCurta)}</p>` : ""}
-        <div class="svc-fatos">${fatos}</div>
-        <div class="svc-info__acoes">
-          <a href="${zap}" class="btn-primary" target="_blank" rel="noopener"><span class="icon">${ICONS.whatsapp}</span>Agendar pelo WhatsApp</a>
-          <button type="button" class="btn-secondary" id="svc-compartilhar">Compartilhar</button>
+
+      <div class="product-detail__info">
+        ${rotulo ? `<span class="product-detail__brand">${escHtml(rotulo)}</span>` : ""}
+        <h1 class="product-detail__name">${escHtml(servico.nome)}</h1>
+        <span class="product-detail__price">${textoPrecoServico(servico)}</span>
+        ${servico.descricaoCurta ? `<p class="product-detail__desc">${escHtml(servico.descricaoCurta)}</p>` : ""}
+
+        ${(servico.duracao || servico.sessoes) ? `
+        <div class="product-detail__meta">
+          ${servico.duracao ? `<span>Duração: ${escHtml(servico.duracao)}</span>` : ""}
+          ${servico.sessoes ? `<span>Sessões: ${escHtml(servico.sessoes)}</span>` : ""}
+        </div>` : ""}
+
+        <div class="product-detail__actions">
+          <a class="btn-whatsapp-lg" id="agendar-servico" href="${linkAgendarServico(servico)}" target="_blank" rel="noopener"><span data-icon="whatsapp"></span>Agendar pelo WhatsApp</a>
+          <div class="product-detail__actions-row">
+            <button class="btn-secondary ${favoritado ? "is-active" : ""}" id="fav-servico"><span data-icon="heart"></span>${favoritado ? "Favoritado" : "Favoritar"}</button>
+            <button class="btn-secondary" id="compartilhar"><span data-icon="messageSquare"></span>Compartilhar</button>
+          </div>
+          <button class="btn-secondary" id="copiar-link"><span data-icon="copy"></span>Copiar link do serviço</button>
         </div>
       </div>
     </div>
-    <div class="svc-secoes">
-      ${texto("O que é", s.descricao, true)}
-      ${lista("Como funciona", s.comoFunciona, "ol")}
-      ${lista("Benefícios", s.beneficios)}
-      ${lista("Indicado para", s.indicadoPara)}
-      ${texto("Cuidados e contraindicações", s.cuidados)}
+
+    <div class="product-tabs">
+      <div>
+        <div class="product-tabs__nav" role="tablist">
+          ${abas.map((a, i) => `<button type="button" class="product-tabs__btn ${i === 0 ? "is-active" : ""}" data-tab="${a.chave}"><span data-icon="${a.icone}"></span>${a.titulo}</button>`).join("")}
+        </div>
+        ${abas.map((a, i) => `<div class="product-tabs__panel" data-panel="${a.chave}" ${i === 0 ? "" : "hidden"}>${a.html}</div>`).join("")}
+      </div>
+      ${beneficios.length ? `
+      <aside class="product-highlights">
+        <h3>Benefícios</h3>
+        <ul>
+          ${beneficios.map(item => `<li><span data-icon="star"></span>${escHtml(item)}</li>`).join("")}
+        </ul>
+      </aside>` : ""}
     </div>`;
 
-  // troca de foto
-  elConteudo.querySelectorAll(".svc-galeria__thumb").forEach(btn => btn.addEventListener("click", () => {
-    const u = imgPos(urls[Number(btn.dataset.i)], 900);
-    const img = elConteudo.querySelector("#svc-img-principal");
-    img.src = u.src; img.style.objectPosition = u.pos;
-    elConteudo.querySelectorAll(".svc-galeria__thumb").forEach(b => b.classList.toggle("is-active", b === btn));
-  }));
+  aplicarIconesEstaticos();
 
-  // compartilhar
-  elConteudo.querySelector("#svc-compartilhar").addEventListener("click", async () => {
-    const url = window.location.href;
-    try {
-      if (navigator.share) await navigator.share({ title: s.nome, text: `Confira: ${s.nome}`, url });
-      else { await navigator.clipboard.writeText(url); toast("Link copiado."); }
-    } catch { /* usuário cancelou */ }
+  document.querySelectorAll(".product-tabs__btn").forEach(btn => {
+    btn.addEventListener("click", () => {
+      document.querySelectorAll(".product-tabs__btn").forEach(b => b.classList.remove("is-active"));
+      btn.classList.add("is-active");
+      document.querySelectorAll(".product-tabs__panel").forEach(p => { p.hidden = p.dataset.panel !== btn.dataset.tab; });
+    });
   });
+
+  const thumbsEl = document.querySelector("#galeria-thumbs");
+  thumbsEl?.querySelectorAll("[data-thumb]").forEach(btn => {
+    btn.addEventListener("click", () => {
+      const { src, pos } = imgPos(imagens[Number(btn.dataset.thumb)], 960);
+      const principal = document.querySelector("#imagem-principal");
+      principal.src = src;
+      principal.style.objectPosition = pos;
+      thumbsEl.querySelectorAll("[data-thumb]").forEach(b => b.classList.remove("is-active"));
+      btn.classList.add("is-active");
+    });
+  });
+
+  document.querySelector("#fav-servico")?.addEventListener("click", (e) => {
+    const ativo = alternarFavoritoServico(servico.id);
+    e.currentTarget.classList.toggle("is-active", ativo);
+    e.currentTarget.innerHTML = `${icon("heart")}${ativo ? "Favoritado" : "Favoritar"}`;
+  });
+
+  document.querySelector("#compartilhar")?.addEventListener("click", async () => {
+    const resultado = await compartilharServico(servico);
+    if (resultado === "copiado") toast("Link copiado para a área de transferência.");
+  });
+
+  document.querySelector("#copiar-link")?.addEventListener("click", async () => {
+    try {
+      await navigator.clipboard.writeText(window.location.href);
+      toast("Link copiado para a área de transferência.");
+    } catch {
+      toast("Não foi possível copiar o link.", "error");
+    }
+  });
+
+  renderizarRelacionados(servico, todos);
 }
 
-function desenharRelacionados(atual, todos) {
-  if (!atual.categoriaId) return;
-  const rel = todos.filter(s => s.id !== atual.id && s.categoriaId === atual.categoriaId).slice(0, 4);
-  if (!rel.length) return;
-  document.querySelector("#nome-categoria-rel").textContent = atual.categoriaNome;
-  document.querySelector("#grade-relacionados").innerHTML = rel.map(s => {
-    const img = imgPos(s.imagem || s.imagens?.[0] || "", 560);
-    return `
-    <article class="svc-card">
-      <a class="svc-card__link" href="/pages/servico.html?id=${encodeURIComponent(s.id)}">
-        <div class="svc-card__img"><img src="${img.src || "/assets/images/placeholder.svg"}" style="object-position:${img.pos}" alt="${escHtml(s.nome)}" loading="lazy"></div>
-        <div class="svc-card__body">
-          ${s.subcategoriaNome ? `<span class="svc-card__cat">${escHtml(s.subcategoriaNome)}</span>` : ""}
-          <h3 class="svc-card__nome">${escHtml(s.nome)}</h3>
-          ${s.descricaoCurta ? `<p class="svc-card__desc">${escHtml(s.descricaoCurta)}</p>` : ""}
-        </div>
-      </a>
-    </article>`;
-  }).join("");
-  document.querySelector("#secao-relacionados").hidden = false;
-}
+document.querySelector("#btn-ver-servicos")?.addEventListener("click", () => {
+  window.location.href = "/pages/servicos.html";
+});
 
-(async function iniciar() {
-  const id = getQueryParam("id");
-  if (!id) return naoEncontrado();
-  try {
-    const dados = await obterServicoPublico(id);
-    if (!dados) return naoEncontrado();
-    const [s] = resolverNomesServicos([dados.servico], dados.categorias);
-    const todos = ordenarServicos(resolverNomesServicos(dados.servicos, dados.categorias), dados.categorias);
+document.querySelector("#form-busca-servico").addEventListener("submit", (e) => {
+  e.preventDefault();
+  const termo = document.querySelector("#busca-header").value.trim();
+  window.location.href = `/pages/servicos.html${termo ? `?q=${encodeURIComponent(termo)}` : ""}`;
+});
 
-    document.title = `${s.nome} — ${NOME_SALAO}`;
-    document.querySelector("#meta-descricao").setAttribute("content", (s.descricaoCurta || s.descricao || `Conheça o serviço ${s.nome}.`).slice(0, 160));
-    document.querySelector("#breadcrumb-servico").textContent = s.nome;
-    desenhar(s);
-    desenharRelacionados(s, todos);
-  } catch (erro) {
-    console.error("[servico] falha ao carregar:", erro);
-    elConteudo.innerHTML = `<div class="svc-vazio"><strong>Não foi possível carregar o serviço</strong>Atualize a página e tente novamente.</div>`;
+ouvirEstadoAuth((usuario) => {
+  const btnAdmin = document.querySelector("#abrir-admin");
+  const btnEntrar = document.querySelector("#btn-entrar");
+  const btnSair = document.querySelector("#btn-sair");
+  const btnMinhaConta = document.querySelector("#btn-minha-conta");
+  if (usuario) {
+    btnEntrar?.setAttribute("hidden", "");
+    btnSair?.removeAttribute("hidden");
+    btnMinhaConta?.removeAttribute("hidden");
+    if (ehAdmin()) btnAdmin?.removeAttribute("hidden");
+    else btnAdmin?.setAttribute("hidden", "");
+  } else {
+    btnEntrar?.removeAttribute("hidden");
+    btnSair?.setAttribute("hidden", "");
+    btnMinhaConta?.setAttribute("hidden", "");
+    btnAdmin?.setAttribute("hidden", "");
   }
-})();
+});
+document.querySelector("#btn-entrar")?.addEventListener("click", () => { window.location.href = "/?abrir=login"; });
+document.querySelector("#btn-minha-conta")?.addEventListener("click", () => { window.location.href = "/?abrir=conta"; });
+document.querySelector("#abrir-admin")?.addEventListener("click", () => { window.location.href = "/?abrir=admin"; });
+document.querySelector("#btn-sair")?.addEventListener("click", sair);
+
+iniciarServico();
 </script>
 </body>
 </html>
