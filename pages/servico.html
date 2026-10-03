@@ -1,0 +1,238 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title id="titulo-pagina">Serviço — Espaço Viviane Vargas</title>
+<meta name="description" id="meta-descricao" content="Conheça este serviço do Espaço Viviane Vargas.">
+<link rel="icon" href="/assets/icons/favicon.ico">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Figtree:wght@400;500;600&family=Newsreader:ital,opsz,wght@0,6..72,400;0,6..72,500;0,6..72,600;1,6..72,400;1,6..72,500&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="/css/style.css?v=4">
+<link rel="stylesheet" href="/css/modal.css?v=3">
+<link rel="stylesheet" href="/css/responsive.css?v=3">
+<link rel="stylesheet" href="/css/servicos.css?v=1">
+</head>
+<body>
+
+<a href="#conteudo" class="skip-link">Pular para o conteúdo</a>
+
+<header class="site-header">
+  <div class="container header-top">
+    <a href="/" class="logo">
+      <img src="/assets/images/logo.webp" alt="Espaço Viviane Vargas" class="logo__mark" width="256" height="256" decoding="async">
+      <span class="logo__text"><span class="logo__t1">Espaço</span><span class="logo__t2">Viviane Vargas</span><span class="logo__t3">Estética e salão de beleza</span></span>
+    </a>
+    <div class="header-actions" style="margin-left:auto">
+      <a href="/pages/catalogo.html" class="header-action header-action--nav" aria-label="Catálogo"><span data-icon="shoppingBag"></span><span>Catálogo</span></a>
+      <a href="/pages/servicos.html" class="header-action header-action--nav is-active" aria-label="Serviços"><span data-icon="calendar"></span><span>Serviços</span></a>
+    </div>
+  </div>
+</header>
+
+<main class="container" id="conteudo">
+  <nav class="breadcrumb" aria-label="Trilha de navegação">
+    <a href="/">Início</a>
+    <span data-icon="chevronRight"></span>
+    <a href="/pages/servicos.html">Serviços</a>
+    <span data-icon="chevronRight"></span>
+    <span class="breadcrumb__atual" id="breadcrumb-servico">Serviço</span>
+  </nav>
+
+  <div id="servico-conteudo">
+    <div class="svc-vazio">Carregando serviço...</div>
+  </div>
+
+  <section class="svc-relacionados" id="secao-relacionados" hidden>
+    <h2>Outros serviços de <span id="nome-categoria-rel"></span></h2>
+    <div class="svc-grid" id="grade-relacionados"></div>
+  </section>
+</main>
+
+<footer class="site-footer">
+  <div class="container footer-grid">
+    <div>
+      <h4>Espaço Viviane Vargas</h4>
+      <p>R. Dr. Ézio Carneiro, 158 - St. Aeroporto, Luziânia - GO, 72800-420</p>
+    </div>
+    <div>
+      <h4>Contato</h4>
+      <a href="https://wa.me/5561999184452" target="_blank" rel="noopener">WhatsApp</a>
+      <p>futuralza@gmail.com</p>
+    </div>
+    <div>
+      <h4>Redes sociais</h4>
+      <div class="social-row">
+        <a href="https://www.instagram.com/futurapapelaria/" aria-label="Instagram" target="_blank" rel="noopener"><span data-icon="instagram"></span></a>
+      </div>
+    </div>
+  </div>
+  <div class="footer-bottom">© 2026 Espaço Viviane Vargas. Todos os direitos reservados.<span class="footer-credit">Desenvolvido por <a href="https://www.instagram.com/eduardo_xis" target="_blank" rel="noopener noreferrer">@eduardo_xis</a></span></div>
+</footer>
+
+<!-- BOTTOM NAV (mobile) -->
+<nav class="bottom-nav">
+  <a href="/" class="bottom-nav__item">
+    <span data-icon="home"></span><span>Início</span>
+  </a>
+  <a href="/pages/catalogo.html" class="bottom-nav__item">
+    <span data-icon="shoppingBag"></span><span>Catálogo</span>
+  </a>
+  <a href="/pages/servicos.html" class="bottom-nav__item is-active">
+    <svg class="icon" viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M12 4.5c1.8 2 2.8 4.2 2.8 6.4S13.8 14.9 12 16.5c-1.8-1.6-2.8-3.6-2.8-5.6S10.2 6.5 12 4.5Z" stroke="currentColor" stroke-width="1.5" stroke-linejoin="round"/><path d="M9.4 14.6C7 14.8 4.7 13.6 3.5 11.1c2.6-.3 4.7.5 6 2M14.6 14.6c2.4.2 4.7-1 5.9-3.5-2.6-.3-4.7.5-6 2M5 18c2.2 1.5 4.6 2 7 2s4.8-.5 7-2" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg><span>Serviços</span>
+  </a>
+  <a href="/" class="bottom-nav__item">
+    <span data-icon="user"></span><span>Conta</span>
+  </a>
+</nav>
+
+<script type="module">
+import { ICONS } from "../js/utils/icons.js";
+import { STORE_CONFIG } from "../firebase/firebase-config.js";
+import { escHtml, formatBRL, imgPos, getQueryParam, toast } from "../js/utils/utils.js";
+import {
+  obterServicoPublico, resolverNomesServicos, ordenarServicos, invalidarCacheServicos
+} from "../js/services/servicos.js";
+import { observarAtualizacaoPublica } from "../js/services/public-sync.js";
+
+const NOME_SALAO = "Espaço Viviane Vargas";
+const linkZap = (texto) => `https://wa.me/${STORE_CONFIG.whatsapp}?text=${encodeURIComponent(texto)}`;
+
+function aplicarIcones(raiz = document) {
+  raiz.querySelectorAll("[data-icon]").forEach(el => {
+    const nome = el.dataset.icon;
+    if (ICONS[nome] && !el.querySelector("svg")) {
+      el.innerHTML = ICONS[nome];
+      el.classList.add("icon");
+    }
+  });
+}
+aplicarIcones();
+
+let recargaAgendada = false;
+observarAtualizacaoPublica(() => {
+  if (recargaAgendada) return;
+  recargaAgendada = true;
+  invalidarCacheServicos();
+  window.setTimeout(() => window.location.reload(), 500);
+});
+
+const elConteudo = document.querySelector("#servico-conteudo");
+
+function naoEncontrado() {
+  document.querySelector("#breadcrumb-servico").textContent = "Não encontrado";
+  elConteudo.innerHTML = `<div class="svc-vazio"><strong>Serviço não encontrado</strong>Ele pode ter sido removido ou estar indisponível.<br><br><a href="/pages/servicos.html" class="btn-secondary">Ver todos os serviços</a></div>`;
+}
+
+function lista(titulo, itens, tag = "ul", larga = false) {
+  if (!Array.isArray(itens) || !itens.length) return "";
+  return `<section class="svc-secao ${larga ? "svc-secao--larga" : ""}"><h2>${titulo}</h2><${tag}>${itens.map(i => `<li>${escHtml(i)}</li>`).join("")}</${tag}></section>`;
+}
+function texto(titulo, valor, larga = false) {
+  if (!valor) return "";
+  return `<section class="svc-secao ${larga ? "svc-secao--larga" : ""}"><h2>${titulo}</h2><p>${escHtml(valor)}</p></section>`;
+}
+
+function desenhar(s) {
+  const rotulo = [s.categoriaNome, s.subcategoriaNome].filter(Boolean).join(" · ");
+  const urls = (Array.isArray(s.imagens) && s.imagens.length ? s.imagens : (s.imagem ? [s.imagem] : [])).filter(Boolean);
+  const principal = imgPos(urls[0] || "", 900);
+  const zap = linkZap(`Olá! Vim do site do ${NOME_SALAO} e gostaria de agendar o serviço de ${s.nome}.`);
+
+  const fatos = [
+    s.duracao ? `<div class="svc-fato"><span>Duração</span><strong>${escHtml(s.duracao)}</strong></div>` : "",
+    s.sessoes ? `<div class="svc-fato"><span>Sessões</span><strong>${escHtml(s.sessoes)}</strong></div>` : "",
+    `<div class="svc-fato"><span>Valor</span><strong>${Number(s.preco) > 0 ? `a partir de ${formatBRL(s.preco)}` : "Sob consulta"}</strong></div>`
+  ].join("");
+
+  elConteudo.innerHTML = `
+    <div class="svc-detalhe">
+      <div class="svc-galeria">
+        <div class="svc-galeria__principal"><img id="svc-img-principal" src="${principal.src || "/assets/images/placeholder.svg"}" style="object-position:${principal.pos}" alt="${escHtml(s.nome)}"></div>
+        ${urls.length > 1 ? `<div class="svc-galeria__thumbs">${urls.map((u, i) => {
+          const t = imgPos(u, 200);
+          return `<button type="button" class="svc-galeria__thumb ${i === 0 ? "is-active" : ""}" data-i="${i}" aria-label="Ver foto ${i + 1}"><img src="${t.src}" style="object-position:${t.pos}" alt="" loading="lazy"></button>`;
+        }).join("")}</div>` : ""}
+      </div>
+      <div class="svc-info">
+        ${rotulo ? `<span class="svc-info__cat">${escHtml(rotulo)}</span>` : ""}
+        <h1>${escHtml(s.nome)}</h1>
+        ${s.descricaoCurta ? `<p class="svc-info__curta">${escHtml(s.descricaoCurta)}</p>` : ""}
+        <div class="svc-fatos">${fatos}</div>
+        <div class="svc-info__acoes">
+          <a href="${zap}" class="btn-primary" target="_blank" rel="noopener"><span class="icon">${ICONS.whatsapp}</span>Agendar pelo WhatsApp</a>
+          <button type="button" class="btn-secondary" id="svc-compartilhar">Compartilhar</button>
+        </div>
+      </div>
+    </div>
+    <div class="svc-secoes">
+      ${texto("O que é", s.descricao, true)}
+      ${lista("Como funciona", s.comoFunciona, "ol")}
+      ${lista("Benefícios", s.beneficios)}
+      ${lista("Indicado para", s.indicadoPara)}
+      ${texto("Cuidados e contraindicações", s.cuidados)}
+    </div>`;
+
+  // troca de foto
+  elConteudo.querySelectorAll(".svc-galeria__thumb").forEach(btn => btn.addEventListener("click", () => {
+    const u = imgPos(urls[Number(btn.dataset.i)], 900);
+    const img = elConteudo.querySelector("#svc-img-principal");
+    img.src = u.src; img.style.objectPosition = u.pos;
+    elConteudo.querySelectorAll(".svc-galeria__thumb").forEach(b => b.classList.toggle("is-active", b === btn));
+  }));
+
+  // compartilhar
+  elConteudo.querySelector("#svc-compartilhar").addEventListener("click", async () => {
+    const url = window.location.href;
+    try {
+      if (navigator.share) await navigator.share({ title: s.nome, text: `Confira: ${s.nome}`, url });
+      else { await navigator.clipboard.writeText(url); toast("Link copiado."); }
+    } catch { /* usuário cancelou */ }
+  });
+}
+
+function desenharRelacionados(atual, todos) {
+  if (!atual.categoriaId) return;
+  const rel = todos.filter(s => s.id !== atual.id && s.categoriaId === atual.categoriaId).slice(0, 4);
+  if (!rel.length) return;
+  document.querySelector("#nome-categoria-rel").textContent = atual.categoriaNome;
+  document.querySelector("#grade-relacionados").innerHTML = rel.map(s => {
+    const img = imgPos(s.imagem || s.imagens?.[0] || "", 560);
+    return `
+    <article class="svc-card">
+      <a class="svc-card__link" href="/pages/servico.html?id=${encodeURIComponent(s.id)}">
+        <div class="svc-card__img"><img src="${img.src || "/assets/images/placeholder.svg"}" style="object-position:${img.pos}" alt="${escHtml(s.nome)}" loading="lazy"></div>
+        <div class="svc-card__body">
+          ${s.subcategoriaNome ? `<span class="svc-card__cat">${escHtml(s.subcategoriaNome)}</span>` : ""}
+          <h3 class="svc-card__nome">${escHtml(s.nome)}</h3>
+          ${s.descricaoCurta ? `<p class="svc-card__desc">${escHtml(s.descricaoCurta)}</p>` : ""}
+        </div>
+      </a>
+    </article>`;
+  }).join("");
+  document.querySelector("#secao-relacionados").hidden = false;
+}
+
+(async function iniciar() {
+  const id = getQueryParam("id");
+  if (!id) return naoEncontrado();
+  try {
+    const dados = await obterServicoPublico(id);
+    if (!dados) return naoEncontrado();
+    const [s] = resolverNomesServicos([dados.servico], dados.categorias);
+    const todos = ordenarServicos(resolverNomesServicos(dados.servicos, dados.categorias), dados.categorias);
+
+    document.title = `${s.nome} — ${NOME_SALAO}`;
+    document.querySelector("#meta-descricao").setAttribute("content", (s.descricaoCurta || s.descricao || `Conheça o serviço ${s.nome}.`).slice(0, 160));
+    document.querySelector("#breadcrumb-servico").textContent = s.nome;
+    desenhar(s);
+    desenharRelacionados(s, todos);
+  } catch (erro) {
+    console.error("[servico] falha ao carregar:", erro);
+    elConteudo.innerHTML = `<div class="svc-vazio"><strong>Não foi possível carregar o serviço</strong>Atualize a página e tente novamente.</div>`;
+  }
+})();
+</script>
+</body>
+</html>
