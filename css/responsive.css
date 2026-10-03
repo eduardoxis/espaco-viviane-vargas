@@ -276,7 +276,7 @@
 @media (max-width: 760px) {
   .hero {
     background: #f3ebe5 url("/assets/images/hero-mobile-full.webp") right bottom / auto 100% no-repeat;
-    min-height: 76vw; padding: 1.5rem 0 0.6rem;
+    min-height: 88vw; padding: 1.5rem 0 0.6rem;
   }
   .hero::after { display: none; }
   .hero__inner { display: block; min-height: 0; }
