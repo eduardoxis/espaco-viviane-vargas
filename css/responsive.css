@@ -1,5 +1,12 @@
 /* ===== RESPONSIVE ===== */
 
+/* 4 cards por linha em telas largas; abaixo de 1180px caem para 3 pra
+   cada card manter largura confortável. Este bloco fica ANTES dos de 760px
+   e 480px de propósito (mesma especificidade: o último que aparece vence). */
+@media (max-width: 1180px) {
+  .products-grid, .products-grid--5col { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+}
+
 @media (max-width: 980px) {
   /* Evita o zoom automático do iOS Safari ao focar em qualquer campo
      (ele dá zoom sozinho quando a fonte do input fica abaixo de 16px). */
@@ -117,8 +124,12 @@
   .related-products__track .product-card { flex: 0 0 calc((100% - 1rem) / 2); }
   .related-products__head h2 { font-size: 1.1rem; }
 
-  /* O acesso à conta continua disponível também no topo, como na vitrine. */
+  /* Perfil/conta: no topo some só onde a barra inferior tem o botão "Conta"
+     funcional (home). Nas demais páginas o ícone do topo continua, senão
+     o celular ficaria sem acesso ao login. */
   #btn-entrar { display: inline-flex; }
+  body:has(#bottom-nav-conta) #btn-entrar,
+  body:has(#bottom-nav-conta) #btn-minha-conta { display: none !important; }
 
   /* Toast no mobile: embaixo (no desktop fica em cima, ver style.css). */
   .toast {
@@ -137,7 +148,7 @@
 
   /* ---- catálogo/busca: filtros viram painel recolhível ---- */
   .search-page__btn-filtros { display: flex; }
-  .products-grid { grid-template-columns: repeat(2, 1fr); }
+  .products-grid, .products-grid--5col { grid-template-columns: repeat(2, 1fr); }
   .search-page__filters {
     display: none;
     margin-bottom: 1.25rem;
