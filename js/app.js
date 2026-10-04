@@ -602,8 +602,9 @@ function configurarLogin() {
       const abrir = getQueryParam("abrir");
       if (abrir === "login" && !usuario) {
         abrirModal(document.querySelector("#modal-login"));
-      } else if (abrir === "conta" && usuario) {
-        abrirModal(document.querySelector("#modal-conta"));
+      } else if (abrir === "conta") {
+        // Vindo do botão "Conta" de outra página: abre a conta se logado, senão o login.
+        abrirModal(document.querySelector(usuario ? "#modal-conta" : "#modal-login"));
       } else if (abrir === "admin" && usuario && ehAdmin()) {
         const modal = document.querySelector("#modal-admin");
         abrirModal(modal);
