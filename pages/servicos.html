@@ -127,13 +127,6 @@
       <button type="submit" class="search-bar__btn" aria-label="Pesquisar"><span data-icon="search"></span></button>
     </form>
 
-    <div class="select-pill">
-      <select id="filtro-categoria" aria-label="Filtrar por categoria">
-        <option value="">Todas as categorias</option>
-      </select>
-      <span class="select-pill__chevron" data-icon="chevronRight"></span>
-    </div>
-
     <div class="header-actions">
       <a href="/pages/catalogo.html" class="header-action header-action--nav" aria-label="Catálogo"><span data-icon="shoppingBag"></span><span>Catálogo</span></a>
       <a href="/pages/servicos.html" class="header-action header-action--nav is-active" aria-label="Serviços" aria-current="page"><span data-icon="calendar"></span><span>Serviços</span></a>
@@ -255,7 +248,6 @@ const estado = {
 const topo = document.querySelector("#catalogo-topo");
 const conteudo = document.querySelector("#catalogo-conteudo");
 const inputBusca = document.querySelector("#busca-header");
-const selectCategoria = document.querySelector("#filtro-categoria");
 inputBusca.value = estado.termo;
 
 // ---------- dados ----------
@@ -427,9 +419,6 @@ function renderBusca() {
 function render() {
   const arvore = arvoreVisivel();
 
-  // Mantém o select do cabeçalho em sincronia com a categoria aberta.
-  selectCategoria.value = arvore.some(c => c.id === estado.catId) ? estado.catId : "";
-
   if (estado.termo.trim()) return renderBusca();
 
   const cat = arvore.find(c => c.id === estado.catId);
@@ -459,7 +448,6 @@ inputBusca.addEventListener("input", (e) => {
   estado.termo = e.target.value;
   buscaDebounced();
 });
-selectCategoria.addEventListener("change", () => navegar(selectCategoria.value));
 
 // ---------- conta ----------
 function configurarContaUI() {
@@ -503,9 +491,6 @@ async function iniciar() {
     toast("Erro ao carregar serviços.", "error");
     return;
   }
-
-  selectCategoria.innerHTML = `<option value="">Todas as categorias</option>` +
-    arvoreVisivel().map(c => `<option value="${escHtml(c.id)}">${escHtml(c.nome)}</option>`).join("");
 
   render();
 }
