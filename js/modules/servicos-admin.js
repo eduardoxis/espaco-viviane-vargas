@@ -11,6 +11,9 @@ import {
   finalizarImportacaoServicos, montarArvoreCategorias, resolverNomesServicos,
   ordenarServicos, normalizarTexto
 } from "../services/servicos.js";
+import { comprimirParaBase64, bytesTotais, LIMITE_FOTOS_DOC_BYTES } from "../services/imagem-base64.js";
+
+const MAX_FOTOS_SERVICO = 6;
 
 let categorias = [];
 let servicos = [];
@@ -42,6 +45,16 @@ const ESTILO = `
   .svc-admin__ajuda { font-size: 0.8rem; color: var(--cinza-500); margin: -0.4rem 0 0; }
   .svc-admin__ajuda--grid { grid-column: 1 / -1; }
   .svc-admin__dica { font-weight: 400; color: var(--cinza-500); font-size: 0.78rem; }
+  .svc-cat__thumb { width: 46px; height: 30px; object-fit: cover; border-radius: 6px; flex-shrink: 0; border: 1px solid var(--cinza-200); background: var(--branco); }
+  .svc-cat__btn[disabled] { opacity: 0.3; cursor: default; }
+  .svc-cat__btn[disabled]:hover { background: transparent; }
+  .svc-catimg { display: grid; gap: 0.5rem; }
+  .svc-catimg__frame { aspect-ratio: 3.4 / 1; border: 1px dashed var(--cinza-300); border-radius: var(--raio-sm); background: var(--cinza-050); overflow: hidden; display: grid; place-items: center; color: var(--cinza-500); font-size: 0.82rem; }
+  .svc-catimg__frame img { width: 100%; height: 100%; object-fit: cover; display: block; }
+  .svc-catimg__row { display: flex; gap: 0.6rem; flex-wrap: wrap; align-items: center; }
+  .svc-catimg__row label.btn-secondary { cursor: pointer; }
+  .svc-catimg__pos { display: grid; gap: 0.25rem; font-size: 0.82rem; color: var(--cinza-700); }
+  .svc-catimg__pos input[type=range] { width: 100%; accent-color: var(--azul-700); }
 </style>`;
 
 // ---------- ENTRADA ----------
@@ -86,6 +99,38 @@ function contarServicos(categoriaId, ehSub) {
   return servicos.filter(s => (ehSub ? s.subcategoriaId : s.categoriaId) === categoriaId).length;
 }
 
+function irmasOrdenadas(parentId = "") {
+  return categorias
+    .filter(c => (c.parentId || "") === (parentId || ""))
+    .sort((a, b) => (Number(a.ordem) || 0) - (Number(b.ordem) || 0) || String(a.nome).localeCompare(String(b.nome), "pt-BR"));
+}
+
+function botoesOrdem(cat) {
+  const irmas = irmasOrdenadas(cat.parentId);
+  const i = irmas.findIndex(c => c.id === cat.id);
+  return `
+    <button type="button" class="svc-cat__btn" data-act="subir-cat" data-id="${cat.id}" title="Mover para cima" ${i <= 0 ? "disabled" : ""}>${icon("chevronLeft")}</button>
+    <button type="button" class="svc-cat__btn" data-act="descer-cat" data-id="${cat.id}" title="Mover para baixo" ${i === irmas.length - 1 ? "disabled" : ""}>${icon("chevronRight")}</button>`;
+}
+
+async function moverCategoria(container, cat, direcao) {
+  const irmas = irmasOrdenadas(cat.parentId);
+  const i = irmas.findIndex(c => c.id === cat.id);
+  const j = i + direcao;
+  if (i < 0 || j < 0 || j >= irmas.length) return;
+  [irmas[i], irmas[j]] = [irmas[j], irmas[i]];
+  const mudancas = irmas
+    .map((c, idx) => ({ c, nova: idx + 1 }))
+    .filter(({ c, nova }) => Number(c.ordem) !== nova);
+  try {
+    for (let k = 0; k < mudancas.length; k++) {
+      const { c, nova } = mudancas[k];
+      await atualizarCategoriaServico(c.id, { ordem: nova }, { silencioso: k < mudancas.length - 1 });
+    }
+    await recarregarEDesenhar(container);
+  } catch (erro) { falha("mudar a ordem", erro); }
+}
+
 function desenharPainel(container) {
   const arvore = montarArvoreCategorias(categorias);
   const opcoesFiltro = arvore.map(c => `<option value="${c.id}" ${filtros.categoriaId === c.id ? "selected" : ""}>${escHtml(c.nome)}</option>`).join("");
@@ -100,7 +145,7 @@ function desenharPainel(container) {
       <div class="svc-admin__cats-head">
         <div>
           <h2>Categorias de serviços</h2>
-          <p>Ex.: <strong>Estética</strong> com subcategorias como Facial e Corporal. Os serviços ficam dentro delas.</p>
+          <p>Ex.: <strong>Estética</strong> com subcategorias como Limpeza de pele e Massagens. Cada categoria vira um card no site, com foto e descrição. Use as setas para mudar a ordem.</p>
         </div>
         <button type="button" class="btn-secondary" id="btn-nova-categoria-servico">${icon("plus")}Nova categoria</button>
       </div>
@@ -108,15 +153,19 @@ function desenharPainel(container) {
         ${arvore.map(c => `
           <div class="svc-cat" data-cat="${c.id}">
             <div class="svc-cat__head">
+              ${c.imagem ? `<img class="svc-cat__thumb" src="${c.imagem}" alt="">` : ""}
               <span class="svc-cat__nome">${escHtml(c.nome)}</span>
               <span class="svc-cat__count">${contarServicos(c.id, false)} serv.</span>
+              ${botoesOrdem(c, arvore)}
               <button type="button" class="svc-cat__btn" data-act="editar-cat" data-id="${c.id}" title="Editar categoria">${icon("pencil")}</button>
               <button type="button" class="svc-cat__btn" data-act="excluir-cat" data-id="${c.id}" title="Excluir categoria">${icon("trash")}</button>
             </div>
             ${c.filhas.length ? `<ul class="svc-cat__subs">${c.filhas.map(f => `
               <li>
+                ${f.imagem ? `<img class="svc-cat__thumb" src="${f.imagem}" alt="">` : ""}
                 <span class="svc-cat__nome">${escHtml(f.nome)}</span>
                 <span class="svc-cat__count">${contarServicos(f.id, true)}</span>
+                ${botoesOrdem(f, arvore)}
                 <button type="button" class="svc-cat__btn" data-act="editar-cat" data-id="${f.id}" title="Editar subcategoria">${icon("pencil")}</button>
                 <button type="button" class="svc-cat__btn" data-act="excluir-cat" data-id="${f.id}" title="Excluir subcategoria">${icon("trash")}</button>
               </li>`).join("")}</ul>` : ""}
@@ -257,6 +306,8 @@ function ligarEventos(container) {
     if (btn.dataset.act === "editar-cat") return abrirFormularioCategoria(container, cat);
     if (btn.dataset.act === "nova-sub") return abrirFormularioCategoria(container, null, cat.id);
     if (btn.dataset.act === "excluir-cat") return excluirCategoria(container, cat);
+    if (btn.dataset.act === "subir-cat") return moverCategoria(container, cat, -1);
+    if (btn.dataset.act === "descer-cat") return moverCategoria(container, cat, 1);
   });
 
   // importação
@@ -318,6 +369,9 @@ function abrirFormularioCategoria(container, categoria = null, parentIdInicial =
   const temFilhas = categoria && categorias.some(c => c.parentId === categoria.id);
   const parentAtual = categoria ? (categoria.parentId || "") : parentIdInicial;
 
+  let imagemAtual = categoria?.imagem || "";
+  let posY = Number.isFinite(Number(categoria?.imagemPosY)) ? Number(categoria.imagemPosY) : 50;
+
   dialog.innerHTML = `
     <form id="form-categoria-servico" class="product-form">
       <h3>${categoria ? "Editar categoria" : (parentIdInicial ? "Nova subcategoria" : "Nova categoria")}</h3>
@@ -331,6 +385,23 @@ function abrirFormularioCategoria(container, categoria = null, parentIdInicial =
         </label>
       </div>
       ${temFilhas ? `<p class="svc-admin__ajuda">Esta categoria tem subcategorias, por isso continua como categoria principal.</p>` : ""}
+      <label>Descrição curta (aparece no card)
+        <textarea name="descricao" rows="2" maxlength="110" placeholder="Ex.: Cuidados e tratamentos para realçar sua beleza.">${escHtml(categoria?.descricao || "")}</textarea>
+      </label>
+      <div class="svc-catimg">
+        <strong style="font-size:0.9rem">Foto do card</strong>
+        <div class="svc-catimg__frame" id="cat-img-frame"></div>
+        <div class="svc-catimg__row">
+          <label class="btn-secondary">${icon("plus")}<span id="cat-img-rotulo">Escolher foto</span>
+            <input type="file" id="cat-img-input" accept="image/*" hidden>
+          </label>
+          <button type="button" class="svc-cat__add" id="cat-img-remover" hidden>Remover foto</button>
+        </div>
+        <label class="svc-catimg__pos" id="cat-img-pos-wrap" hidden>Enquadramento vertical
+          <input type="range" id="cat-img-pos" min="0" max="100" value="${posY}">
+        </label>
+        <p class="svc-admin__ajuda" style="margin:0">A foto é comprimida automaticamente e salva no próprio banco. O card mostra uma faixa horizontal, então prefira fotos largas.</p>
+      </div>
       <div class="form-actions">
         <button type="button" data-fechar>Cancelar</button>
         <button type="submit" class="btn-primary">Salvar</button>
@@ -338,6 +409,38 @@ function abrirFormularioCategoria(container, categoria = null, parentIdInicial =
     </form>`;
   dialog.showModal();
   dialog.querySelector("[data-fechar]").addEventListener("click", () => dialog.close());
+
+  const frame = dialog.querySelector("#cat-img-frame");
+  const wrapPos = dialog.querySelector("#cat-img-pos-wrap");
+  const btnRemover = dialog.querySelector("#cat-img-remover");
+  const rotulo = dialog.querySelector("#cat-img-rotulo");
+  function desenharImagem() {
+    if (imagemAtual) {
+      frame.innerHTML = `<img src="${imagemAtual}" alt="" style="object-position:50% ${posY}%">`;
+    } else {
+      frame.textContent = "Sem foto";
+    }
+    wrapPos.hidden = !imagemAtual;
+    btnRemover.hidden = !imagemAtual;
+    rotulo.textContent = imagemAtual ? "Trocar foto" : "Escolher foto";
+  }
+  desenharImagem();
+
+  dialog.querySelector("#cat-img-pos").addEventListener("input", (e) => {
+    posY = Number(e.target.value);
+    const img = frame.querySelector("img");
+    if (img) img.style.objectPosition = `50% ${posY}%`;
+  });
+  btnRemover.addEventListener("click", () => { imagemAtual = ""; posY = 50; dialog.querySelector("#cat-img-pos").value = 50; desenharImagem(); });
+  dialog.querySelector("#cat-img-input").addEventListener("change", async (e) => {
+    const arquivo = e.target.files?.[0];
+    e.target.value = "";
+    if (!arquivo) return;
+    try {
+      imagemAtual = await comprimirParaBase64(arquivo, { maxLargura: 900, maxBytes: 110 * 1024 });
+      desenharImagem();
+    } catch (erro) { falha("processar a foto", erro); }
+  });
 
   dialog.querySelector("form").addEventListener("submit", async (e) => {
     e.preventDefault();
@@ -351,10 +454,18 @@ function abrirFormularioCategoria(container, categoria = null, parentIdInicial =
       c.id !== categoria?.id && (c.parentId || "") === parentId && normalizarTexto(c.nome) === normalizarTexto(nome));
     if (duplicada) { toast("Já existe uma categoria com esse nome aí.", "error"); return; }
 
+    const dados = {
+      nome,
+      parentId,
+      descricao: form.descricao.value.trim(),
+      imagem: imagemAtual,
+      imagemPosY: posY
+    };
+
     btn.disabled = true;
     try {
-      if (categoria) await atualizarCategoriaServico(categoria.id, { nome, parentId });
-      else await criarCategoriaServico({ nome, parentId });
+      if (categoria) await atualizarCategoriaServico(categoria.id, dados);
+      else await criarCategoriaServico(dados);
       toast("Categoria salva.");
       dialog.close();
       await recarregarEDesenhar(container);
@@ -407,7 +518,7 @@ async function abrirFormularioServico(container, servico = null) {
 
         <div class="galeria-produto" id="galeria-servico-wrap">
           <h4>Fotos do serviço</h4>
-          <p class="galeria-produto__ajuda">A primeira foto da lista é a capa no site. Arraste as miniaturas para reordenar e use ⤡ para ajustar o enquadramento.</p>
+          <p class="galeria-produto__ajuda">A primeira foto da lista é a capa no site. As fotos são comprimidas automaticamente (até ${MAX_FOTOS_SERVICO}). Arraste as miniaturas para reordenar e use ⤡ para ajustar o enquadramento.</p>
           <div class="galeria-produto__grid" id="galeria-grid-servico"></div>
           <label class="galeria-produto__upload">
             ${icon("plus")}Escolher arquivos
@@ -525,18 +636,25 @@ async function abrirFormularioServico(container, servico = null) {
     btnSalvar.disabled = true;
 
     try {
+      if (galeria.length > MAX_FOTOS_SERVICO) {
+        throw new Error(`Use no máximo ${MAX_FOTOS_SERVICO} fotos por serviço.`);
+      }
       const pendentes = galeria.filter(g => g.file);
       for (let i = 0; i < pendentes.length; i++) {
-        btnSalvar.textContent = `Enviando foto ${i + 1}/${pendentes.length}...`;
-        const url = await ajuda.enviarImagem(pendentes[i].file, `SERVICO-${nome.toUpperCase()}-${i + 1}`);
-        if (!url) return; // enviarImagem já mostrou o erro; o formulário continua aberto
+        btnSalvar.textContent = `Comprimindo foto ${i + 1}/${pendentes.length}...`;
+        const url = await comprimirParaBase64(pendentes[i].file, { maxLargura: 800, maxBytes: 120 * 1024 });
         const posSalva = imgPos(pendentes[i].previewUrl || "").pos;
         pendentes[i].url = posSalva !== "50% 50%" ? `${url}#pos=${posSalva.replace(/%/g, "").replace(" ", ",")}` : url;
         if (pendentes[i].previewUrl) URL.revokeObjectURL(pendentes[i].previewUrl);
+        pendentes[i].file = null;
+        pendentes[i].previewUrl = null;
       }
 
       const precoNum = parseFloat(form.preco.value);
       const imagens = galeria.map(g => g.url).filter(Boolean);
+      if (bytesTotais(imagens) > LIMITE_FOTOS_DOC_BYTES) {
+        throw new Error("As fotos juntas passam do limite do banco de dados. Remova alguma foto.");
+      }
       const dados = {
         nome,
         codigo: form.codigo.value.trim() || generateCode("SERV"),
