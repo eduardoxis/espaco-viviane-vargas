@@ -23,20 +23,30 @@ const COL_SERVICOS = "servicos";
 const COL_CATEGORIAS = "categoriasServico";
 
 // ---------- CACHE PÚBLICO (sessionStorage, 5 min) ----------
-const CHAVE_CACHE = "evv_servicos_publico_v2";
+const CHAVE_CACHE = "evv_servicos_publico_v3";
 const TTL_MS = 5 * 60 * 1000;
 
 function lerCache() {
   try {
     const bruto = sessionStorage.getItem(CHAVE_CACHE);
     if (!bruto) return null;
-    const { t, v } = JSON.parse(bruto);
+    const { t, v, ver } = JSON.parse(bruto);
     if (Date.now() - t > TTL_MS) return null;
-    return v;
+    return { v, ver };
   } catch { return null; }
 }
-function salvarCache(valor) {
-  try { sessionStorage.setItem(CHAVE_CACHE, JSON.stringify({ t: Date.now(), v: valor })); } catch { /* cache é opcional */ }
+function salvarCache(valor, ver) {
+  try { sessionStorage.setItem(CHAVE_CACHE, JSON.stringify({ t: Date.now(), v: valor, ver })); } catch { /* cache é opcional */ }
+}
+
+// Versão do catálogo: o painel grava publicacoes/catalogo a cada alteração.
+// Se a versão mudou, o cache está velho (ex.: serviço excluído em outra aba).
+async function lerVersaoPublica() {
+  try {
+    const snap = await getDoc(doc(db, "publicacoes", "catalogo"));
+    const t = snap.data()?.atualizadoEm;
+    return t?.seconds ? `${t.seconds}.${t.nanoseconds || 0}` : "0";
+  } catch { return null; }
 }
 export function invalidarCacheServicos() {
   try { sessionStorage.removeItem(CHAVE_CACHE); } catch { /* ignora */ }
@@ -98,8 +108,9 @@ export function servicoTemImagem(servico = {}) {
 // ---------- LEITURA PÚBLICA ----------
 /** Categorias + serviços visíveis ao público (status "disponivel"). */
 export async function listarServicosPublico() {
+  const versao = await lerVersaoPublica();
   const emCache = lerCache();
-  if (emCache) return emCache;
+  if (emCache && (versao === null || emCache.ver === versao)) return emCache.v;
 
   return withLoading("listarServicosPublico", async () => {
     const [snapCats, snapServ] = await Promise.all([
@@ -113,7 +124,7 @@ export async function listarServicosPublico() {
       return { id: d.id, ...dados, criadoEm: dados.criadoEm?.seconds || 0 };
     });
     const resultado = { categorias, servicos };
-    salvarCache(resultado);
+    salvarCache(resultado, versao);
     return resultado;
   });
 }
