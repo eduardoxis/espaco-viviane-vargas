@@ -9,9 +9,9 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Figtree:wght@400;500;600&family=Newsreader:ital,opsz,wght@0,6..72,400;0,6..72,500;0,6..72,600;1,6..72,400;1,6..72,500&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="/css/style.css?v=4">
+<link rel="stylesheet" href="/css/style.css?v=5">
 <link rel="stylesheet" href="/css/modal.css?v=3">
-<link rel="stylesheet" href="/css/responsive.css?v=3">
+<link rel="stylesheet" href="/css/responsive.css?v=4">
 <style>
   /* Estilos exclusivos do catálogo navegável de serviços. */
   .catalogo { position: relative; padding-block: 2.2rem 4rem; min-height: 60vh; }
@@ -72,7 +72,7 @@
 
   /* ----- cards de serviço ----- */
   .svc-grid {
-    display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+    display: grid; grid-template-columns: repeat(4, minmax(0, 1fr));
     gap: clamp(1rem, 1.8vw, 1.4rem); margin-top: 2rem;
   }
   .svc-card {
@@ -95,9 +95,11 @@
 
   .cat-vazio { grid-column: 1 / -1; padding: 3rem 1rem; text-align: center; color: var(--cinza-500); }
 
-  @media (max-width: 1100px) { .cat-grid { grid-template-columns: repeat(3, minmax(0, 1fr)); } }
+  @media (max-width: 1100px) {
+    .cat-grid, .svc-grid { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+  }
   @media (max-width: 780px) {
-    .cat-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+    .cat-grid, .svc-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
     .cat-card__body { padding: 1rem 1rem 1.1rem; }
     .cat-card__nome { font-size: 1.3rem; }
     .cat-card__desc { max-width: none; }
