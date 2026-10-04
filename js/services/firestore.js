@@ -3,7 +3,7 @@ import { db } from "../../firebase/firebase-config.js";
 import {
   collection, doc, getDoc, getDocs, addDoc, updateDoc, deleteDoc, setDoc,
   query, where, orderBy, limit, startAfter, serverTimestamp, increment,
-  runTransaction, getCountFromServer, getAggregateFromServer, sum, writeBatch
+  runTransaction, getCountFromServer, getAggregateFromServer, sum, writeBatch, documentId
 } from "https://www.gstatic.com/firebasejs/12.19.0/firebase-firestore.js";
 import { withLoading } from "../utils/loadingManager.js";
 import { sinalizarAtualizacaoPublica } from "./public-sync.js";
@@ -594,6 +594,8 @@ export function atualizarProduto(id, dados) {
 export function excluirProduto(id) {
   return withLoading("excluirProduto", async () => {
     const resultado = await deleteDoc(doc(db, "produtos", id));
+    // Os custos ficam em outra coleção; sem o produto eles não servem mais.
+    try { await excluirCustoProduto(id); } catch (erro) { console.warn("Não foi possível apagar os custos do produto:", erro); }
     invalidarCacheVitrinesHome();
     await notificarMudancaPublica();
     return resultado;
@@ -603,8 +605,70 @@ export function excluirProduto(id) {
 export function duplicarProduto(produto) {
   return withLoading("duplicarProduto", async () => {
     const { id, ...resto } = produto;
-    return criarProduto({ ...resto, nome: `${resto.nome} (cópia)` });
+    const novo = await criarProduto({ ...resto, nome: `${resto.nome} (cópia)` });
+    // A cópia leva os mesmos custos do original (a margem continua calculável).
+    try {
+      const custos = await obterCustoProduto(id);
+      if (custos) await salvarCustoProduto(novo.id, custos);
+    } catch (erro) {
+      console.warn("Produto duplicado, mas os custos não foram copiados:", erro);
+    }
+    return novo;
   });
+}
+
+// ---------- CUSTOS DO PRODUTO (somente admin) ----------
+// Custo, gastos, impostos e taxas NÃO ficam no documento do produto: a coleção
+// "produtos" é pública (qualquer visitante lê). Eles ficam em "custosProdutos",
+// cujo documento tem o mesmo ID do produto e só o admin lê/escreve (ver
+// firebase/firestore.rules).
+const COL_CUSTOS = "custosProdutos";
+
+function numeroDeCusto(valor, maximo = Infinity) {
+  const n = Number(valor);
+  return Number.isFinite(n) && n > 0 ? Math.min(Math.round(n * 100) / 100, maximo) : 0;
+}
+
+/** Custos de um produto ({ custo, gastos, impostoPct, taxaPct }) ou null se não houver. */
+export async function obterCustoProduto(id) {
+  if (!id) return null;
+  const snap = await getDoc(doc(db, COL_CUSTOS, id));
+  return snap.exists() ? snap.data() : null;
+}
+
+/** Custos de vários produtos de uma vez: Map(idProduto -> custos). Produtos sem custo ficam fora do Map. */
+export async function listarCustosProdutos(ids = []) {
+  const unicos = [...new Set((ids || []).filter(Boolean))];
+  const mapa = new Map();
+  // O operador "in" aceita no máximo 30 valores por consulta.
+  for (let i = 0; i < unicos.length; i += 30) {
+    const lote = unicos.slice(i, i + 30);
+    const snap = await getDocs(query(collection(db, COL_CUSTOS), where(documentId(), "in", lote)));
+    snap.forEach((d) => mapa.set(d.id, d.data()));
+  }
+  return mapa;
+}
+
+/** Grava os custos de um produto. Se tudo vier vazio/zero, apaga o registro. Devolve o que foi salvo (ou null). */
+export async function salvarCustoProduto(id, dados = {}) {
+  if (!id) throw new Error("Produto inválido para salvar os custos.");
+  const limpo = {
+    custo: numeroDeCusto(dados.custo),
+    gastos: numeroDeCusto(dados.gastos),
+    impostoPct: numeroDeCusto(dados.impostoPct, 100),
+    taxaPct: numeroDeCusto(dados.taxaPct, 100)
+  };
+  const ref = doc(db, COL_CUSTOS, id);
+  if (Object.values(limpo).every((v) => !v)) {
+    await deleteDoc(ref);
+    return null;
+  }
+  await setDoc(ref, { ...limpo, atualizadoEm: serverTimestamp() });
+  return limpo;
+}
+
+export function excluirCustoProduto(id) {
+  return deleteDoc(doc(db, COL_CUSTOS, id));
 }
 
 export function incrementarVisualizacao(id) {
