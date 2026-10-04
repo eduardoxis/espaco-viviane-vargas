@@ -17,7 +17,7 @@ const MAX_FOTOS_SERVICO = 6;
 
 let categorias = [];
 let servicos = [];
-const filtros = { termo: "", categoriaId: "" };
+const filtros = { termo: "", categoriaId: "", subId: "", todas: false, recolhida: false };
 
 // helpers injetados pelo dashboard.js (evita import circular)
 let ajuda = { abrirAjusteEnquadramento: null, enviarImagem: null };
@@ -55,6 +55,71 @@ const ESTILO = `
   .svc-catimg__row label.btn-secondary { cursor: pointer; }
   .svc-catimg__pos { display: grid; gap: 0.25rem; font-size: 0.82rem; color: var(--cinza-700); }
   .svc-catimg__pos input[type=range] { width: 100%; accent-color: var(--azul-700); }
+  .svc2 { display: grid; grid-template-columns: minmax(250px, 310px) 1fr; gap: 1rem; align-items: start; margin-bottom: 1rem; }
+  .svc2__cats { border: 1px solid var(--cinza-100); border-radius: var(--raio-md); background: var(--branco); padding: 1rem 0.8rem 0.8rem; position: sticky; top: 0; max-height: 72vh; overflow: auto; }
+  .svc2__cats > h2 { margin: 0 0 0.7rem 0.4rem; font-size: 1rem; color: var(--azul-900); }
+  .svc2-cat { margin-bottom: 0.2rem; }
+  .svc2-cat__row { width: 100%; display: flex; align-items: center; gap: 0.6rem; padding: 0.6rem 0.7rem; border-radius: 12px; background: transparent; color: var(--cinza-900); font-size: 0.92rem; text-align: left; cursor: pointer; }
+  .svc2-cat__row:hover { background: var(--cinza-050); }
+  .svc2-cat.is-ativa > .svc2-cat__row { background: var(--azul-100); color: var(--azul-900); font-weight: 600; }
+  .svc2-ico { width: 20px; height: 20px; flex-shrink: 0; color: var(--azul-700); }
+  .svc2-cat__thumb { width: 22px; height: 22px; border-radius: 6px; object-fit: cover; flex-shrink: 0; }
+  .svc2-cat__nome { flex: 1; min-width: 0; overflow-wrap: anywhere; }
+  .svc2-cat__badge { min-width: 24px; padding: 0.05rem 0.45rem; border-radius: 999px; background: var(--cinza-100); color: var(--cinza-700); font-size: 0.74rem; font-weight: 600; text-align: center; }
+  .svc2-cat.is-ativa .svc2-cat__badge { background: rgba(255,255,255,0.7); }
+  .svc2-cat__chev { width: 16px; height: 16px; color: var(--cinza-500); transform: rotate(90deg); transition: transform .15s; flex-shrink: 0; }
+  .svc2-subs { list-style: none; margin: 0.2rem 0 0.5rem 1.35rem; padding: 0 0 0 0.4rem; display: grid; gap: 0.05rem; }
+  .svc2-sub { display: flex; align-items: center; gap: 0.2rem; border-radius: 8px; }
+  .svc2-sub:hover { background: var(--cinza-050); }
+  .svc2-sub.is-ativa { background: var(--cinza-050); }
+  .svc2-sub__btn { flex: 1; min-width: 0; display: flex; align-items: center; gap: 0.6rem; padding: 0.3rem 0.4rem; background: transparent; font-size: 0.85rem; color: var(--cinza-700); text-align: left; cursor: pointer; }
+  .svc2-sub__btn::before { content: ""; width: 6px; height: 6px; border-radius: 50%; border: 1.5px solid var(--cinza-300); flex-shrink: 0; }
+  .svc2-sub.is-ativa .svc2-sub__btn { color: var(--azul-900); font-weight: 600; }
+  .svc2-sub.is-ativa .svc2-sub__btn::before { background: var(--azul-700); border-color: var(--azul-700); }
+  .svc2-sub__acoes { display: none; gap: 0; }
+  .svc2-sub:hover .svc2-sub__acoes, .svc2-sub:focus-within .svc2-sub__acoes { display: flex; }
+  .svc2-mini { width: 24px; height: 24px; border-radius: 50%; display: grid; place-items: center; background: transparent; color: var(--cinza-700); cursor: pointer; }
+  .svc2-mini:hover { background: var(--cinza-100); }
+  .svc2-mini[disabled] { opacity: .3; cursor: default; }
+  .svc2-mini .icon { width: 13px; height: 13px; }
+  .svc2-addsub { margin: 0.2rem 0 0.3rem 1.8rem; font-size: 0.8rem; color: var(--azul-700); background: transparent; display: inline-flex; align-items: center; gap: 0.3rem; cursor: pointer; }
+  .svc2-addsub .icon { width: 12px; height: 12px; }
+  .svc2-addsub:hover { text-decoration: underline; }
+  .svc2__main { border: 1px solid var(--cinza-100); border-radius: var(--raio-md); background: var(--branco); padding: 1rem; min-width: 0; }
+  .svc2__head { display: flex; align-items: center; gap: 0.8rem; flex-wrap: wrap; margin-bottom: 0.9rem; }
+  .svc2__head > .svc2-ico, .svc2__head > .svc2-cat__thumb { width: 34px; height: 34px; }
+  .svc2__head-txt { flex: 1; min-width: 160px; }
+  .svc2__head-txt h2 { margin: 0; font-size: 1.15rem; color: var(--azul-900); }
+  .svc2__head-txt p { margin: 0.1rem 0 0; font-size: 0.82rem; color: var(--cinza-500); }
+  .svc2__head-acoes { display: flex; align-items: center; gap: 0.2rem; }
+  .svc2__filtros { display: flex; gap: 0.7rem; flex-wrap: wrap; margin-bottom: 0.8rem; }
+  .svc2__filtros .select-icon { min-width: 190px; }
+  .svc2-lista { display: grid; gap: 0.55rem; }
+  .svc2-linha { display: grid; grid-template-columns: 48px minmax(150px, 2.2fr) 0.8fr 0.8fr minmax(120px, 1.6fr) 104px 112px; align-items: center; gap: 0.8rem; padding: 0.6rem 0.8rem; border: 1px solid var(--cinza-100); border-radius: 14px; background: var(--branco); font-size: 0.86rem; color: var(--cinza-700); }
+  .svc2-linha:hover { background: var(--cinza-050); }
+  .svc2-linha__thumb { width: 44px; height: 44px; border-radius: 12px; background: var(--azul-100); display: grid; place-items: center; overflow: hidden; }
+  .svc2-linha__thumb img { width: 100%; height: 100%; object-fit: cover; }
+  .svc2-linha__nome strong { display: block; color: var(--cinza-900); font-size: 0.92rem; overflow-wrap: anywhere; }
+  .svc2-linha__cat { display: flex; align-items: center; gap: 0.35rem; font-size: 0.78rem; color: var(--cinza-500); }
+  .svc2-linha__cat::before { content: ""; width: 8px; height: 8px; border-radius: 50%; background: var(--azul-500); opacity: .55; flex-shrink: 0; }
+  .svc2-status { justify-self: start; display: inline-flex; align-items: center; gap: 0.35rem; padding: 0.2rem 0.65rem; border-radius: 999px; font-size: 0.75rem; font-weight: 600; background: #dcfce7; color: #15803d; white-space: nowrap; }
+  .svc2-status::before { content: ""; width: 6px; height: 6px; border-radius: 50%; background: currentColor; }
+  .svc2-status.is-oculto { background: var(--cinza-100); color: var(--cinza-700); }
+  .svc2-linha__acoes { display: flex; gap: 0.35rem; }
+  .svc2-acao { width: 34px; height: 34px; border-radius: 10px; border: 1px solid var(--cinza-200); background: var(--branco); display: grid; place-items: center; color: var(--cinza-900); cursor: pointer; }
+  .svc2-acao:hover { background: var(--cinza-100); }
+  .svc2-acao .icon { width: 15px; height: 15px; }
+  .svc2-acao--dup { opacity: 0; }
+  .svc2-linha:hover .svc2-acao--dup, .svc2-acao--dup:focus-visible { opacity: 1; }
+  @media (hover: none) { .svc2-acao--dup { opacity: 1; } .svc2-sub__acoes { display: flex; } }
+  .svc2__bar { display: flex; gap: 0.7rem; flex-wrap: wrap; align-items: center; margin-bottom: 1.25rem; }
+  .svc2__bar .admin-search { flex: 1; min-width: 220px; }
+  @media (max-width: 960px) {
+    .svc2 { grid-template-columns: 1fr; }
+    .svc2__cats { position: static; max-height: none; }
+    .svc2-linha { grid-template-columns: 44px 1fr auto; }
+    .svc2-linha > .svc2-linha__extra { display: none; }
+  }
 </style>`;
 
 // ---------- ENTRADA ----------
@@ -86,6 +151,7 @@ function servicosFiltrados() {
   const termo = normalizarTexto(filtros.termo);
   const lista = resolverNomesServicos(servicos, categorias).filter(s => {
     if (filtros.categoriaId && s.categoriaId !== filtros.categoriaId) return false;
+    if (filtros.subId && s.subcategoriaId !== filtros.subId) return false;
     if (!termo) return true;
     return normalizarTexto([s.nome, s.categoriaNome, s.subcategoriaNome, s.codigo, s.descricaoCurta].join(" ")).includes(termo);
   });
@@ -131,8 +197,33 @@ async function moverCategoria(container, cat, direcao) {
   } catch (erro) { falha("mudar a ordem", erro); }
 }
 
+// ---------- ÍCONES DAS CATEGORIAS ----------
+const svgIcone = (d) => `<svg class="svc2-ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">${d}</svg>`;
+const ICONES_CATEGORIA = [
+  [/estet|massag|spa|relax/, svgIcone('<path d="M12 5c1.8 2 2.6 4.2 2.6 6.4 0 2.2-1 4-2.6 5.6-1.6-1.6-2.6-3.4-2.6-5.6C9.4 9.2 10.2 7 12 5z"/><path d="M9.6 14.2C7 14.2 4.8 12.8 3.5 10.5c2.8-.3 5 .5 6.4 2"/><path d="M14.4 14.2c2.6 0 4.8-1.4 6.1-3.7-2.8-.3-5 .5-6.4 2"/><path d="M4.5 16.5c2.4 2 5 3 7.5 3s5.1-1 7.5-3"/>')],
+  [/cabel|corte|escova/, svgIcone('<circle cx="6" cy="7" r="2.5"/><circle cx="6" cy="17" r="2.5"/><path d="M8 8.5 20 18M8 15.5 20 6"/>')],
+  [/unha|manicure|pedicure/, svgIcone('<rect x="8" y="11" width="8" height="10" rx="2"/><path d="M10 11V7h4v4M11 7V3h2v4"/>')],
+  [/depila|cera|laser/, svgIcone('<path d="M12 3s6 6.2 6 11a6 6 0 0 1-12 0c0-4.8 6-11 6-11z"/>')],
+  [/saude|bem.?estar|terapia/, svgIcone('<path d="M12 20s-7-4.4-7-10a4 4 0 0 1 7-2.5A4 4 0 0 1 19 10c0 5.6-7 10-7 10z"/>')],
+  [/sobrancel|design|cilios/, svgIcone('<path d="M3 13c3-5 11-7 18-3"/><path d="M4 16c3-3 9-4.5 15-2.5"/>')],
+  [/maquia|make|beleza/, svgIcone('<path d="M20 4 11 13"/><path d="M11 13c-2.5-.5-4.5 1-4.5 3.2 0 1.5-.8 2.6-2.5 3.3 3.5 1.3 8.5 1 9.5-2.5.5-1.5.2-3-.5-4z"/>')]
+];
+function iconeCategoria(cat) {
+  const nome = normalizarTexto(cat?.nome || "");
+  const achou = ICONES_CATEGORIA.find(([re]) => re.test(nome));
+  if (achou) return achou[1];
+  if (cat?.imagem) return `<img class="svc2-cat__thumb" src="${cat.imagem}" alt="">`;
+  return icon("grid", "svc2-ico");
+}
+
+function categoriaSelecionada() {
+  return categorias.find(c => c.id === filtros.categoriaId && !c.parentId) || null;
+}
+
 function desenharPainel(container) {
   const arvore = montarArvoreCategorias(categorias);
+  if (filtros.categoriaId && !arvore.some(c => c.id === filtros.categoriaId)) { filtros.categoriaId = ""; filtros.subId = ""; }
+  if (!filtros.categoriaId && arvore.length && !filtros.todas) filtros.categoriaId = arvore[0].id;
   const opcoesFiltro = arvore.map(c => `<option value="${c.id}" ${filtros.categoriaId === c.id ? "selected" : ""}>${escHtml(c.nome)}</option>`).join("");
 
   container.innerHTML = `${ESTILO}
@@ -141,45 +232,27 @@ function desenharPainel(container) {
       <p>Cadastre os serviços do salão, organizados em categorias e subcategorias, com fotos e explicação do que cada um faz.</p>
     </div>
 
-    <section class="svc-admin__cats" aria-label="Categorias de serviços">
-      <div class="svc-admin__cats-head">
-        <div>
-          <h2>Categorias de serviços</h2>
-          <p>Ex.: <strong>Estética</strong> com subcategorias como Limpeza de pele e Massagens. Cada categoria vira um card no site, com foto e descrição. Use as setas para mudar a ordem.</p>
+    <div class="svc2">
+      <aside class="svc2__cats" aria-label="Categorias de serviços">
+        <h2>Categorias de serviços</h2>
+        <div id="svc2-arvore"></div>
+      </aside>
+      <section class="svc2__main">
+        <header class="svc2__head" id="svc2-head"></header>
+        <div class="svc2__filtros">
+          <form class="admin-search" id="form-busca-interna-servicos" role="search" style="flex:1;min-width:200px">
+            <div class="input-icon">${icon("search")}<input type="search" id="busca-interna-servicos" placeholder="Buscar serviço..." autocomplete="off" value="${escHtml(filtros.termo)}"></div>
+          </form>
+          <div class="select-icon">${icon("filter")}<select id="filtro-sub-servicos" aria-label="Filtrar por subcategoria"></select></div>
         </div>
-        <button type="button" class="btn-secondary" id="btn-nova-categoria-servico">${icon("plus")}Nova categoria</button>
-      </div>
-      <div class="svc-admin__tree">
-        ${arvore.map(c => `
-          <div class="svc-cat" data-cat="${c.id}">
-            <div class="svc-cat__head">
-              ${c.imagem ? `<img class="svc-cat__thumb" src="${c.imagem}" alt="">` : ""}
-              <span class="svc-cat__nome">${escHtml(c.nome)}</span>
-              <span class="svc-cat__count">${contarServicos(c.id, false)} serv.</span>
-              ${botoesOrdem(c, arvore)}
-              <button type="button" class="svc-cat__btn" data-act="editar-cat" data-id="${c.id}" title="Editar categoria">${icon("pencil")}</button>
-              <button type="button" class="svc-cat__btn" data-act="excluir-cat" data-id="${c.id}" title="Excluir categoria">${icon("trash")}</button>
-            </div>
-            ${c.filhas.length ? `<ul class="svc-cat__subs">${c.filhas.map(f => `
-              <li>
-                ${f.imagem ? `<img class="svc-cat__thumb" src="${f.imagem}" alt="">` : ""}
-                <span class="svc-cat__nome">${escHtml(f.nome)}</span>
-                <span class="svc-cat__count">${contarServicos(f.id, true)}</span>
-                ${botoesOrdem(f, arvore)}
-                <button type="button" class="svc-cat__btn" data-act="editar-cat" data-id="${f.id}" title="Editar subcategoria">${icon("pencil")}</button>
-                <button type="button" class="svc-cat__btn" data-act="excluir-cat" data-id="${f.id}" title="Excluir subcategoria">${icon("trash")}</button>
-              </li>`).join("")}</ul>` : ""}
-            <button type="button" class="svc-cat__add" data-act="nova-sub" data-id="${c.id}">${icon("plus")}Subcategoria</button>
-          </div>`).join("") || `<p style="margin:0;font-size:0.88rem;color:var(--cinza-500)">Nenhuma categoria ainda. Crie uma ou importe um JSON — as categorias e subcategorias do arquivo são criadas automaticamente.</p>`}
-      </div>
-    </section>
+        <div class="svc2-lista" id="svc2-lista"></div>
+        <div class="table-pagination"><p class="table-count" id="contagem-servicos"></p></div>
+      </section>
+    </div>
 
-    <div class="admin-toolbar">
+    <div class="svc2__bar">
       <form class="admin-search" id="form-busca-admin-servicos" role="search">
-        <div class="input-icon">
-          ${icon("search")}
-          <input type="search" id="busca-admin-servicos" placeholder="Pesquisar serviços..." autocomplete="off" value="${escHtml(filtros.termo)}">
-        </div>
+        <div class="input-icon">${icon("search")}<input type="search" id="busca-admin-servicos" placeholder="Pesquisar serviços..." autocomplete="off" value="${escHtml(filtros.termo)}"></div>
       </form>
       <div class="select-icon">
         ${icon("sort")}
@@ -192,12 +265,6 @@ function desenharPainel(container) {
       <input type="file" id="input-importar-json-servicos" accept="application/json,.json" hidden>
       <button class="btn-primary" id="btn-novo-servico">${icon("plus")}Novo serviço</button>
     </div>
-
-    <div class="table-wrap"><table class="admin-table" id="tabela-servicos">
-      <thead><tr><th></th><th>Nome</th><th>Categoria</th><th>Duração</th><th>Preço</th><th>Status</th><th>Ações</th></tr></thead>
-      <tbody></tbody>
-    </table></div>
-    <div class="table-pagination"><p class="table-count" id="contagem-servicos"></p></div>
 
     <dialog id="dialog-servico" class="dialog-form"></dialog>
     <dialog id="dialog-categoria-servico" class="dialog-form"></dialog>
@@ -219,43 +286,115 @@ function desenharPainel(container) {
       </div>
     </dialog>`;
 
+  renderizarArvore(container);
   renderizarTabela(container);
   ligarEventos(container);
 }
 
+function renderizarArvore(container) {
+  const arvore = montarArvoreCategorias(categorias);
+  const alvo = container.querySelector("#svc2-arvore");
+  if (!arvore.length) {
+    alvo.innerHTML = `<p style="margin:0.4rem;font-size:0.86rem;color:var(--cinza-500)">Nenhuma categoria ainda. Crie uma ou importe um JSON — as categorias e subcategorias do arquivo são criadas automaticamente.</p>`;
+    return;
+  }
+  alvo.innerHTML = arvore.map(c => {
+    const ativa = c.id === filtros.categoriaId;
+    const aberta = ativa && !filtros.recolhida;
+    return `
+    <div class="svc2-cat ${ativa ? "is-ativa" : ""} ${aberta ? "is-aberta" : ""}" data-cat="${c.id}">
+      <button type="button" class="svc2-cat__row" data-act="sel-cat" data-id="${c.id}" aria-expanded="${aberta}">
+        ${iconeCategoria(c)}
+        <span class="svc2-cat__nome">${escHtml(c.nome)}</span>
+        <span class="svc2-cat__badge">${contarServicos(c.id, false)}</span>
+        ${icon("chevronRight", "svc2-cat__chev")}
+      </button>
+      ${aberta ? `
+        <ul class="svc2-subs">${c.filhas.map(f => `
+          <li class="svc2-sub ${filtros.subId === f.id ? "is-ativa" : ""}">
+            <button type="button" class="svc2-sub__btn" data-act="sel-sub" data-id="${f.id}">${escHtml(f.nome)}</button>
+            <span class="svc2-sub__acoes">
+              ${botoesOrdemMini(f)}
+              <button type="button" class="svc2-mini" data-act="editar-cat" data-id="${f.id}" title="Editar subcategoria">${icon("pencil")}</button>
+              <button type="button" class="svc2-mini" data-act="excluir-cat" data-id="${f.id}" title="Excluir subcategoria">${icon("trash")}</button>
+            </span>
+          </li>`).join("")}</ul>
+        <button type="button" class="svc2-addsub" data-act="nova-sub" data-id="${c.id}">${icon("plus")}Subcategoria</button>` : ""}
+    </div>`;
+  }).join("");
+}
+
+function botoesOrdemMini(cat) {
+  const irmas = irmasOrdenadas(cat.parentId);
+  const i = irmas.findIndex(c => c.id === cat.id);
+  return `
+    <button type="button" class="svc2-mini" data-act="subir-cat" data-id="${cat.id}" title="Mover para cima" ${i <= 0 ? "disabled" : ""}>${icon("chevronLeft")}</button>
+    <button type="button" class="svc2-mini" data-act="descer-cat" data-id="${cat.id}" title="Mover para baixo" ${i === irmas.length - 1 ? "disabled" : ""}>${icon("chevronRight")}</button>`;
+}
+
+function renderizarCabecalho(container) {
+  const cat = categoriaSelecionada();
+  const total = cat ? contarServicos(cat.id, false) : servicos.length;
+  const head = container.querySelector("#svc2-head");
+  head.innerHTML = `
+    ${cat ? iconeCategoria(cat) : icon("grid", "svc2-ico")}
+    <div class="svc2__head-txt">
+      <h2>${cat ? escHtml(cat.nome) : "Todos os serviços"}</h2>
+      <p>${total} serviço${total === 1 ? "" : "s"} cadastrado${total === 1 ? "" : "s"}</p>
+    </div>
+    <div class="svc2__head-acoes">
+      ${cat ? `${botoesOrdemMini(cat)}
+        <button type="button" class="svc2-mini" data-act="editar-cat" data-id="${cat.id}" title="Editar categoria">${icon("pencil")}</button>
+        <button type="button" class="svc2-mini" data-act="excluir-cat" data-id="${cat.id}" title="Excluir categoria">${icon("trash")}</button>` : ""}
+    </div>
+    <button type="button" class="btn-primary" id="btn-nova-categoria-servico">${icon("plus")}Nova categoria</button>`;
+  head.querySelector("#btn-nova-categoria-servico").addEventListener("click", () => abrirFormularioCategoria(container));
+
+  const sel = container.querySelector("#filtro-sub-servicos");
+  const filhas = cat ? irmasOrdenadas(cat.id) : [];
+  sel.innerHTML = `<option value="">Todos os serviços</option>` +
+    filhas.map(f => `<option value="${f.id}" ${filtros.subId === f.id ? "selected" : ""}>${escHtml(f.nome)}</option>`).join("");
+  sel.disabled = !filhas.length;
+}
+
 function renderizarTabela(container) {
-  const tbody = container.querySelector("#tabela-servicos tbody");
+  renderizarCabecalho(container);
+  const alvo = container.querySelector("#svc2-lista");
   const lista = servicosFiltrados();
   container.querySelector("#contagem-servicos").textContent = `${lista.length} serviço(s)`;
+  const catPorId = new Map(categorias.map(c => [c.id, c]));
 
-  tbody.innerHTML = lista.map(s => {
+  alvo.innerHTML = lista.map(s => {
     const img = imgPos(s.imagem);
+    const cat = catPorId.get(s.categoriaId);
+    const subDiferente = s.subcategoriaNome && normalizarTexto(s.subcategoriaNome) !== normalizarTexto(s.nome);
+    const rotuloCat = s.categoriaNome ? (subDiferente ? `${s.categoriaNome} › ${s.subcategoriaNome}` : s.categoriaNome) : "Sem categoria";
+    const oculto = s.status === "oculto";
     return `
-    <tr data-id="${s.id}">
-      <td><img class="thumb" src="${img.src || "/assets/images/placeholder.svg"}" style="object-position:${img.pos}" alt=""></td>
-      <td>${escHtml(s.nome)}</td>
-      <td>${escHtml(textoCategoria(s))}</td>
-      <td>${escHtml(s.duracao || "-")}</td>
-      <td>${Number(s.preco) > 0 ? formatBRL(s.preco) : "Sob consulta"}</td>
-      <td><span class="status-pill status-${escHtml(s.status || "disponivel")}">${s.status === "oculto" ? "oculto" : "disponível"}</span></td>
-      <td class="row-actions">
-        <button data-action="editar" title="Editar">${icon("pencil")}</button>
-        <button data-action="duplicar" title="Duplicar">${icon("copy")}</button>
-        <button data-action="excluir" title="Excluir">${icon("trash")}</button>
-      </td>
-    </tr>`;
-  }).join("") || `<tr><td colspan="7">
+    <article class="svc2-linha" data-id="${s.id}">
+      <div class="svc2-linha__thumb">${img.src ? `<img src="${img.src}" style="object-position:${img.pos}" alt="">` : iconeCategoria(cat)}</div>
+      <div class="svc2-linha__nome"><strong>${escHtml(s.nome)}</strong><span class="svc2-linha__cat">${escHtml(rotuloCat)}</span></div>
+      <div class="svc2-linha__extra">${Number(s.preco) > 0 ? formatBRL(s.preco) : "Sob consulta"}</div>
+      <div class="svc2-linha__extra">${escHtml(s.duracao || "-")}</div>
+      <div class="svc2-linha__extra">${escHtml(s.sessoes || "")}</div>
+      <span class="svc2-status ${oculto ? "is-oculto" : ""}">${oculto ? "Oculto" : "Disponível"}</span>
+      <div class="svc2-linha__acoes">
+        <button type="button" class="svc2-acao svc2-acao--dup" data-action="duplicar" title="Duplicar">${icon("copy")}</button>
+        <button type="button" class="svc2-acao" data-action="editar" title="Editar">${icon("pencil")}</button>
+        <button type="button" class="svc2-acao" data-action="excluir" title="Excluir">${icon("trash")}</button>
+      </div>
+    </article>`;
+  }).join("") || `
       <div class="empty-state">
         ${icon("gridEmpty", "empty-state__icon")}
-        <strong>${filtros.termo || filtros.categoriaId ? "Nenhum serviço encontrado" : "Nenhum serviço cadastrado"}</strong>
-        <p>${filtros.termo || filtros.categoriaId ? "Tente outro nome ou categoria." : "Adicione o primeiro serviço do salão ou importe um arquivo JSON."}</p>
-        ${filtros.termo || filtros.categoriaId ? "" : `<button type="button" class="btn-secondary" id="btn-primeiro-servico">${icon("plus")}Adicionar primeiro serviço</button>`}
-      </div>
-    </td></tr>`;
+        <strong>${filtros.termo || filtros.subId ? "Nenhum serviço encontrado" : "Nenhum serviço cadastrado"}</strong>
+        <p>${filtros.termo || filtros.subId ? "Tente outro nome ou subcategoria." : "Adicione o primeiro serviço do salão ou importe um arquivo JSON."}</p>
+        ${filtros.termo || filtros.subId ? "" : `<button type="button" class="btn-secondary" id="btn-primeiro-servico">${icon("plus")}Adicionar primeiro serviço</button>`}
+      </div>`;
 
-  tbody.querySelector("#btn-primeiro-servico")?.addEventListener("click", () => abrirFormularioServico(container));
+  alvo.querySelector("#btn-primeiro-servico")?.addEventListener("click", () => abrirFormularioServico(container));
 
-  tbody.querySelectorAll("tr[data-id]").forEach(tr => {
+  alvo.querySelectorAll(".svc2-linha[data-id]").forEach(tr => {
     const servico = servicos.find(s => s.id === tr.dataset.id);
     if (!servico) return;
     tr.querySelector('[data-action="editar"]').addEventListener("click", () => abrirFormularioServico(container, servico));
@@ -285,30 +424,67 @@ function falha(acao, erro) {
   toast(erro?.message || `Não foi possível ${acao}.`, "error");
 }
 
+function atualizarVisao(container) {
+  renderizarArvore(container);
+  renderizarTabela(container);
+  const selBaixo = container.querySelector("#filtro-admin-servicos-categoria");
+  if (selBaixo) selBaixo.value = filtros.categoriaId;
+}
+
 function ligarEventos(container) {
-  const busca = container.querySelector("#busca-admin-servicos");
+  const buscaBaixo = container.querySelector("#busca-admin-servicos");
+  const buscaInterna = container.querySelector("#busca-interna-servicos");
   container.querySelector("#form-busca-admin-servicos").addEventListener("submit", (e) => e.preventDefault());
-  busca.addEventListener("input", () => { filtros.termo = busca.value; renderizarTabela(container); });
+  container.querySelector("#form-busca-interna-servicos").addEventListener("submit", (e) => e.preventDefault());
+  const aoBuscar = (origem, outra) => () => {
+    filtros.termo = origem.value;
+    outra.value = origem.value;
+    renderizarTabela(container);
+  };
+  buscaBaixo.addEventListener("input", aoBuscar(buscaBaixo, buscaInterna));
+  buscaInterna.addEventListener("input", aoBuscar(buscaInterna, buscaBaixo));
+
   container.querySelector("#filtro-admin-servicos-categoria").addEventListener("change", (e) => {
     filtros.categoriaId = e.target.value;
+    filtros.todas = !e.target.value;
+    filtros.subId = "";
+    filtros.recolhida = false;
+    atualizarVisao(container);
+  });
+  container.querySelector("#filtro-sub-servicos").addEventListener("change", (e) => {
+    filtros.subId = e.target.value;
+    renderizarArvore(container);
     renderizarTabela(container);
   });
 
   container.querySelector("#btn-novo-servico").addEventListener("click", () => abrirFormularioServico(container));
-  container.querySelector("#btn-nova-categoria-servico").addEventListener("click", () => abrirFormularioCategoria(container));
 
-  // categorias (editar / excluir / nova subcategoria)
-  container.querySelector(".svc-admin__tree").addEventListener("click", async (e) => {
+  // categorias e cabeçalho (selecionar / editar / excluir / nova subcategoria / ordem)
+  const aoClicarCategoria = async (e) => {
     const btn = e.target.closest("[data-act]");
-    if (!btn) return;
+    if (!btn || btn.disabled) return;
+    const act = btn.dataset.act;
+    if (act === "sel-cat") {
+      if (filtros.categoriaId === btn.dataset.id) filtros.recolhida = !filtros.recolhida;
+      else { filtros.categoriaId = btn.dataset.id; filtros.todas = false; filtros.recolhida = false; }
+      filtros.subId = "";
+      return atualizarVisao(container);
+    }
+    if (act === "sel-sub") {
+      filtros.subId = filtros.subId === btn.dataset.id ? "" : btn.dataset.id;
+      renderizarArvore(container);
+      return renderizarTabela(container);
+    }
     const cat = categorias.find(c => c.id === btn.dataset.id);
     if (!cat) return;
-    if (btn.dataset.act === "editar-cat") return abrirFormularioCategoria(container, cat);
-    if (btn.dataset.act === "nova-sub") return abrirFormularioCategoria(container, null, cat.id);
-    if (btn.dataset.act === "excluir-cat") return excluirCategoria(container, cat);
-    if (btn.dataset.act === "subir-cat") return moverCategoria(container, cat, -1);
-    if (btn.dataset.act === "descer-cat") return moverCategoria(container, cat, 1);
-  });
+    if (act === "editar-cat") return abrirFormularioCategoria(container, cat);
+    if (act === "nova-sub") return abrirFormularioCategoria(container, null, cat.id);
+    if (act === "excluir-cat") return excluirCategoria(container, cat);
+    if (act === "subir-cat") return moverCategoria(container, cat, -1);
+    if (act === "descer-cat") return moverCategoria(container, cat, 1);
+  };
+  container.querySelector("#svc2-arvore").addEventListener("click", aoClicarCategoria);
+  container.querySelector("#svc2-head").addEventListener("click", aoClicarCategoria);
 
   // importação
   const inputJson = container.querySelector("#input-importar-json-servicos");
