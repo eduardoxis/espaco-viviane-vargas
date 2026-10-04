@@ -124,12 +124,9 @@
   .related-products__track .product-card { flex: 0 0 calc((100% - 1rem) / 2); }
   .related-products__head h2 { font-size: 1.1rem; }
 
-  /* Perfil/conta: no topo some só onde a barra inferior tem o botão "Conta"
-     funcional (home). Nas demais páginas o ícone do topo continua, senão
-     o celular ficaria sem acesso ao login. */
-  #btn-entrar { display: inline-flex; }
-  body:has(#bottom-nav-conta) #btn-entrar,
-  body:has(#bottom-nav-conta) #btn-minha-conta { display: none !important; }
+  /* Perfil/conta: no mobile o ícone de perfil não aparece no menu superior em
+     nenhuma página. O acesso fica no botão "Conta" da barra inferior. */
+  #btn-entrar, #btn-minha-conta { display: none !important; }
 
   /* Toast no mobile: embaixo (no desktop fica em cima, ver style.css). */
   .toast {
