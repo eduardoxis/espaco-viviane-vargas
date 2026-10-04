@@ -26,7 +26,10 @@ export async function exigirAdmin(req) {
   let decodificado;
   try {
     decodificado = await getAuth().verifyIdToken(token);
-  } catch {
+  } catch (causa) {
+    // Loga o motivo real (ex: auth/argument-error, "incorrect aud" = projeto
+    // do Firebase Admin diferente do projeto do site) nos logs da Vercel.
+    console.error("[_auth] verifyIdToken falhou:", causa?.code, causa?.message);
     const erro = new Error("Sessão inválida ou expirada.");
     erro.status = 401;
     throw erro;
