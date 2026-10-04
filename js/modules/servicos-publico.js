@@ -84,7 +84,8 @@ export function cartaoServico(servico, favoritos = null) {
 }
 
 export function renderizarGradeServicos(container, servicos) {
-  const comFoto = (Array.isArray(servicos) ? servicos : []).filter(servicoTemImagem);
+  // Serviços sem foto também aparecem (o cartão usa a imagem padrão).
+  const comFoto = Array.isArray(servicos) ? servicos : [];
   if (!comFoto.length) {
     container.innerHTML = `<div class="empty-state">Nenhum serviço encontrado. Tente ajustar sua busca ou filtros.</div>`;
     return;
