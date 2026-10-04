@@ -41,6 +41,19 @@ service cloud.firestore {
       allow read: if true;
       allow write: if ehAdmin();
     }
+    // ---------- SERVIÇOS DO SALÃO ----------
+    // Categorias/subcategorias são públicas (viram os cards do site). Serviços
+    // "ocultos" só o admin lê, igual aos produtos.
+    match /categoriasServico/{id} {
+      allow read: if true;
+      allow write: if ehAdmin();
+    }
+    match /servicos/{servicoId} {
+      allow get: if resource.data.status != 'oculto' || ehAdmin();
+      allow list: if resource.data.status == 'disponivel' || ehAdmin();
+      allow create, update, delete: if ehAdmin();
+    }
+
     // Sinal leve de alteração pública. Não contém dados do catálogo.
     match /publicacoes/{id} {
       allow get: if true;
