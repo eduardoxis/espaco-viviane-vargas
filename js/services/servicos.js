@@ -4,7 +4,8 @@
 // pública para o site recarregar quando o painel muda algo.
 //
 // Coleções:
-//   categoriasServico  { nome, parentId ("" = categoria principal), ordem }
+//   categoriasServico  { nome, parentId ("" = categoria principal), ordem,
+//                        descricao, imagem (base64 comprimido), imagemPosY }
 //   servicos           { nome, categoriaId, subcategoriaId, ... }
 //
 // Os serviços guardam apenas os IDs da categoria/subcategoria. Os nomes são
@@ -22,7 +23,7 @@ const COL_SERVICOS = "servicos";
 const COL_CATEGORIAS = "categoriasServico";
 
 // ---------- CACHE PÚBLICO (sessionStorage, 5 min) ----------
-const CHAVE_CACHE = "evv_servicos_publico_v1";
+const CHAVE_CACHE = "evv_servicos_publico_v2";
 const TTL_MS = 5 * 60 * 1000;
 
 function lerCache() {
@@ -148,12 +149,15 @@ export function listarServicosAdmin() {
 }
 
 // ---------- CATEGORIAS ----------
-export function criarCategoriaServico({ nome, parentId = "", ordem = Date.now() }, { silencioso = false } = {}) {
+export function criarCategoriaServico({ nome, parentId = "", ordem = Date.now(), descricao = "", imagem = "", imagemPosY = 50 }, { silencioso = false } = {}) {
   return withLoading("criarCategoriaServico", async () => {
     const ref = await addDoc(collection(db, COL_CATEGORIAS), {
       nome: String(nome).trim(),
       parentId: parentId || "",
       ordem: Number(ordem) || Date.now(),
+      descricao: String(descricao || "").trim(),
+      imagem: imagem || "",
+      imagemPosY: Number.isFinite(Number(imagemPosY)) ? Number(imagemPosY) : 50,
       criadoEm: serverTimestamp()
     });
     if (!silencioso) await notificarMudancaPublica();
@@ -161,10 +165,10 @@ export function criarCategoriaServico({ nome, parentId = "", ordem = Date.now() 
   });
 }
 
-export function atualizarCategoriaServico(id, dados) {
+export function atualizarCategoriaServico(id, dados, { silencioso = false } = {}) {
   return withLoading("atualizarCategoriaServico", async () => {
     await updateDoc(doc(db, COL_CATEGORIAS, id), dados);
-    await notificarMudancaPublica();
+    if (!silencioso) await notificarMudancaPublica();
   });
 }
 
