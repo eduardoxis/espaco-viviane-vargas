@@ -9,7 +9,7 @@ import {
   obterResumoDashboard, listarPedidosAdminPagina, atualizarStatusPedido, listarHistoricoEstoquePagina
 } from "../services/firestore.js";
 import { formatBRL, escHtml, generateCode, converterParaPNG, converterParaProporcaoPadrao, toast, confirmarAcao, imgPos } from "../utils/utils.js";
-import { enviarImagemParaCloudinary, migrarImagensAntigas } from "../services/cloudinary.js";
+import { comprimirParaBase64 } from "../services/imagem-base64.js";
 import { carregarPainelLeads } from "../modules/leads.js";
 import { ICONS, icon } from "../utils/icons.js";
 import { auth } from "../../firebase/firebase-config.js";
@@ -20,30 +20,40 @@ let cacheCategorias = [];
 let cacheEtiquetas = [];
 
 /**
- * Converte o arquivo selecionado para WebP (máx. 800px, qualidade 80%) e
- * envia para o Cloudinary. Retorna a URL pública ou null se falhar — nunca
- * salvamos base64 no Firestore nem usamos Firebase Storage.
+ * Padroniza a foto (proporção fixa), comprime para WebP e devolve um data URL
+ * (base64) para salvar direto no Firestore. Retorna null se falhar.
  */
 async function enviarImagem(file, nomeBase) {
   try {
     const padronizada = await converterParaProporcaoPadrao(file);
-    return await enviarImagemParaCloudinary(padronizada, nomeBase);
+    return await comprimirParaBase64(padronizada, { maxLargura: 800, maxBytes: 110 * 1024 });
   } catch (erro) {
-    toast(erro.message || "Falha ao enviar a imagem.", "error");
+    toast(erro.message || "Falha ao processar a imagem.", "error");
     return null;
   }
 }
 
+function blobParaDataUrl(blob) {
+  return new Promise((resolve, reject) => {
+    const r = new FileReader();
+    r.onload = () => resolve(r.result);
+    r.onerror = () => reject(new Error("Falha ao ler a imagem."));
+    r.readAsDataURL(blob);
+  });
+}
+
 /**
- * Igual a enviarImagem, mas para categorias e marcas: mantém PNG (a pedido)
- * em vez de recomprimir em WebP — bom para logos com fundo transparente.
+ * Para categorias e marcas: mantém PNG (transparência de logos). Se o PNG
+ * ficar grande demais para o Firestore, cai para WebP comprimido.
  */
 async function enviarImagemComoPNG(file, nomeBase) {
   try {
     const png = await converterParaPNG(file, 500);
-    return await enviarImagemParaCloudinary(png, nomeBase);
+    const dataUrl = await blobParaDataUrl(png);
+    if (dataUrl.length <= 200 * 1024) return dataUrl;
+    return await comprimirParaBase64(file, { maxLargura: 500, maxBytes: 110 * 1024 });
   } catch (erro) {
-    toast(erro.message || "Falha ao enviar a imagem.", "error");
+    toast(erro.message || "Falha ao processar a imagem.", "error");
     return null;
   }
 }
@@ -272,17 +282,6 @@ async function carregarDashboard(container) {
       </section>
 
       <section class="dashboard-action-stack" aria-label="Ferramentas de manutenção">
-        <article class="dashboard-action-card" id="bloco-migracao-imagens">
-          <span class="dashboard-action-icon dashboard-action-icon--blue">${icon("upload")}</span>
-          <div class="dashboard-action-copy">
-            <h2>Imagens antigas (base64)</h2>
-            <p>Converte imagens antigas do Firestore para WebP hospedado no Cloudinary.</p>
-            <p class="dashboard-action-status" id="status-migracao" aria-live="polite"></p>
-          </div>
-          <button class="btn-secondary dashboard-action-button dashboard-action-button--blue" id="btn-migrar-imagens">
-            ${icon("upload")}Migrar imagens antigas
-          </button>
-        </article>
         <article class="dashboard-action-card" id="bloco-migracao-filtros">
           <span class="dashboard-action-icon dashboard-action-icon--green">${icon("filter")}</span>
           <div class="dashboard-action-copy">
@@ -354,27 +353,6 @@ async function carregarDashboard(container) {
     } catch (erro) {
       status.textContent = "Erro na migração: " + (erro.message || "tente novamente.");
       toast("Falha ao preparar produtos.", "error");
-    } finally {
-      btn.disabled = false;
-    }
-  });
-
-  container.querySelector("#btn-migrar-imagens")?.addEventListener("click", async (e) => {
-    const btn = e.currentTarget;
-    const status = container.querySelector("#status-migracao");
-    btn.disabled = true;
-    status.textContent = "Procurando imagens antigas...";
-    try {
-      const resultado = await migrarImagensAntigas((feitos, total) => {
-        status.textContent = `Migrando ${feitos}/${total}...`;
-      });
-      status.textContent = resultado.total === 0
-        ? "Nenhuma imagem antiga encontrada — tudo já está em WebP/Cloudinary."
-        : `Concluído: ${resultado.total - resultado.erros} de ${resultado.total} migradas${resultado.erros ? `, ${resultado.erros} com erro (veja o console)` : ""}.`;
-      toast("Migração de imagens concluída.");
-    } catch (erro) {
-      status.textContent = "Erro na migração: " + (erro.message || "tente novamente.");
-      toast("Falha na migração de imagens.", "error");
     } finally {
       btn.disabled = false;
     }
