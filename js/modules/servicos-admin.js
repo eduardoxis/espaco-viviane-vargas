@@ -879,14 +879,14 @@ function paraLista(valor) {
 function criarPromptImportacaoServicos() {
   const arvore = montarArvoreCategorias(categorias);
   const existentes = arvore.length
-    ? arvore.map(c => `- ${c.nome}${c.filhas.length ? ` (subcategorias: ${c.filhas.map(f => f.nome).join(", ")})` : ""}`).join("\n")
+    ? arvore.map(c => `- ${c.nome}`).join("\n")
     : "- Nenhuma categoria cadastrada ainda.";
 
   return `Crie e entregue um ARQUIVO para download chamado "servicos-importacao.json" para importar SERVIÇOS no painel do Espaço Viviane Vargas (estética e salão de beleza).
 
 Não responda com explicações, texto comum, Markdown ou blocos de código. Gere o arquivo .json anexável/baixável; o conteúdo do arquivo deve ser somente JSON válido.
 
-REGRA PRINCIPAL: o arquivo deve criar APENAS serviços. NÃO crie, invente nem sugira categorias ou subcategorias novas. Use somente as categorias e subcategorias que já existem no painel (lista no final). Só crie categorias/subcategorias se eu pedir isso de forma explícita nesta conversa (veja a seção "Somente se eu pedir categorias novas").
+REGRA PRINCIPAL: o arquivo deve criar APENAS serviços. NÃO crie, invente nem sugira categorias novas. Use somente as categorias que já existem no painel (lista no final). NÃO use subcategorias: o campo "subcategoria" não existe neste arquivo. Só crie categorias/subcategorias se eu pedir isso de forma explícita nesta conversa (veja a seção "Somente se eu pedir categorias novas").
 
 O arquivo deve ter exatamente esta estrutura:
 {
@@ -894,7 +894,6 @@ O arquivo deve ter exatamente esta estrutura:
     {
       "nome": "Limpeza de pele",
       "categoria": "Estética",
-      "subcategoria": "Facial",
       "descricaoCurta": "Frase curta que aparece no card do serviço.",
       "descricao": "Explicação do que é o serviço e o que ele faz pela cliente.",
       "comoFunciona": ["Avaliação da pele", "Higienização", "Extração", "Máscara e finalização"],
@@ -903,7 +902,6 @@ O arquivo deve ter exatamente esta estrutura:
       "cuidados": "Evitar sol por 48h após o procedimento.",
       "duracao": "60 min",
       "sessoes": "1 sessão a cada 30 dias",
-      "preco": 120,
       "status": "disponivel",
       "codigo": "SERV-LIMPEZA-001",
       "imagens": ["https://url-publica-da-imagem.webp"]
@@ -913,16 +911,18 @@ O arquivo deve ter exatamente esta estrutura:
 
 Regras obrigatórias:
 - Só "nome" é obrigatório em cada serviço. Todos os outros campos são opcionais; omita o que não souber.
-- "categoria" e "subcategoria" devem ser EXATAMENTE como aparecem na lista de categorias já cadastradas (mesma grafia). Use "subcategoria" apenas se ela existir dentro daquela categoria.
-- Se nenhuma categoria existente servir para o serviço, omita "categoria" e "subcategoria". Nunca invente um nome que não está na lista: serviços com categoria inexistente são rejeitados na importação.
+- "categoria" deve ser EXATAMENTE como aparece na lista de categorias já cadastradas (mesma grafia).
+- NUNCA use "subcategoria". Todo serviço fica direto na categoria, sem subcategoria.
+- Se nenhuma categoria existente servir para o serviço, omita "categoria". Nunca invente um nome que não está na lista: serviços com categoria inexistente são rejeitados na importação.
 - "descricaoCurta": uma frase de até 180 caracteres. "descricao": explique de forma clara e simples o que o serviço é e o que ele faz.
 - "comoFunciona", "beneficios" e "indicadoPara" são listas de textos curtos. "cuidados" é um texto.
-- "preco" é número (sem R$, vírgula ou texto); omita se o valor for sob consulta. "status" pode ser "disponivel" ou "oculto".
+- "preco": NÃO invente preço e não use valor de exemplo. Omita o campo "preco" em todos os serviços (ficam "sob consulta" e eu defino o valor depois no painel). Só inclua "preco" se eu informar o valor de um serviço específico; nesse caso é número puro (sem R$, vírgula ou texto).
+- "status": omita (o padrão é "disponivel"); use "oculto" só se eu pedir.
 - "imagens" é opcional e só aceita URLs públicas HTTPS. Sem foto, o serviço aparece no site com imagem padrão.
 - Não use comentários, reticências, texto fora do JSON, vírgula depois do último campo, base64, arquivo local ou URL privada.
 
 Somente se eu pedir categorias novas (caso contrário, ignore esta seção):
-- Se eu pedir explicitamente para criar categorias e/ou subcategorias, acrescente no topo do JSON o campo "criarCategorias": true e use "categoria"/"subcategoria" nos serviços com os nomes novos que eu pedi. Crie somente as que eu pedi, nenhuma além delas.
+- Se eu pedir explicitamente para criar categorias e/ou subcategorias, acrescente no topo do JSON o campo "criarCategorias": true e use "categoria" (e "subcategoria", só se eu pedir subcategorias) nos serviços com os nomes novos que eu pedi. Crie somente as que eu pedi, nenhuma além delas.
 - Sem esse pedido explícito, NÃO inclua "criarCategorias" e NÃO use nomes que não estejam na lista abaixo.
 
 Categorias já cadastradas no painel agora:
@@ -1071,7 +1071,7 @@ async function importarServicosJson(container, arquivo) {
       if (categoria) {
         categoriaId = await garantirCategoria(categoria);
         if (!categoriaId) { invalidos.push({ linha: i + 1, nome: r.dados.nome, erros: [`a categoria "${categoria}" não existe no painel (categorias não são criadas automaticamente)`] }); continue; }
-        if (subcategoria) {
+        if (subcategoria && estrutura.permitirCriar) {
           subcategoriaId = await garantirCategoria(subcategoria, categoriaId);
           if (!subcategoriaId) { invalidos.push({ linha: i + 1, nome: r.dados.nome, erros: [`a subcategoria "${subcategoria}" não existe em "${categoria}"`] }); continue; }
         }
