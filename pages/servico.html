@@ -95,13 +95,6 @@
       <button type="submit" class="search-bar__btn" aria-label="Pesquisar"><span data-icon="search"></span></button>
     </form>
 
-    <div class="select-pill">
-      <select id="filtro-categoria" aria-label="Filtrar por categoria">
-        <option value="">Todas as categorias</option>
-      </select>
-      <span class="select-pill__chevron" data-icon="chevronRight"></span>
-    </div>
-
     <div class="header-actions">
       <a href="/pages/catalogo.html" class="header-action header-action--nav" aria-label="Catálogo"><span data-icon="shoppingBag"></span><span>Catálogo</span></a>
       <a href="/pages/servicos.html" class="header-action header-action--nav is-active" aria-label="Serviços" aria-current="page"><span data-icon="calendar"></span><span>Serviços</span></a>
@@ -289,15 +282,7 @@ async function iniciarServico() {
   const cuidados = String(servico.cuidados || "").split(/\n+/).flatMap(l => l.trim().split(/(?<=[.!?])\s+/)).map(t => t.trim()).filter(Boolean);
   const temPreco = Number(servico.preco) > 0;
 
-  // categoria no cabeçalho + link de voltar
-  const selCat = document.querySelector("#filtro-categoria");
-  if (selCat) {
-    selCat.innerHTML = `<option value="">Todas as categorias</option>` +
-      montarArvoreCategorias(dados.categorias).map(c => `<option value="${escHtml(c.id)}" ${c.id === servico.categoriaId ? "selected" : ""}>${escHtml(c.nome)}</option>`).join("");
-    selCat.addEventListener("change", () => {
-      window.location.href = `/pages/servicos.html${selCat.value ? `?categoria=${encodeURIComponent(selCat.value)}` : ""}`;
-    });
-  }
+  // link de voltar leva à categoria do serviço
   if (servico.categoriaId) document.querySelector("#sv-voltar")?.setAttribute("href", `/pages/servicos.html?categoria=${encodeURIComponent(servico.categoriaId)}`);
 
   const meta = [
