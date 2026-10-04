@@ -9,9 +9,9 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Figtree:wght@400;500;600&family=Newsreader:ital,opsz,wght@0,6..72,400;0,6..72,500;0,6..72,600;1,6..72,400;1,6..72,500&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="/css/style.css?v=4">
+<link rel="stylesheet" href="/css/style.css?v=5">
 <link rel="stylesheet" href="/css/modal.css?v=3">
-<link rel="stylesheet" href="/css/responsive.css?v=3">
+<link rel="stylesheet" href="/css/responsive.css?v=4">
 <style>
   /* Estilos exclusivos da página de catálogo/busca. */
   .search-page__layout {
@@ -22,6 +22,11 @@
   }
   @media (min-width: 981px) {
     .search-page__layout { grid-template-columns: 260px 1fr; }
+  }
+  /* Com a barra de filtros ao lado, sobra menos largura: 4 cards por linha só
+     a partir de 1400px (abaixo disso ficam 3, para a foto não espremer). */
+  @media (min-width: 981px) and (max-width: 1399px) {
+    .search-page__layout .products-grid { grid-template-columns: repeat(3, minmax(0, 1fr)); }
   }
   .search-page__filters {
     background: var(--branco);
