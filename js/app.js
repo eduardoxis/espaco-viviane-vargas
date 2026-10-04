@@ -20,6 +20,7 @@ import { ICONS, icon } from "./utils/icons.js";
 import { STORE_CONFIG } from "../firebase/firebase-config.js";
 import { iniciarLoadingGlobal } from "./utils/loadingUI.js";
 import { observarAtualizacaoPublica } from "./services/public-sync.js";
+import { listarServicosPublico, montarArvoreCategorias, normalizarTexto } from "./services/servicos.js";
 
 iniciarLoadingGlobal();
 
@@ -64,6 +65,64 @@ function carregarAoAproximar(alvo, tarefa) {
     executar();
   }, { rootMargin: "500px 0px" });
   observer.observe(alvo);
+}
+
+// ---------- Seção "Cuidados para você" (home) ----------
+const SVG_SV = (d) => `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">${d}</svg>`;
+const ICONES_SERVICO_HOME = {
+  facial: SVG_SV('<path d="M12 3.5c-3.3 0-5.5 2.5-5.5 6 0 4.2 2.4 8 5.5 8s5.5-3.8 5.5-8c0-3.5-2.2-6-5.5-6Z"/><path d="M9.6 10.4h.01M14.4 10.4h.01"/><path d="M10.2 14c1 .7 2.6.7 3.6 0"/><path d="M9.2 17.2 8.4 20.5h7.2l-.8-3.3"/>'),
+  corporal: SVG_SV('<path d="M8.2 3.5c.4 3.2-1.2 5-1.8 7.2-.6 2.3.6 4 1.6 6.3L8.2 21"/><path d="M15.8 3.5c-.4 3.2 1.2 5 1.8 7.2.6 2.3-.6 4-1.6 6.3L15.8 21"/><path d="M9.6 13.6c1.4 1.2 3.4 1.2 4.8 0"/>'),
+  capilar: SVG_SV('<path d="M12 3.5s5 5.2 5 9.3a5 5 0 0 1-10 0c0-4.1 5-9.3 5-9.3Z"/><path d="M12 9v8"/><path d="M9.5 20.5h5"/>'),
+  bemestar: SVG_SV('<path d="M12 4.8c2.2 2.2 3 4.6 3 7s-1.2 4.4-3 6c-1.8-1.6-3-3.6-3-6s.8-4.8 3-7Z"/><path d="M9 17.5c-2.5 0-4.8-1.7-5.8-5.1 2.8-.2 5 .8 6.3 3M15 17.5c2.5 0 4.8-1.7 5.8-5.1-2.8-.2-5 .8-6.3 3"/><path d="M6 19.8c4 1.2 8 1.2 12 0"/>'),
+  folha: SVG_SV('<path d="M12 4.5c1.8 2 2.8 4.2 2.8 6.4S13.8 14.9 12 16.5c-1.8-1.6-2.8-3.6-2.8-5.6S10.2 6.5 12 4.5Z"/><path d="M9.4 14.6C7 14.8 4.7 13.6 3.5 11.1c2.6-.3 4.7.5 6 2M14.6 14.6c2.4.2 4.7-1 5.9-3.5-2.6-.3-4.7.5-6 2M5 18c2.2 1.5 4.6 2 7 2s4.8-.5 7-2"/>')
+};
+
+function iconeServicoHome(nome = "") {
+  const n = normalizarTexto(nome);
+  if (/facial|rosto|pele|face/.test(n)) return ICONES_SERVICO_HOME.facial;
+  if (/corporal|corpo/.test(n)) return ICONES_SERVICO_HOME.corporal;
+  if (/capilar|cabelo|cabelos|fios/.test(n)) return ICONES_SERVICO_HOME.capilar;
+  if (/bem.?estar|massagem|massagens|spa|relax/.test(n)) return ICONES_SERVICO_HOME.bemestar;
+  return ICONES_SERVICO_HOME.folha;
+}
+
+/** Mostra as 4 primeiras categorias de serviço (que tenham serviço disponível). */
+async function renderizarServicosHome(secao) {
+  const grade = secao?.querySelector("#grade-servicos-home");
+  if (!grade) return;
+  let dados;
+  try {
+    dados = await listarServicosPublico();
+  } catch (erro) {
+    console.error("[home] falha ao carregar serviços:", erro);
+    secao.hidden = true;
+    return;
+  }
+  const { categorias = [], servicos = [] } = dados || {};
+  const cats = montarArvoreCategorias(categorias)
+    .map(c => ({ ...c, total: servicos.filter(s => s.categoriaId === c.id).length }))
+    .filter(c => c.total > 0)
+    .slice(0, 4);
+  // Sem categoria com serviço publicado: esconde a seção inteira.
+  if (!cats.length) { secao.hidden = true; return; }
+
+  grade.innerHTML = cats.map((c) => {
+    const posY = Number.isFinite(Number(c.imagemPosY)) ? Number(c.imagemPosY) : 50;
+    const desc = c.descricao || `${c.total} ${c.total === 1 ? "serviço" : "serviços"}`;
+    const foto = c.imagem
+      ? `<img src="${escHtml(c.imagem)}" alt="" style="object-position:50% ${posY}%" loading="lazy" decoding="async">`
+      : `<span class="sv-home__img-vazia">${ICONES_SERVICO_HOME.folha}</span>`;
+    return `
+      <a class="sv-home__card" href="/pages/servicos.html?categoria=${encodeURIComponent(c.id)}">
+        <span class="sv-home__img">${foto}</span>
+        <span class="sv-home__body">
+          <span class="sv-home__icon">${iconeServicoHome(c.nome)}</span>
+          <span class="sv-home__nome">${escHtml(c.nome)}</span>
+          <span class="sv-home__desc">${escHtml(desc)}</span>
+          <span class="sv-home__btn">Ver serviços <svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M4 12h15m-5-5 5 5-5 5" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg></span>
+        </span>
+      </a>`;
+  }).join("");
 }
 
 function iconeParaCategoria(nome = "") {
@@ -171,6 +230,8 @@ async function iniciar() {
     // Oito itens formam duas linhas completas de quatro no desktop.
     renderizarGrade(gradeDestaques, await listarProdutosDestaque(8));
   });
+  const secaoServicosHome = document.querySelector("#servicos-home");
+  carregarAoAproximar(secaoServicosHome, () => renderizarServicosHome(secaoServicosHome));
   const gradeRecentes = document.querySelector("#grade-recentes");
   carregarAoAproximar(gradeRecentes, async () => {
     renderizarGrade(gradeRecentes, await listarProdutosRecentes(8));
