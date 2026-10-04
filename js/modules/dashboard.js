@@ -6,10 +6,12 @@ import {
   listarMarcas, listarMarcasPagina, criarMarca, atualizarMarca, excluirMarca,
   listarClientes, listarClientesPagina, criarCliente, atualizarCliente, excluirCliente,
   ajustarEstoque, listarUsuarios, listarUsuariosPagina, migrarCamposFiltroCatalogo, migrarIndiceBuscaProdutos, listarUltimoAlertaEstoque,
-  obterResumoDashboard, listarPedidosAdminPagina, atualizarStatusPedido, listarHistoricoEstoquePagina
+  obterResumoDashboard, listarPedidosAdminPagina, atualizarStatusPedido, listarHistoricoEstoquePagina,
+  obterCustoProduto, listarCustosProdutos, salvarCustoProduto
 } from "../services/firestore.js";
 import { formatBRL, escHtml, generateCode, converterParaPNG, converterParaProporcaoPadrao, toast, confirmarAcao, imgPos } from "../utils/utils.js";
 import { comprimirParaBase64 } from "../services/imagem-base64.js";
+import { calcularMargem, formatarPct, ROTULO_NIVEL_MARGEM } from "../utils/margem.js";
 import { carregarPainelLeads } from "../modules/leads.js";
 import { ICONS, icon } from "../utils/icons.js";
 import { auth } from "../../firebase/firebase-config.js";
@@ -18,6 +20,69 @@ import { carregarAbaServicos } from "./servicos-admin.js";
 let cacheProdutos = [];
 let cacheCategorias = [];
 let cacheEtiquetas = [];
+// Custos dos produtos já carregados (id -> custos, ou null = sem custo cadastrado).
+// Usado só para mostrar a margem na tabela; é atualizado ao salvar/excluir.
+const cacheCustos = new Map();
+
+function htmlCelulaMargem(produto) {
+  if (!cacheCustos.has(produto.id)) return `<span class="margem-vazia" title="Carregando...">…</span>`;
+  const custos = cacheCustos.get(produto.id);
+  if (!custos) return `<span class="margem-vazia" title="Sem custo cadastrado">—</span>`;
+  const r = calcularMargem({ ...custos, preco: produto.preco, quantidade: produto.quantidade });
+  if (r.margemPct === null) return `<span class="margem-vazia" title="Sem preço de venda">—</span>`;
+  return `<span class="margem-pill margem-pill--${r.nivel}" title="${ROTULO_NIVEL_MARGEM[r.nivel]} — lucro de ${escHtml(formatBRL(r.lucro))} por unidade">${formatarPct(r.margemPct)}</span><small class="margem-lucro">${escHtml(formatBRL(r.lucro))}</small>`;
+}
+
+/** Busca os custos que faltam e preenche a coluna "Margem" sem travar a tabela. */
+async function preencherMargensProdutos(container, produtos) {
+  const faltando = produtos.map(p => p.id).filter(id => !cacheCustos.has(id));
+  if (faltando.length) {
+    try {
+      const mapa = await listarCustosProdutos(faltando);
+      faltando.forEach(id => cacheCustos.set(id, mapa.get(id) || null));
+    } catch (erro) {
+      console.warn("Não foi possível carregar os custos dos produtos:", erro);
+      container.querySelectorAll("#tabela-produtos td.margem-cell").forEach(td => {
+        td.innerHTML = `<span class="margem-vazia" title="Não foi possível carregar os custos. Confira se as regras do Firestore foram publicadas.">—</span>`;
+      });
+      return;
+    }
+  }
+  const tbody = container.querySelector("#tabela-produtos tbody");
+  if (!tbody) return;
+  produtos.forEach(p => {
+    const td = tbody.querySelector(`tr[data-id="${CSS.escape(p.id)}"] td.margem-cell`);
+    if (td) td.innerHTML = htmlCelulaMargem(p);
+  });
+}
+
+/** Painel de resumo (lucro, margem, markup...) mostrado no formulário de produto. */
+function htmlResumoMargem(r) {
+  if (r.preco <= 0) return `<p class="margem-resumo__vazio">Informe o preço de venda para ver o lucro.</p>`;
+  if (!r.temCusto && !r.imposto && !r.taxa) {
+    return `<p class="margem-resumo__vazio">Informe o custo do produto (e, se houver, gastos, impostos e taxas) para calcular o lucro e a margem.</p>`;
+  }
+  const linha = (rotulo, valor, negativo = false) =>
+    `<div><dt>${rotulo}</dt><dd>${negativo ? "−" : ""}${escHtml(formatBRL(valor))}</dd></div>`;
+  return `
+    <dl class="margem-resumo__linhas">
+      ${linha("Preço de venda", r.preco)}
+      ${r.custo > 0 ? linha("Custo do produto", r.custo, true) : ""}
+      ${r.gastos > 0 ? linha("Outros gastos", r.gastos, true) : ""}
+      ${r.imposto > 0 ? linha("Impostos", r.imposto, true) : ""}
+      ${r.taxa > 0 ? linha("Taxas", r.taxa, true) : ""}
+    </dl>
+    <div class="margem-resumo__destaque margem-resumo__destaque--${r.nivel}">
+      <div><span>Lucro por unidade</span><strong>${escHtml(formatBRL(r.lucro))}</strong></div>
+      <div><span>Margem de lucro</span><strong>${formatarPct(r.margemPct)}</strong></div>
+      <div><span>Markup (sobre o custo)</span><strong>${formatarPct(r.markupPct)}</strong></div>
+    </div>
+    <p class="margem-resumo__nivel"><span class="margem-pill margem-pill--${r.nivel}">${ROTULO_NIVEL_MARGEM[r.nivel]}</span></p>
+    <ul class="margem-resumo__extras">
+      ${r.precoMinimo !== null ? `<li>Preço mínimo para não ter prejuízo: <strong>${escHtml(formatBRL(r.precoMinimo))}</strong></li>` : ""}
+      ${r.quantidade > 0 ? `<li>Lucro potencial do estoque (${r.quantidade} un.): <strong>${escHtml(formatBRL(r.lucroEstoque))}</strong></li>` : ""}
+    </ul>`;
+}
 
 /**
  * Padroniza a foto (proporção fixa), comprime para WebP e devolve um data URL
@@ -516,7 +581,7 @@ async function carregarAbaProdutos(container) {
       <button class="btn-primary" id="btn-novo-produto">${icon("plus")}Novo produto</button>
     </div>
     <div class="table-wrap"><table class="admin-table" id="tabela-produtos">
-      <thead><tr><th></th><th>Nome</th><th>Categoria</th><th>Preço</th><th>Qtd</th><th>Status</th><th>Ações</th></tr></thead>
+      <thead><tr><th></th><th>Nome</th><th>Categoria</th><th>Preço</th><th>Margem</th><th>Qtd</th><th>Status</th><th>Ações</th></tr></thead>
       <tbody></tbody>
     </table></div>
     <div class="table-pagination">
@@ -944,6 +1009,7 @@ function renderizarTabelaProdutos(container, produtos, { busca = false } = {}) {
       <td>${escHtml(p.nome)}</td>
       <td>${escHtml(p.categoria || "-")}</td>
       <td>${formatBRL(p.preco)}</td>
+      <td class="margem-cell">${htmlCelulaMargem(p)}</td>
       <td>${p.quantidade ?? 0}</td>
       <td><span class="status-pill status-${p.status}">${escHtml(p.status)}</span></td>
       <td class="row-actions">
@@ -951,7 +1017,7 @@ function renderizarTabelaProdutos(container, produtos, { busca = false } = {}) {
         <button data-action="duplicar" title="Duplicar">${icon("copy")}</button>
         <button data-action="excluir" title="Excluir">${icon("trash")}</button>
       </td>
-    </tr>`).join("") || `<tr><td colspan="7">
+    </tr>`).join("") || `<tr><td colspan="8">
       <div class="empty-state">
         ${icon("gridEmpty", "empty-state__icon")}
         <strong>${busca ? "Nenhum produto encontrado" : "Nenhum produto cadastrado"}</strong>
@@ -965,6 +1031,8 @@ function renderizarTabelaProdutos(container, produtos, { busca = false } = {}) {
           : `<button type="button" class="btn-secondary" id="btn-primeiro-produto">${icon("plus")}Adicionar primeiro produto</button>`}
       </div>
     </td></tr>`;
+
+  preencherMargensProdutos(container, produtos);
 
   tbody.querySelector("#btn-primeiro-produto")?.addEventListener("click", () => abrirFormularioProduto(container));
   tbody.querySelector("#btn-limpar-busca-vazia")?.addEventListener("click", async () => {
@@ -995,6 +1063,7 @@ function renderizarTabelaProdutos(container, produtos, { busca = false } = {}) {
       });
       if (!ok) return;
       await excluirProduto(id);
+      cacheCustos.delete(id);
       toast("Produto excluído.");
       carregarPaginaProdutos(container, estadoPaginacaoProdutos.paginaIndex);
     });
@@ -1072,6 +1141,18 @@ async function abrirFormularioProduto(container, produto = null) {
   dialog.className = "dialog-form dialog-produto";
   cacheCategorias = await listarCategorias();
   cacheMarcas = (await listarMarcas()).sort((a, b) => (a.ordem || 0) - (b.ordem || 0));
+  // Custos ficam numa coleção só do admin. Se a leitura falhar (ex.: regras ainda
+  // não publicadas), o produto continua editável e os custos não são sobrescritos.
+  let custosAtuais = null;
+  let custosCarregados = true;
+  if (produto?.id) {
+    try {
+      custosAtuais = await obterCustoProduto(produto.id);
+    } catch (erro) {
+      custosCarregados = false;
+      console.warn("Não foi possível carregar os custos do produto:", erro);
+    }
+  }
   const opcoesCategoria = cacheCategorias.map(c => `<option value="${escHtml(c.nome)}" ${produto?.categoria === c.nome ? "selected" : ""}>${escHtml(c.nome)}</option>`).join("");
   const opcoesMarca = cacheMarcas.map(m => `<option value="${escHtml(m.nome)}" ${produto?.marca === m.nome ? "selected" : ""}>${escHtml(m.nome)}</option>`).join("");
   const opcoesEtiquetas = cacheEtiquetas.map(e => `
@@ -1108,7 +1189,7 @@ async function abrirFormularioProduto(container, produto = null) {
       <div class="form-grid">
         <label>Nome<input name="nome" required autocomplete="off" value="${escHtml(produto?.nome || "")}"></label>
         <label>Marca<select name="marca"><option value="">Selecione</option>${opcoesMarca}</select></label>
-        <label>Preço (R$)<input name="preco" type="number" step="0.01" required value="${produto?.preco ?? ""}"></label>
+        <label>Preço de venda (R$)<input name="preco" type="number" step="0.01" required value="${produto?.preco ?? ""}"></label>
         <label>Quantidade<input name="quantidade" type="number" required value="${produto?.quantidade ?? 0}"></label>
         <label>Categoria<select name="categoria"><option value="">Selecione</option>${opcoesCategoria}</select></label>
         <label>Status
@@ -1123,6 +1204,19 @@ async function abrirFormularioProduto(container, produto = null) {
           <input type="checkbox" name="visivelSemFoto" ${produto?.visivelSemFoto ? "checked" : ""}> Exibir no site mesmo sem foto
         </label>
       </div>
+
+      <section class="custos-produto" id="custos-produto">
+        <h4>Custos e margem de lucro</h4>
+        <p class="galeria-produto__ajuda">Só você vê isto no painel: nada aparece no site. Preencha o que se aplica ao produto (por unidade) para calcular o lucro e a margem.</p>
+        ${custosCarregados ? "" : `<p class="custos-produto__aviso">Não foi possível carregar os custos deste produto. Confira se as regras do Firestore foram publicadas. Os custos já salvos só serão alterados se você preencher os campos abaixo.</p>`}
+        <div class="form-grid">
+          <label>Custo do produto (R$)<input name="custo" type="number" step="0.01" min="0" inputmode="decimal" placeholder="0,00" value="${custosAtuais?.custo || ""}"></label>
+          <label>Outros gastos (R$)<input name="gastos" type="number" step="0.01" min="0" inputmode="decimal" placeholder="Frete, embalagem..." value="${custosAtuais?.gastos || ""}"></label>
+          <label>Impostos (% da venda)<input name="impostoPct" type="number" step="0.01" min="0" max="100" inputmode="decimal" placeholder="0" value="${custosAtuais?.impostoPct || ""}"></label>
+          <label>Taxas de pagamento (%)<input name="taxaPct" type="number" step="0.01" min="0" max="100" inputmode="decimal" placeholder="Cartão, comissão..." value="${custosAtuais?.taxaPct || ""}"></label>
+        </div>
+        <div class="margem-resumo" id="margem-resumo" aria-live="polite"></div>
+      </section>
 
       <div class="cores-produto">
         <h4>Variações de cor (opcional)</h4>
@@ -1159,6 +1253,24 @@ async function abrirFormularioProduto(container, produto = null) {
 
   dialog.showModal();
   dialog.querySelectorAll("[data-modal-close-dialog]").forEach((botao) => botao.addEventListener("click", () => dialog.close()));
+
+  // Margem ao vivo: recalcula a cada digitação em qualquer campo envolvido.
+  const formProduto = dialog.querySelector("#form-produto");
+  const painelMargem = dialog.querySelector("#margem-resumo");
+  const atualizarMargem = () => {
+    painelMargem.innerHTML = htmlResumoMargem(calcularMargem({
+      preco: formProduto.preco.value,
+      quantidade: formProduto.quantidade.value,
+      custo: formProduto.custo.value,
+      gastos: formProduto.gastos.value,
+      impostoPct: formProduto.impostoPct.value,
+      taxaPct: formProduto.taxaPct.value
+    }));
+  };
+  ["preco", "quantidade", "custo", "gastos", "impostoPct", "taxaPct"].forEach(nome => {
+    formProduto.elements[nome].addEventListener("input", atualizarMargem);
+  });
+  atualizarMargem();
 
   const grid = dialog.querySelector("#galeria-grid");
 
@@ -1452,12 +1564,38 @@ async function abrirFormularioProduto(container, produto = null) {
       dados.status = "oculto";
     }
 
+    let idSalvo;
     if (produto) {
       await atualizarProduto(produto.id, dados);
+      idSalvo = produto.id;
       toast("Produto atualizado.");
     } else {
-      await criarProduto(dados);
+      const ref = await criarProduto(dados);
+      idSalvo = ref?.id;
       toast("Produto cadastrado.");
+    }
+
+    // Custos vão para a coleção só do admin. O produto já está salvo; se isto
+    // falhar, avisamos sem desfazer o produto.
+    try {
+      const novos = {
+        custo: form.custo.value, gastos: form.gastos.value,
+        impostoPct: form.impostoPct.value, taxaPct: form.taxaPct.value
+      };
+      const n = (v) => Number(v) > 0 ? Math.round(Number(v) * 100) / 100 : 0;
+      const preenchido = Object.values(novos).some(v => n(v) > 0);
+      const igualAoAtual = ["custo", "gastos", "impostoPct", "taxaPct"]
+        .every(c => n(novos[c]) === n(custosAtuais?.[c]));
+      // Não grava quando nada mudou, nem quando não deu para ler os custos
+      // existentes e o campo está vazio (evita apagar sem querer).
+      const deveGravar = idSalvo && !igualAoAtual && (custosCarregados || preenchido);
+      if (deveGravar) {
+        const salvo = await salvarCustoProduto(idSalvo, novos);
+        cacheCustos.set(idSalvo, salvo);
+      }
+    } catch (erroCusto) {
+      console.error("Erro ao salvar custos do produto:", erroCusto);
+      toast("Produto salvo, mas não foi possível salvar os custos. Confira se as regras do Firestore foram publicadas.", "error");
     }
     dialog.close();
     carregarAbaProdutos(container);
