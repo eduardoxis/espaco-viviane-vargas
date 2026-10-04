@@ -9,9 +9,9 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Figtree:wght@400;500;600&family=Newsreader:ital,opsz,wght@0,6..72,400;0,6..72,500;0,6..72,600;1,6..72,400;1,6..72,500&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="/css/style.css">
+<link rel="stylesheet" href="/css/style.css?v=5">
 <link rel="stylesheet" href="/css/modal.css">
-<link rel="stylesheet" href="/css/responsive.css">
+<link rel="stylesheet" href="/css/responsive.css?v=4">
 <style>
   /* Impede que navegadores móveis alterem a escala ao carregar esta página. */
   html { -webkit-text-size-adjust: 100%; text-size-adjust: 100%; }
@@ -20,6 +20,7 @@
   .sv-voltar { display: inline-flex; align-items: center; gap: 0.4rem; margin: 1.6rem 0 1.1rem; font-size: 0.86rem; font-weight: 500; color: var(--azul-700); }
   .sv-voltar .icon { width: 13px; height: 13px; transform: rotate(180deg); }
   .sv-voltar:hover { text-decoration: underline; }
+  #sv-breadcrumb { margin-bottom: 1.2rem; }
 
   .sv-hero { display: grid; grid-template-columns: 1fr; gap: 1.6rem 2.2rem; align-items: start; }
   @media (min-width: 900px) { .sv-hero { grid-template-columns: minmax(0, 1.05fr) minmax(0, 1fr); } }
@@ -116,7 +117,13 @@
 </header>
 
 <main class="container" id="conteudo">
-  <a class="sv-voltar" id="sv-voltar" href="/pages/servicos.html"><span data-icon="chevronRight"></span>Voltar para categorias</a>
+  <nav class="breadcrumb" id="sv-breadcrumb" aria-label="Trilha de navegação">
+    <a href="/">Início</a>
+    <span data-icon="chevronRight"></span>
+    <a href="/pages/servicos.html">Serviços</a>
+    <span data-icon="chevronRight"></span>
+    <span class="breadcrumb__atual" id="breadcrumb-servico">Serviço</span>
+  </nav>
 
   <div id="servico-conteudo">
     <div class="empty-state">Carregando serviço...</div>
@@ -238,11 +245,31 @@ function renderizarRelacionados(servico, todos) {
   try {
     const relacionados = todos
       .filter(s => s.id !== servico.id && s.categoriaId === servico.categoriaId)
-      .slice(0, 6);
+      .slice(0, 4);
     if (!relacionados.length) return;
     document.querySelector("#secao-relacionados").hidden = false;
     renderizarGradeServicos(document.querySelector("#grade-relacionados"), relacionados);
   } catch { /* silencioso: seção de relacionados é só um bônus */ }
+}
+
+function montarBreadcrumb(servico) {
+  const nav = document.querySelector("#sv-breadcrumb");
+  if (!nav) return;
+  const chevron = `<span class="icon" aria-hidden="true">${ICONS.chevronRight}</span>`;
+  const urlCat = servico.categoriaId
+    ? `/pages/servicos.html?categoria=${encodeURIComponent(servico.categoriaId)}`
+    : "";
+  const urlSub = servico.categoriaId && servico.subcategoriaId
+    ? `${urlCat}&sub=${encodeURIComponent(servico.subcategoriaId)}`
+    : "";
+  const trilha = [
+    `<a href="/">Início</a>`,
+    `<a href="/pages/servicos.html">Serviços</a>`,
+    servico.categoriaNome && urlCat ? `<a href="${urlCat}">${escHtml(servico.categoriaNome)}</a>` : "",
+    servico.subcategoriaNome && urlSub ? `<a href="${urlSub}">${escHtml(servico.subcategoriaNome)}</a>` : "",
+    `<span class="breadcrumb__atual">${escHtml(servico.nome)}</span>`
+  ].filter(Boolean);
+  nav.innerHTML = trilha.join(chevron);
 }
 
 function naoEncontrado() {
@@ -282,8 +309,8 @@ async function iniciarServico() {
   const cuidados = String(servico.cuidados || "").split(/\n+/).flatMap(l => l.trim().split(/(?<=[.!?])\s+/)).map(t => t.trim()).filter(Boolean);
   const temPreco = Number(servico.preco) > 0;
 
-  // link de voltar leva à categoria do serviço
-  if (servico.categoriaId) document.querySelector("#sv-voltar")?.setAttribute("href", `/pages/servicos.html?categoria=${encodeURIComponent(servico.categoriaId)}`);
+  // Trilha: Início › Serviços › Categoria › Subcategoria › Serviço
+  montarBreadcrumb(servico);
 
   const meta = [
     servico.duracao ? { ico: I_RELOGIO, rotulo: "Duração", valor: servico.duracao } : null,
