@@ -28,6 +28,13 @@ service cloud.firestore {
       allow create, update, delete: if ehAdmin();
     }
 
+    // ---------- CUSTOS DOS PRODUTOS ----------
+    // Custo, gastos, impostos e taxas (base da margem de lucro). Ficam fora de
+    // "produtos" de propósito: aquela coleção é pública. Aqui só o admin lê/escreve.
+    match /custosProdutos/{produtoId} {
+      allow read, write: if ehAdmin();
+    }
+
     // ---------- CATEGORIAS / ETIQUETAS ----------
     match /categorias/{id} {
       allow read: if true;
@@ -99,57 +106,4 @@ service cloud.firestore {
         request.resource.data.itens is list && request.resource.data.itens.size() <= 500;
     }
 
-    // ---------- ENDEREÇOS ----------
-    match /enderecos/{id} {
-      allow create: if autenticado() && request.resource.data.usuarioId == request.auth.uid;
-      allow read, delete: if autenticado() && (resource.data.usuarioId == request.auth.uid || ehAdmin());
-      allow update: if ehAdmin();
-    }
-
-    // ---------- HISTÓRICO DE ESTOQUE ----------
-    match /historicoEstoque/{id} {
-      allow read, write: if ehAdmin();
-    }
-
-    // ---------- USUÁRIOS ----------
-    match /usuarios/{uid} {
-      allow read: if autenticado() && (request.auth.uid == uid || ehAdmin());
-      // Um usuário pode criar o PRÓPRIO documento ao se cadastrar, mas nunca
-      // pode se autopromover a admin — só o admin altera "cargos".
-      allow create: if autenticado() && request.auth.uid == uid &&
-        request.resource.data.cargos == ['cliente'];
-      allow update: if ehAdmin();
-      allow delete: if ehAdmin();
-    }
-
-    // ---------- LOGS DE ERRO (monitoramento) ----------
-    // Client e as functions gravam aqui quando algo falha (upload, relatório,
-    // criação de pedido). Ninguém além do admin lista ou lê os logs.
-    match /logsErros/{id} {
-      allow create: if false;
-      allow read, delete: if ehAdmin();
-      allow update: if false;
-    }
-
-    // ---------- LIMITES DE USO (rate limit das functions) ----------
-    // Só as próprias functions (Admin SDK, que ignora rules) leem/escrevem aqui.
-    match /limitesUso/{id} {
-      allow read, write: if false;
-    }
-
-    // ---------- ALERTAS DE ESTOQUE BAIXO (gerado pelo cron) ----------
-    // Só a function (Admin SDK) grava aqui; o admin lê no painel.
-    match /alertasEstoque/{id} {
-      allow read: if ehAdmin();
-      allow write: if false;
-    }
-
-    // ---------- LEADS PERDIDOS ----------
-    // Qualquer visitante (mesmo sem login) pode CRIAR um lead ao abandonar o carrinho,
-    // mas ninguém além do admin pode listar/editar — evita vazar dados de outros clientes.
-    match /leadsPerdidos/{id} {
-      allow create: if false;
-      allow read, update, delete: if ehAdmin();
-    }
-  }
-}
+    // ---------- ENDEREÇOS
