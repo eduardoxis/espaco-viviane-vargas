@@ -890,3 +890,34 @@ dialog.dialog-form.dialog-produto { width: min(1210px, 92vw); max-height: 88vh; 
 .cores-produto__add input[type="color"] { width: 42px; height: 42px; padding: 0; border: none; cursor: pointer; }
 .cores-produto__add .btn-secondary { display: inline-flex; align-items: center; gap: 0.35rem; white-space: nowrap; }
 .cores-produto__add .btn-secondary .icon { width: 14px; height: 14px; }
+
+
+/* ===== Custos e margem de lucro (painel admin, produtos) ===== */
+.custos-produto { display: grid; gap: 0.7rem; padding: 1rem 1.1rem; border: 1px solid var(--cinza-100); border-radius: 14px; background: var(--cinza-50, #fbf7f3); }
+.custos-produto h4 { margin: 0; font-size: 1.08rem; color: var(--azul-900); }
+.custos-produto__aviso { margin: 0; padding: 0.6rem 0.8rem; border-radius: 10px; font-size: 0.82rem; background: #fdebd3; color: #8a4b08; }
+
+.margem-resumo { display: grid; gap: 0.75rem; }
+.margem-resumo__vazio { margin: 0; font-size: 0.85rem; color: var(--cinza-500); }
+.margem-resumo__linhas { display: grid; gap: 0.3rem; margin: 0; padding: 0.7rem 0.9rem; border: 1px solid var(--cinza-100); border-radius: 12px; background: var(--branco); font-size: 0.88rem; }
+.margem-resumo__linhas > div { display: flex; justify-content: space-between; gap: 1rem; }
+.margem-resumo__linhas dt { color: var(--cinza-600); }
+.margem-resumo__linhas dd { margin: 0; font-weight: 500; color: var(--cinza-700); font-variant-numeric: tabular-nums; }
+.margem-resumo__destaque { display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 0.6rem; padding: 0.85rem 0.9rem; border-radius: 12px; background: #e6f4ec; color: #1f6b44; }
+.margem-resumo__destaque > div { display: grid; gap: 0.15rem; }
+.margem-resumo__destaque span { font-size: 0.78rem; opacity: 0.85; }
+.margem-resumo__destaque strong { font-size: 1.25rem; font-variant-numeric: tabular-nums; }
+.margem-resumo__destaque--media { background: #fbf1d6; color: #7a5b00; }
+.margem-resumo__destaque--baixa { background: #fdebd3; color: #99490a; }
+.margem-resumo__destaque--prejuizo { background: #fde4e1; color: #a3231a; }
+.margem-resumo__nivel { margin: 0; }
+.margem-resumo__extras { display: grid; gap: 0.25rem; margin: 0; padding: 0; list-style: none; font-size: 0.85rem; color: var(--cinza-600); }
+.margem-resumo__extras strong { color: var(--cinza-700); }
+
+.margem-pill { display: inline-block; padding: 0.2rem 0.6rem; border-radius: 999px; font-size: 0.75rem; font-weight: 600; background: #e6f4ec; color: #1f6b44; white-space: nowrap; }
+.margem-pill--media { background: #fbf1d6; color: #7a5b00; }
+.margem-pill--baixa { background: #fdebd3; color: #99490a; }
+.margem-pill--prejuizo { background: #fde4e1; color: #a3231a; }
+.margem-vazia { color: var(--cinza-400); }
+td.margem-cell { white-space: nowrap; }
+.margem-lucro { display: block; margin-top: 0.15rem; font-size: 0.72rem; color: var(--cinza-500); }
