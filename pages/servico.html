@@ -237,7 +237,7 @@ const lista = (v) => (Array.isArray(v) ? v.filter(Boolean) : []);
 function renderizarRelacionados(servico, todos) {
   try {
     const relacionados = todos
-      .filter(s => s.id !== servico.id && s.categoriaId === servico.categoriaId && servicoTemImagem(s))
+      .filter(s => s.id !== servico.id && s.categoriaId === servico.categoriaId)
       .slice(0, 6);
     if (!relacionados.length) return;
     document.querySelector("#secao-relacionados").hidden = false;
