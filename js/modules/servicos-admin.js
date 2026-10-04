@@ -295,7 +295,7 @@ function renderizarArvore(container) {
   const arvore = montarArvoreCategorias(categorias);
   const alvo = container.querySelector("#svc2-arvore");
   if (!arvore.length) {
-    alvo.innerHTML = `<p style="margin:0.4rem;font-size:0.86rem;color:var(--cinza-500)">Nenhuma categoria ainda. Crie uma ou importe um JSON — as categorias e subcategorias do arquivo são criadas automaticamente.</p>`;
+    alvo.innerHTML = `<p style="margin:0.4rem;font-size:0.86rem;color:var(--cinza-500)">Nenhuma categoria ainda. Crie uma pelo botão "Nova categoria".</p>`;
     return;
   }
   alvo.innerHTML = arvore.map(c => {
@@ -880,50 +880,50 @@ function criarPromptImportacaoServicos() {
   const arvore = montarArvoreCategorias(categorias);
   const existentes = arvore.length
     ? arvore.map(c => `- ${c.nome}${c.filhas.length ? ` (subcategorias: ${c.filhas.map(f => f.nome).join(", ")})` : ""}`).join("\n")
-    : "- Nenhuma categoria cadastrada ainda. Pode criar as categorias e subcategorias que fizerem sentido.";
+    : "- Nenhuma categoria cadastrada ainda.";
 
-  return `Crie e entregue um ARQUIVO para download chamado "servicos-importacao.json" para importar os serviços no painel do Espaço Viviane Vargas (estética e salão de beleza).
+  return `Crie e entregue um ARQUIVO para download chamado "servicos-importacao.json" para importar SERVIÇOS no painel do Espaço Viviane Vargas (estética e salão de beleza).
 
 Não responda com explicações, texto comum, Markdown ou blocos de código. Gere o arquivo .json anexável/baixável; o conteúdo do arquivo deve ser somente JSON válido.
 
+REGRA PRINCIPAL: o arquivo deve criar APENAS serviços. NÃO crie, invente nem sugira categorias ou subcategorias novas. Use somente as categorias e subcategorias que já existem no painel (lista no final). Só crie categorias/subcategorias se eu pedir isso de forma explícita nesta conversa (veja a seção "Somente se eu pedir categorias novas").
+
 O arquivo deve ter exatamente esta estrutura:
 {
-  "categorias": [
+  "servicos": [
     {
-      "nome": "Estética",
-      "subcategorias": ["Facial", "Corporal"],
-      "servicos": [
-        {
-          "nome": "Limpeza de pele",
-          "subcategoria": "Facial",
-          "descricaoCurta": "Frase curta que aparece no card do serviço.",
-          "descricao": "Explicação do que é o serviço e o que ele faz pela cliente.",
-          "comoFunciona": ["Avaliação da pele", "Higienização", "Extração", "Máscara e finalização"],
-          "beneficios": ["Pele mais limpa", "Previne cravos"],
-          "indicadoPara": ["Pele oleosa", "Manutenção mensal"],
-          "cuidados": "Evitar sol por 48h após o procedimento.",
-          "duracao": "60 min",
-          "sessoes": "1 sessão a cada 30 dias",
-          "preco": 120,
-          "status": "disponivel",
-          "codigo": "SERV-LIMPEZA-001",
-          "imagens": ["https://url-publica-da-imagem.webp"]
-        }
-      ]
+      "nome": "Limpeza de pele",
+      "categoria": "Estética",
+      "subcategoria": "Facial",
+      "descricaoCurta": "Frase curta que aparece no card do serviço.",
+      "descricao": "Explicação do que é o serviço e o que ele faz pela cliente.",
+      "comoFunciona": ["Avaliação da pele", "Higienização", "Extração", "Máscara e finalização"],
+      "beneficios": ["Pele mais limpa", "Previne cravos"],
+      "indicadoPara": ["Pele oleosa", "Manutenção mensal"],
+      "cuidados": "Evitar sol por 48h após o procedimento.",
+      "duracao": "60 min",
+      "sessoes": "1 sessão a cada 30 dias",
+      "preco": 120,
+      "status": "disponivel",
+      "codigo": "SERV-LIMPEZA-001",
+      "imagens": ["https://url-publica-da-imagem.webp"]
     }
   ]
 }
 
 Regras obrigatórias:
 - Só "nome" é obrigatório em cada serviço. Todos os outros campos são opcionais; omita o que não souber.
-- Cada categoria tem "nome", "subcategorias" (lista de textos, opcional) e "servicos" (lista). Um serviço pode ficar direto na categoria (sem "subcategoria") ou dentro de uma subcategoria, usando em "subcategoria" exatamente o mesmo nome listado em "subcategorias".
-- Se um serviço não precisar de subcategoria, pode ser só o nome em texto, por exemplo: "servicos": ["Massagem", "Microagulhamento"].
+- "categoria" e "subcategoria" devem ser EXATAMENTE como aparecem na lista de categorias já cadastradas (mesma grafia). Use "subcategoria" apenas se ela existir dentro daquela categoria.
+- Se nenhuma categoria existente servir para o serviço, omita "categoria" e "subcategoria". Nunca invente um nome que não está na lista: serviços com categoria inexistente são rejeitados na importação.
 - "descricaoCurta": uma frase de até 180 caracteres. "descricao": explique de forma clara e simples o que o serviço é e o que ele faz.
 - "comoFunciona", "beneficios" e "indicadoPara" são listas de textos curtos. "cuidados" é um texto.
 - "preco" é número (sem R$, vírgula ou texto); omita se o valor for sob consulta. "status" pode ser "disponivel" ou "oculto".
 - "imagens" é opcional e só aceita URLs públicas HTTPS. Sem foto, o serviço aparece no site com imagem padrão.
-- Se a categoria/subcategoria já existir no painel, mantenha exatamente a mesma grafia para não duplicar. Categorias novas serão criadas automaticamente.
 - Não use comentários, reticências, texto fora do JSON, vírgula depois do último campo, base64, arquivo local ou URL privada.
+
+Somente se eu pedir categorias novas (caso contrário, ignore esta seção):
+- Se eu pedir explicitamente para criar categorias e/ou subcategorias, acrescente no topo do JSON o campo "criarCategorias": true e use "categoria"/"subcategoria" nos serviços com os nomes novos que eu pedi. Crie somente as que eu pedi, nenhuma além delas.
+- Sem esse pedido explícito, NÃO inclua "criarCategorias" e NÃO use nomes que não estejam na lista abaixo.
 
 Categorias já cadastradas no painel agora:
 ${existentes}`;
@@ -965,10 +965,11 @@ function normalizarServicoImportado(item) {
   };
 }
 
-/** Converte qualquer formato aceito em: { categorias: [{nome, subs:[nome]}], servicos: [{categoria, subcategoria, item}] } */
+/** Converte qualquer formato aceito em: { categorias: [{nome, subs:[nome]}], servicos: [{categoria, subcategoria, item}], permitirCriar } — categorias novas só são criadas se o JSON trouxer "criarCategorias": true. */
 function lerEstruturaImportada(json) {
   const cats = [];
   const itens = [];
+  let permitirCriar = false;
   let listaCats = [];
   let listaServicos = [];
 
@@ -978,6 +979,7 @@ function lerEstruturaImportada(json) {
   } else if (json && typeof json === "object") {
     listaCats = Array.isArray(json.categorias) ? json.categorias : [];
     listaServicos = Array.isArray(json.servicos) ? json.servicos : [];
+    permitirCriar = json.criarCategorias === true;
   } else {
     return null;
   }
@@ -1014,7 +1016,7 @@ function lerEstruturaImportada(json) {
       item: s
     });
   }
-  return { categorias: cats, servicos: itens };
+  return { categorias: cats, servicos: itens, permitirCriar };
 }
 
 async function importarServicosJson(container, arquivo) {
@@ -1026,7 +1028,7 @@ async function importarServicosJson(container, arquivo) {
     estrutura = lerEstruturaImportada(JSON.parse(await arquivo.text()));
     if (!estrutura) throw new Error("formato");
   } catch {
-    toast("Arquivo JSON inválido. Use o formato { \"categorias\": [...] } gerado pelo botão Prompt para IA.", "error");
+    toast("Arquivo JSON inválido. Use o formato { \"servicos\": [...] } gerado pelo botão Prompt para IA.", "error");
     return;
   }
   if (!estrutura.categorias.length && !estrutura.servicos.length) {
@@ -1039,10 +1041,12 @@ async function importarServicosJson(container, arquivo) {
   let importados = 0;
   let ordem = Date.now();
 
-  // Busca categoria por nome (ignora maiúsculas/acentos) ou cria.
+  // Busca categoria por nome (ignora maiúsculas/acentos). Só cria se o JSON
+  // pediu explicitamente ("criarCategorias": true); senão devolve null.
   async function garantirCategoria(nome, parentId = "") {
     const achada = categorias.find(c => (c.parentId || "") === parentId && normalizarTexto(c.nome) === normalizarTexto(nome));
     if (achada) return achada.id;
+    if (!estrutura.permitirCriar) return null;
     const id = await criarCategoriaServico({ nome, parentId, ordem: ordem++ }, { silencioso: true });
     categorias.push({ id, nome, parentId, ordem });
     criadasCats.push(parentId ? `${categorias.find(c => c.id === parentId)?.nome} › ${nome}` : nome);
@@ -1050,9 +1054,11 @@ async function importarServicosJson(container, arquivo) {
   }
 
   try {
-    for (const cat of estrutura.categorias) {
-      const idCat = await garantirCategoria(cat.nome);
-      for (const sub of cat.subs) await garantirCategoria(sub, idCat);
+    if (estrutura.permitirCriar) {
+      for (const cat of estrutura.categorias) {
+        const idCat = await garantirCategoria(cat.nome);
+        for (const sub of cat.subs) await garantirCategoria(sub, idCat);
+      }
     }
 
     for (let i = 0; i < estrutura.servicos.length; i++) {
@@ -1060,8 +1066,16 @@ async function importarServicosJson(container, arquivo) {
       const r = normalizarServicoImportado(item);
       if (!r.ok) { invalidos.push({ linha: i + 1, nome: r.nome, erros: r.erros }); continue; }
 
-      const categoriaId = categoria ? await garantirCategoria(categoria) : "";
-      const subcategoriaId = categoriaId && subcategoria ? await garantirCategoria(subcategoria, categoriaId) : "";
+      let categoriaId = "";
+      let subcategoriaId = "";
+      if (categoria) {
+        categoriaId = await garantirCategoria(categoria);
+        if (!categoriaId) { invalidos.push({ linha: i + 1, nome: r.dados.nome, erros: [`a categoria "${categoria}" não existe no painel (categorias não são criadas automaticamente)`] }); continue; }
+        if (subcategoria) {
+          subcategoriaId = await garantirCategoria(subcategoria, categoriaId);
+          if (!subcategoriaId) { invalidos.push({ linha: i + 1, nome: r.dados.nome, erros: [`a subcategoria "${subcategoria}" não existe em "${categoria}"`] }); continue; }
+        }
+      }
 
       const jaExiste = servicos.some(s =>
         normalizarTexto(s.nome) === normalizarTexto(r.dados.nome) &&
