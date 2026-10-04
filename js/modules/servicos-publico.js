@@ -145,3 +145,57 @@ export function ordenarListaServicos(servicos, criterio, categorias = []) {
     default: return ordenarServicos(lista, categorias);
   }
 }
+
+// ---------- CATÁLOGO NAVEGÁVEL (cards por categoria → serviço) ----------
+const ICONE_RELOGIO = `<svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><circle cx="12" cy="12" r="8.5" stroke="currentColor" stroke-width="1.6"/><path d="M12 7.5V12l3 2" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg>`;
+
+function resumoServico(servico) {
+  const curta = String(servico.descricaoCurta || "").trim();
+  if (curta) return curta;
+  const longa = String(servico.descricao || "").trim();
+  return longa.length > 130 ? `${longa.slice(0, 127).trimEnd()}...` : longa;
+}
+
+export function cartaoServicoCatalogo(servico) {
+  const primeira = servico.imagem || (Array.isArray(servico.imagens) ? servico.imagens.find(Boolean) : "") || "";
+  const { src, pos } = imgPos(primeira, 640);
+  const imagem = src || "/assets/images/placeholder.svg";
+  const resumo = resumoServico(servico);
+
+  return `
+    <article class="svc-card" data-id="${escHtml(servico.id)}">
+      <a class="svc-card__img" href="/pages/servico.html?id=${encodeURIComponent(servico.id)}" aria-label="Ver detalhes de ${escHtml(servico.nome)}">
+        <img src="${escHtml(imagem)}" style="object-position:${pos}" alt="${escHtml(servico.nome)}" loading="lazy" decoding="async">
+      </a>
+      <div class="svc-card__body">
+        <h3 class="svc-card__nome">${escHtml(servico.nome)}</h3>
+        ${resumo ? `<p class="svc-card__desc">${escHtml(resumo)}</p>` : ""}
+        <div class="svc-card__meta">
+          ${servico.duracao ? `<span class="svc-card__duracao">${ICONE_RELOGIO}${escHtml(servico.duracao)}</span>` : "<span></span>"}
+          <span class="svc-card__preco">${escHtml(textoPrecoServico(servico))}</span>
+        </div>
+        <div class="svc-card__acoes">
+          <button type="button" class="btn-whatsapp svc-card__agendar" data-ask-id="${escHtml(servico.id)}">${icon("whatsapp")}<span>Agendar pelo WhatsApp</span></button>
+          <a class="svc-card__detalhes" href="/pages/servico.html?id=${encodeURIComponent(servico.id)}">Ver detalhes</a>
+        </div>
+      </div>
+    </article>`;
+}
+
+/** Desenha os serviços do catálogo (todos, com ou sem foto) e liga o botão de agendar. */
+export function renderizarServicosCatalogo(container, servicos) {
+  const lista = Array.isArray(servicos) ? servicos : [];
+  container.__servicosPorId = new Map(lista.map(s => [s.id, s]));
+  container.innerHTML = lista.map(cartaoServicoCatalogo).join("");
+
+  if (!container.dataset.agendarLigado) {
+    container.dataset.agendarLigado = "1";
+    container.addEventListener("click", (e) => {
+      const btn = e.target.closest("[data-ask-id]");
+      if (!btn) return;
+      e.preventDefault();
+      const servico = container.__servicosPorId?.get(btn.dataset.askId);
+      if (servico) falarSobreServico(servico);
+    });
+  }
+}
