@@ -250,7 +250,23 @@ export function listarProdutosPagina({ tamanho = 20, cursor = null, categoria = 
  * usam buscaTokens; o fallback mantém compatibilidade com os cadastros antigos.
  * Não limita por status: o painel também precisa encontrar ocultos e esgotados.
  */
+const cacheBuscaAdmin = new Map(); // chave -> { expiraEm, resultado }
+const TTL_BUSCA_ADMIN_MS = 60 * 1000;
+
 export function buscarProdutosPorPrefixo(termo, { tamanho = 20, cursor = null, semFoto = false } = {}) {
+  // Quem apaga uma letra e digita de novo, ou volta uma página, repete a mesma
+  // consulta: respondemos da memória em vez de ler os documentos outra vez.
+  const chave = `${normalizarTermoBusca(termo)}|${tamanho}|${semFoto ? 1 : 0}|${cursor?.id || ""}`;
+  const guardado = cacheBuscaAdmin.get(chave);
+  if (guardado && guardado.expiraEm > Date.now()) return Promise.resolve(guardado.resultado);
+  return buscarProdutosPorPrefixoNoServidor(termo, { tamanho, cursor, semFoto }).then((resultado) => {
+    if (cacheBuscaAdmin.size > 50) cacheBuscaAdmin.clear();
+    cacheBuscaAdmin.set(chave, { expiraEm: Date.now() + TTL_BUSCA_ADMIN_MS, resultado });
+    return resultado;
+  });
+}
+
+function buscarProdutosPorPrefixoNoServidor(termo, { tamanho = 20, cursor = null, semFoto = false } = {}) {
   return withLoading("buscarProdutosPorPrefixo", async () => {
     const termoOriginal = String(termo || "").trim();
     const termoLimpo = normalizarTermoBusca(termoOriginal);
@@ -350,6 +366,7 @@ export function migrarIndiceBuscaProdutos(onProgresso) {
       feitos += lote.length;
       onProgresso?.(feitos, pendentes.length);
     }
+    cacheBuscaAdmin.clear();
     return { total: pendentes.length };
   });
 }
@@ -405,29 +422,34 @@ function dataCriacaoProduto(produto) {
 }
 
 /** Últimos N produtos cadastrados — usado na home ("Recentes"), sem baixar a coleção inteira. */
-export const listarProdutosRecentes = comCache("listarProdutosRecentes:v2", 3 * 60 * 1000, (tamanho = 8) =>
+export const listarProdutosRecentes = comCache("listarProdutosRecentes:v3", 3 * 60 * 1000, (tamanho = 8) =>
   withLoading("listarProdutosRecentes", async () => {
-    // Alguns produtos mais novos podem ainda não ter foto. Buscamos alguns
-    // candidatos extras porque a vitrine nunca deve ficar vazia por eles.
-    const limiteBusca = Math.max(tamanho * 5, 40);
-    const snap = await getDocs(query(
-      collection(db, "produtos"),
-      where("status", "in", STATUS_PUBLICOS),
-      orderBy("criadoEm", "desc"),
-      limit(limiteBusca)
-    ));
-    const recentes = snap.docs.map(d => ({ id: d.id, ...d.data() }))
-      .filter(produtoTemImagemPublica)
-      .slice(0, tamanho);
-    if (recentes.length >= tamanho) return recentes;
+    const col = collection(db, "produtos");
+    const base = [where("status", "in", STATUS_PUBLICOS), orderBy("criadoEm", "desc")];
+
+    // Alguns produtos mais novos podem ainda não ter foto, e a vitrine não pode
+    // ficar vazia por causa deles. Antes líamos 40 documentos sempre; agora lemos
+    // só alguns a mais que o necessário e buscamos outro lote apenas se faltar.
+    const recentes = [];
+    let ultimo = null;
+    let lote = tamanho + 4;
+    for (let rodada = 0; rodada < 3 && recentes.length < tamanho; rodada += 1) {
+      const snap = await getDocs(query(col, ...base, ...(ultimo ? [startAfter(ultimo)] : []), limit(lote)));
+      recentes.push(...snap.docs.map(d => ({ id: d.id, ...d.data() })).filter(produtoTemImagemPublica));
+      if (snap.docs.length < lote) break; // acabaram os produtos com data
+      ultimo = snap.docs.at(-1);
+      // Próximo lote proporcional ao que ainda falta, não um bloco fixo grande.
+      lote = Math.max((tamanho - recentes.length) * 2 + 2, 8);
+    }
+    if (recentes.length >= tamanho) return recentes.slice(0, tamanho);
 
     // Cadastros antigos podem não ter criadoEm e, por isso, não entram em
     // uma consulta ordenada por data. Como alternativa, completa a seção
     // com produtos públicos que tenham foto, mantendo a ordenação disponível.
     const fallback = await getDocs(query(
-      collection(db, "produtos"),
+      col,
       where("status", "in", STATUS_PUBLICOS),
-      limit(limiteBusca)
+      limit(Math.max(tamanho * 3, 24))
     ));
     const porId = new Map([...recentes, ...fallback.docs.map(d => ({ id: d.id, ...d.data() }))]
       .filter(produtoTemImagemPublica)
@@ -438,21 +460,55 @@ export const listarProdutosRecentes = comCache("listarProdutosRecentes:v2", 3 * 
   })
 );
 
+/** Primeira página da home ("Produtos"), com cache. Antes era lida do servidor a cada visita. */
+export const listarProdutosVitrine = comCache("listarProdutosVitrine", 3 * 60 * 1000, (tamanho = 8) =>
+  listarProdutosPagina({ tamanho }).then(({ produtos }) => produtos)
+);
+
+const ETIQUETAS_DESTAQUE = ["Mais Vendido", "Promoção"];
+
+/** Lê somente produtos que TÊM a etiqueta (um índice composto status + etiquetas atende). */
+async function buscarDestaquesPorEtiqueta(tamanho) {
+  const col = collection(db, "produtos");
+  const snaps = await Promise.all(ETIQUETAS_DESTAQUE.map(etiqueta => getDocs(query(
+    col,
+    where("status", "in", STATUS_PUBLICOS),
+    where("etiquetas", "array-contains", etiqueta),
+    limit(tamanho)
+  ))));
+  const porId = new Map();
+  snaps.forEach(snap => snap.docs.forEach(d => porId.set(d.id, { id: d.id, ...d.data() })));
+  return [...porId.values()].filter(p => p.status !== "oculto").slice(0, tamanho);
+}
+
+/** Caminho antigo (sem índice novo): lê alguns produtos e filtra a etiqueta no navegador. */
+async function buscarDestaquesLegado(tamanho) {
+  const snap = await getDocs(query(
+    collection(db, "produtos"),
+    where("status", "in", STATUS_PUBLICOS),
+    limit(Math.max(tamanho + 16, 24))
+  ));
+  return snap.docs
+    .map(d => ({ id: d.id, ...d.data() }))
+    .filter(p => Array.isArray(p.etiquetas) && p.etiquetas.some(etiqueta => ETIQUETAS_DESTAQUE.includes(etiqueta)))
+    .slice(0, tamanho);
+}
+
 /** Produtos com etiqueta "Mais Vendido" ou "Promoção" — usado na home ("Destaques"). */
 export const listarProdutosDestaque = comCache("listarProdutosDestaque", 3 * 60 * 1000, (tamanho = 8) =>
   withLoading("listarProdutosDestaque", async () => {
     // A leitura pública sempre é limitada a produtos visíveis. Filtramos as
     // etiquetas no navegador para não combinar dois filtros disjuntivos
     // (array-contains-any + in), combinação que o Firestore não aceita.
-    const snap = await getDocs(query(
-      collection(db, "produtos"),
-      where("status", "in", STATUS_PUBLICOS),
-      limit(Math.max(tamanho + 16, 24))
-    ));
-    const produtos = snap.docs
-      .map(d => ({ id: d.id, ...d.data() }))
-      .filter(p => Array.isArray(p.etiquetas) && p.etiquetas.some(etiqueta => ["Mais Vendido", "Promoção"].includes(etiqueta)))
-      .slice(0, tamanho);
+    let produtos;
+    try {
+      produtos = await buscarDestaquesPorEtiqueta(tamanho);
+    } catch (erro) {
+      // Índice composto ainda não publicado (ou consulta recusada): volta ao
+      // caminho antigo, que funciona sem índice novo.
+      if (!["failed-precondition", "invalid-argument"].includes(erro?.code)) throw erro;
+      produtos = await buscarDestaquesLegado(tamanho);
+    }
     if (produtos.length) return produtos;
 
     try {
@@ -502,12 +558,15 @@ export const obterProduto = comCache("obterProduto", 2 * 60 * 1000, (id) =>
 
 function invalidarCacheVitrinesHome() {
   invalidarCache("listarProdutosDestaque");
-  invalidarCache("listarProdutosRecentes:v2");
+  invalidarCache("listarProdutosRecentes:v3");
+  invalidarCache("listarProdutosVitrine");
   invalidarCache("listarProdutosPorCategoria");
   invalidarCache("obterProduto");
   invalidarCache("catalogoBase");
   invalidarCache("contarCatalogoServidor");
-  invalidarCache("resumoDashboard");
+  cacheBuscaAdmin.clear();
+  // O resumo do painel (contagens e rankings) NÃO é invalidado a cada edição:
+  // ele vence sozinho em 5 min e é refeito ao criar/excluir produto ou ajustar estoque.
 }
 
 /**
@@ -517,7 +576,7 @@ function invalidarCacheVitrinesHome() {
  */
 export function invalidarCachePublico() {
   [
-    "listarProdutosDestaque", "listarProdutosRecentes:v2", "listarProdutosPorCategoria",
+    "listarProdutosDestaque", "listarProdutosRecentes:v3", "listarProdutosVitrine", "listarProdutosPorCategoria",
     "listarProdutosPagina", "catalogoBase", "contarCatalogoServidor", "obterProduto",
     "listarCategorias", "listarMarcas", "listarEtiquetas"
   ].forEach(invalidarCache);
@@ -544,6 +603,7 @@ export function criarProduto(dados) {
       criadoEm: serverTimestamp()
     });
     invalidarCacheVitrinesHome();
+    invalidarCache("resumoDashboard");
     await notificarMudancaPublica();
     return resultado;
   });
@@ -597,6 +657,7 @@ export function excluirProduto(id) {
     // Os custos ficam em outra coleção; sem o produto eles não servem mais.
     try { await excluirCustoProduto(id); } catch (erro) { console.warn("Não foi possível apagar os custos do produto:", erro); }
     invalidarCacheVitrinesHome();
+    invalidarCache("resumoDashboard");
     await notificarMudancaPublica();
     return resultado;
   });
@@ -709,6 +770,7 @@ export function ajustarEstoque(id, delta, motivo = "") {
     invalidarCache("catalogoBase");
     invalidarCache("obterProduto");
     invalidarCache("listarHistoricoEstoque");
+    cacheBuscaAdmin.clear();
     await notificarMudancaPublica();
   });
 }
@@ -738,7 +800,7 @@ export function ajustarEstoque(id, delta, motivo = "") {
  * acontecem aqui no navegador depois. Isso evita ficar pedindo um índice
  * novo pra cada combinação de filtros que o cliente escolher.
  */
-const buscarConjuntoRestritoCacheado = comCache("catalogoBase", 2 * 60 * 1000, async (categoria, marcasOrdenadas) => {
+const buscarConjuntoRestritoCacheado = comCache("catalogoBase", 5 * 60 * 1000, async (categoria, marcasOrdenadas) => {
   const col = collection(db, "produtos");
   const clausulas = [where("status", "in", STATUS_PUBLICOS)];
 
@@ -1180,7 +1242,7 @@ export function listarUltimoAlertaEstoque() {
 // ---------- RESUMO DO DASHBOARD ----------
 // Agregações e listas limitadas substituem a leitura integral de produtos,
 // categorias e usuários que acontecia toda vez que o painel era aberto.
-export const obterResumoDashboard = comCache("resumoDashboard", 2 * 60 * 1000, () =>
+export const obterResumoDashboard = comCache("resumoDashboard", 5 * 60 * 1000, () =>
   withLoading("obterResumoDashboard", async () => {
     const produtosRef = collection(db, "produtos");
     const [
