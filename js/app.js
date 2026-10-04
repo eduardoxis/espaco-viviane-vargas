@@ -1,6 +1,6 @@
 // js/app.js
 import {
-  listarEtiquetas, listarProdutosPagina, listarProdutosDestaque,
+  listarEtiquetas, listarProdutosVitrine, listarProdutosDestaque,
   listarProdutosRecentes, listarProdutosPorCategoria, obterProduto, listarCategorias, listarMarcas,
   criarPedido, listarPedidosUsuario, listarEnderecos, criarEndereco, excluirEndereco, excluirPedido, excluirPedidos,
   atualizarPerfilUsuario, invalidarCachePublico
@@ -20,7 +20,7 @@ import { ICONS, icon } from "./utils/icons.js";
 import { STORE_CONFIG } from "../firebase/firebase-config.js";
 import { iniciarLoadingGlobal } from "./utils/loadingUI.js";
 import { observarAtualizacaoPublica } from "./services/public-sync.js";
-import { listarServicosPublico, montarArvoreCategorias, normalizarTexto } from "./services/servicos.js";
+import { listarCategoriasHomeServicos, invalidarCacheServicos, normalizarTexto } from "./services/servicos.js";
 
 iniciarLoadingGlobal();
 
@@ -90,19 +90,14 @@ function iconeServicoHome(nome = "") {
 async function renderizarServicosHome(secao) {
   const grade = secao?.querySelector("#grade-servicos-home");
   if (!grade) return;
-  let dados;
+  let cats;
   try {
-    dados = await listarServicosPublico();
+    cats = await listarCategoriasHomeServicos(4);
   } catch (erro) {
     console.error("[home] falha ao carregar serviços:", erro);
     secao.hidden = true;
     return;
   }
-  const { categorias = [], servicos = [] } = dados || {};
-  const cats = montarArvoreCategorias(categorias)
-    .map(c => ({ ...c, total: servicos.filter(s => s.categoriaId === c.id).length }))
-    .filter(c => c.total > 0)
-    .slice(0, 4);
   // Sem categoria com serviço publicado: esconde a seção inteira.
   if (!cats.length) { secao.hidden = true; return; }
 
@@ -222,8 +217,7 @@ async function iniciar() {
   // carregamento de página, o que é suficiente para uma vitrine.
   const gradeProdutos = document.querySelector("#grade-produtos");
   carregarAoAproximar(gradeProdutos, async () => {
-    const { produtos } = await listarProdutosPagina({ tamanho: 8 });
-    renderizarGrade(gradeProdutos, produtos);
+    renderizarGrade(gradeProdutos, await listarProdutosVitrine(8));
   });
   const gradeDestaques = document.querySelector("#grade-destaques");
   carregarAoAproximar(gradeDestaques, async () => {
@@ -259,6 +253,7 @@ async function iniciar() {
     if (recargaPublicaAgendada) return;
     recargaPublicaAgendada = true;
     invalidarCachePublico();
+    invalidarCacheServicos();
     toast("A loja foi atualizada.");
     window.setTimeout(() => window.location.reload(), 700);
   };
