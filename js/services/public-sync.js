@@ -6,8 +6,31 @@ import { doc, onSnapshot, serverTimestamp, setDoc } from "https://www.gstatic.co
 // plano gratuito baixo: só há uma leitura extra quando o painel muda algo.
 const VERSAO_PUBLICA = doc(db, "publicacoes", "catalogo");
 
+// Cada gravação neste documento faz TODO visitante conectado ler o documento de
+// novo (e recarregar a página). Numa importação de 200 produtos eram 200 avisos.
+// Agora o primeiro aviso sai na hora e os seguintes, dentro da janela, viram um
+// só aviso no fim dela — a última alteração sempre é sinalizada.
+const JANELA_AVISO_MS = 4000;
+let ultimoAviso = 0;
+let avisoAgendado = null;
+
+function gravarAviso() {
+  ultimoAviso = Date.now();
+  return setDoc(VERSAO_PUBLICA, { atualizadoEm: serverTimestamp() }, { merge: true });
+}
+
 export async function sinalizarAtualizacaoPublica() {
-  await setDoc(VERSAO_PUBLICA, { atualizadoEm: serverTimestamp() }, { merge: true });
+  const espera = ultimoAviso + JANELA_AVISO_MS - Date.now();
+  if (espera <= 0 && !avisoAgendado) {
+    await gravarAviso();
+    return;
+  }
+  if (!avisoAgendado) {
+    avisoAgendado = window.setTimeout(() => {
+      avisoAgendado = null;
+      gravarAviso().catch((erro) => console.warn("Não foi possível avisar o site sobre a atualização:", erro));
+    }, Math.max(espera, 0));
+  }
 }
 
 export function observarAtualizacaoPublica(aoAtualizar) {
