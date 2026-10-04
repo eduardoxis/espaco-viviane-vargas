@@ -14,7 +14,7 @@
 import { db } from "../../firebase/firebase-config.js";
 import {
   collection, doc, getDoc, getDocs, addDoc, updateDoc, deleteDoc,
-  query, where, serverTimestamp
+  query, where, serverTimestamp, getCountFromServer
 } from "https://www.gstatic.com/firebasejs/12.19.0/firebase-firestore.js";
 import { withLoading } from "../utils/loadingManager.js";
 import { sinalizarAtualizacaoPublica } from "./public-sync.js";
@@ -24,7 +24,10 @@ const COL_CATEGORIAS = "categoriasServico";
 
 // ---------- CACHE PÚBLICO (sessionStorage, 5 min) ----------
 const CHAVE_CACHE = "evv_servicos_publico_v3";
+const CHAVE_CACHE_HOME = "evv_servicos_home_v1";
 const TTL_MS = 5 * 60 * 1000;
+// Dentro deste prazo o cache é usado direto, sem ler o documento de versão.
+const TTL_SEM_CONFERIR_MS = 60 * 1000;
 
 function lerCache() {
   try {
@@ -32,7 +35,7 @@ function lerCache() {
     if (!bruto) return null;
     const { t, v, ver } = JSON.parse(bruto);
     if (Date.now() - t > TTL_MS) return null;
-    return { v, ver };
+    return { v, ver, t };
   } catch { return null; }
 }
 function salvarCache(valor, ver) {
@@ -49,7 +52,10 @@ async function lerVersaoPublica() {
   } catch { return null; }
 }
 export function invalidarCacheServicos() {
-  try { sessionStorage.removeItem(CHAVE_CACHE); } catch { /* ignora */ }
+  try {
+    sessionStorage.removeItem(CHAVE_CACHE);
+    sessionStorage.removeItem(CHAVE_CACHE_HOME);
+  } catch { /* ignora */ }
 }
 
 async function notificarMudancaPublica() {
@@ -108,8 +114,11 @@ export function servicoTemImagem(servico = {}) {
 // ---------- LEITURA PÚBLICA ----------
 /** Categorias + serviços visíveis ao público (status "disponivel"). */
 export async function listarServicosPublico() {
-  const versao = await lerVersaoPublica();
   const emCache = lerCache();
+  // Cache recente: nem a conferência de versão (1 leitura) é necessária.
+  if (emCache && Date.now() - emCache.t < TTL_SEM_CONFERIR_MS) return emCache.v;
+
+  const versao = await lerVersaoPublica();
   if (emCache && (versao === null || emCache.ver === versao)) return emCache.v;
 
   return withLoading("listarServicosPublico", async () => {
@@ -127,6 +136,50 @@ export async function listarServicosPublico() {
     salvarCache(resultado, versao);
     return resultado;
   });
+}
+
+/**
+ * Categorias para os cards da home: as primeiras `max` categorias principais que
+ * têm serviço disponível. Em vez de baixar TODOS os serviços só para saber isso,
+ * lê as categorias e conta os serviços de cada uma (1 leitura por contagem).
+ * Se a lista completa já estiver em cache (página de serviços visitada), usa ela.
+ */
+export async function listarCategoriasHomeServicos(max = 4) {
+  const completo = lerCache();
+  if (completo) {
+    const { categorias = [], servicos = [] } = completo.v || {};
+    return montarArvoreCategorias(categorias)
+      .map(c => ({ ...c, total: servicos.filter(s => s.categoriaId === c.id).length }))
+      .filter(c => c.total > 0)
+      .slice(0, max);
+  }
+
+  try {
+    const bruto = sessionStorage.getItem(CHAVE_CACHE_HOME);
+    if (bruto) {
+      const { t, v } = JSON.parse(bruto);
+      if (Date.now() - t < TTL_MS && Array.isArray(v)) return v;
+    }
+  } catch { /* cache é opcional */ }
+
+  const resultado = await withLoading("listarCategoriasHomeServicos", async () => {
+    const snapCats = await getDocs(collection(db, COL_CATEGORIAS));
+    const principais = montarArvoreCategorias(snapCats.docs.map(d => ({ id: d.id, ...d.data() })));
+    const encontradas = [];
+    // Confere em blocos do tamanho do que falta: normalmente 1 bloco (4 contagens).
+    for (let i = 0; i < principais.length && encontradas.length < max; i += max) {
+      const bloco = principais.slice(i, i + max);
+      const totais = await Promise.all(bloco.map(c => getCountFromServer(query(
+        collection(db, COL_SERVICOS),
+        where("categoriaId", "==", c.id),
+        where("status", "==", "disponivel")
+      )).then(r => r.data().count)));
+      bloco.forEach((c, idx) => { if (totais[idx] > 0) encontradas.push({ ...c, total: totais[idx] }); });
+    }
+    return encontradas.slice(0, max);
+  });
+  try { sessionStorage.setItem(CHAVE_CACHE_HOME, JSON.stringify({ t: Date.now(), v: resultado })); } catch { /* ignora */ }
+  return resultado;
 }
 
 /** Um serviço público + a lista (para os relacionados). Retorna null se não existir/oculto. */
