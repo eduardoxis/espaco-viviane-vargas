@@ -994,6 +994,33 @@ async function importarProdutosJson(container, arquivo) {
   if (validos.length) toast(`${validos.length} produto(s) importado(s).`);
 }
 
+/**
+ * Depois de editar/excluir um produto não precisamos reler a página inteira
+ * (30 documentos): atualizamos a lista que já está na tela. Só relemos quando a
+ * mudança poderia alterar a posição do item (nome/preço da ordenação) ou quando
+ * a tela depende de um filtro de servidor (Sem fotos). Devolve true se resolveu local.
+ */
+function atualizarProdutoNaTela(container, produtoAntigo, dadosNovos) {
+  const estado = estadoPaginacaoProdutos;
+  const tabela = container.querySelector("#tabela-produtos");
+  if (!tabela || estado.semFoto || !cacheProdutos.some(p => p.id === produtoAntigo.id)) return false;
+  const campoOrdem = estado.ordenarPor === "preco" ? "preco" : "nome";
+  if (!estado.buscaAtiva && produtoAntigo[campoOrdem] !== dadosNovos[campoOrdem]) return false;
+  // Na busca, nome/marca/categoria/código mudam os termos indexados.
+  if (estado.buscaAtiva && ["nome", "marca", "categoria", "codigo"].some(c => produtoAntigo[c] !== dadosNovos[c])) return false;
+  cacheProdutos = cacheProdutos.map(p => p.id === produtoAntigo.id ? { ...p, ...dadosNovos } : p);
+  renderizarTabelaProdutos(container, cacheProdutos, { busca: estado.buscaAtiva });
+  return true;
+}
+
+function removerProdutoDaTela(container, id) {
+  const restantes = cacheProdutos.filter(p => p.id !== id);
+  if (!restantes.length || restantes.length === cacheProdutos.length) return false;
+  cacheProdutos = restantes;
+  renderizarTabelaProdutos(container, cacheProdutos, { busca: estadoPaginacaoProdutos.buscaAtiva });
+  return true;
+}
+
 function renderizarTabelaProdutos(container, produtos, { busca = false } = {}) {
   const tbody = container.querySelector("#tabela-produtos tbody");
   const contagem = container.querySelector("#contagem-produtos");
@@ -1065,7 +1092,8 @@ function renderizarTabelaProdutos(container, produtos, { busca = false } = {}) {
       await excluirProduto(id);
       cacheCustos.delete(id);
       toast("Produto excluído.");
-      carregarPaginaProdutos(container, estadoPaginacaoProdutos.paginaIndex);
+      // Sem reler a página: tira a linha da lista que já está carregada.
+      if (!removerProdutoDaTela(container, id)) carregarPaginaProdutos(container, estadoPaginacaoProdutos.paginaIndex);
     });
   });
 }
@@ -1598,7 +1626,9 @@ async function abrirFormularioProduto(container, produto = null) {
       toast("Produto salvo, mas não foi possível salvar os custos. Confira se as regras do Firestore foram publicadas.", "error");
     }
     dialog.close();
-    carregarAbaProdutos(container);
+    // Edição que não muda a posição do item na lista: atualiza a linha na tela
+    // (0 leituras). Cadastro novo e mudanças de ordenação releem a lista.
+    if (!(produto && atualizarProdutoNaTela(container, produto, dados))) carregarAbaProdutos(container);
     } catch (erro) {
       console.error("Erro ao salvar produto:", erro);
       toast(erro?.message || "Não foi possível salvar o produto. Confira os dados e tente novamente.", "error");
