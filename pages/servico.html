@@ -278,7 +278,6 @@ async function iniciarServico() {
 
   document.querySelector("#titulo-pagina").textContent = `${servico.nome} — Espaço Viviane Vargas`;
   document.querySelector("#meta-descricao").setAttribute("content", (servico.descricaoCurta || servico.descricao || servico.nome).slice(0, 155));
-  document.querySelector("#breadcrumb-servico").textContent = servico.nome;
 
   const imagens = (Array.isArray(servico.imagens) && servico.imagens.length ? servico.imagens : [servico.imagem]).filter(Boolean);
   const favoritado = obterIdsFavoritosServicos().includes(servico.id);
