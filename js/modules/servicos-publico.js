@@ -29,8 +29,8 @@ export function alternarFavoritoServico(id) {
 
 // ---------- WHATSAPP / COMPARTILHAR ----------
 export function linkAgendarServico(servico) {
-  const link = servico.id ? `\nLink do serviço: ${window.location.origin}/pages/servico.html?id=${servico.id}` : "";
-  return linkWhatsApp(`Olá! Vim do site do ${NOME_SALAO} e gostaria de agendar o serviço:\n*${servico.nome}*${link}\n\nPoderia me passar mais informações?`);
+  // Sem URL na mensagem: o WhatsApp não exibe cartão com foto do serviço.
+  return linkWhatsApp(`Olá! Vim do site do ${NOME_SALAO} e gostaria de agendar o serviço:\n*${servico.nome}*\n\nPoderia me passar mais informações?`);
 }
 
 export function falarSobreServico(servico) {

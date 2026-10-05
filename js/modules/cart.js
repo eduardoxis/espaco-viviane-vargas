@@ -123,8 +123,9 @@ export function finalizarPedidoWhatsApp(nomeCliente = "") {
  */
 export function falarSobreProduto(produto) {
   const marcaStr = produto.marca ? ` [${produto.marca}]` : "";
-  const link = produto.id ? `\nLink do produto: ${window.location.origin}/pages/produto.html?id=${produto.id}` : "";
-  const mensagem = `Olá!\nTenho interesse neste produto:\n*${produto.nome}*${marcaStr}${link}\n\nPoderia me passar mais informações?`;
+  // O link foi removido da mensagem para o WhatsApp não criar uma prévia
+  // automática com foto do produto.
+  const mensagem = `Olá!\nTenho interesse neste produto:\n*${produto.nome}*${marcaStr}\n\nPoderia me passar mais informações?`;
   const url = `https://wa.me/${STORE_CONFIG.whatsapp}?text=${encodeURIComponent(mensagem)}`;
   window.open(url, "_blank");
 }
