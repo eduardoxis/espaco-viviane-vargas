@@ -6,5 +6,6 @@ export default criarPreview({
   rotaCompartilhavel: "/p",
   nomeSite: "Espaço Viviane Vargas",
   fallbackImagem: "/assets/images/hero-produtos.jpg",
+  tipoImagem: "produto",
   validar: produto => produto.status !== "oculto"
 });

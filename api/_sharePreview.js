@@ -6,12 +6,18 @@ const escapeHtml = (value = "") => String(value)
   .replace(/>/g, "&gt;")
   .replace(/"/g, "&quot;");
 
-function obterImagem(item, origin, fallback) {
+export function obterImagemDoItem(item) {
   const imagemDaCor = Array.isArray(item.cores)
     ? item.cores.flatMap(cor => Array.isArray(cor?.imagens) ? cor.imagens : [cor?.imagem]).find(Boolean)
     : "";
-  const imagem = [item.imagem, ...(Array.isArray(item.imagens) ? item.imagens : []), imagemDaCor].find(valor => typeof valor === "string" && valor.trim());
-  if (!imagem || imagem.startsWith("data:")) return `${origin}${fallback}`;
+  return [item.imagem, ...(Array.isArray(item.imagens) ? item.imagens : []), imagemDaCor]
+    .find(valor => typeof valor === "string" && valor.trim()) || "";
+}
+
+function obterImagem(item, origin, fallback, imagemPorId) {
+  const imagem = obterImagemDoItem(item);
+  if (!imagem) return `${origin}${fallback}`;
+  if (imagem.startsWith("data:")) return imagemPorId;
   if (/^https?:\/\//i.test(imagem)) return imagem;
   return `${origin}/${imagem.replace(/^\//, "")}`;
 }
@@ -23,10 +29,11 @@ function itemDoLink(req) {
   return nome || descricao || imagem ? { nome, descricao, imagem } : null;
 }
 
-function enviarPreview({ res, item, origin, id, rotaDestino, rotaCompartilhavel, nomeSite, fallbackImagem }) {
+function enviarPreview({ res, item, origin, id, rotaDestino, rotaCompartilhavel, nomeSite, fallbackImagem, tipoImagem }) {
   const titulo = escapeHtml(item.nome || nomeSite);
   const descricao = escapeHtml(String(item.descricaoCurta || item.descricao || "Entre em contato para saber mais.").slice(0, 180));
-  const imagem = obterImagem(item, origin, fallbackImagem);
+  const imagemPorId = `${origin}/api/share-image?tipo=${encodeURIComponent(tipoImagem)}&id=${encodeURIComponent(id)}`;
+  const imagem = obterImagem(item, origin, fallbackImagem, imagemPorId);
   const urlCompartilhavel = `${origin}${rotaCompartilhavel}/${encodeURIComponent(id)}`;
   const destino = `${origin}${rotaDestino}?id=${encodeURIComponent(id)}`;
 
@@ -50,7 +57,7 @@ function enviarPreview({ res, item, origin, id, rotaDestino, rotaCompartilhavel,
 </head><body><p>Abrindo <a href="${destino}">${titulo}</a>...</p><script>location.replace(${JSON.stringify(destino)});</script></body></html>`);
 }
 
-export function criarPreview({ colecao, rotaDestino, rotaCompartilhavel, nomeSite, fallbackImagem, validar }) {
+export function criarPreview({ colecao, rotaDestino, rotaCompartilhavel, nomeSite, fallbackImagem, tipoImagem, validar }) {
   return async function handler(req, res) {
     const id = String(req.query?.id || "");
     const protocolo = String(req.headers["x-forwarded-proto"] || "https").split(",")[0];
@@ -62,16 +69,16 @@ export function criarPreview({ colecao, rotaDestino, rotaCompartilhavel, nomeSit
       const documento = id ? await obterDbAdmin().collection(colecao).doc(id).get() : null;
       const item = documento?.exists ? documento.data() : null;
       if (item && validar(item)) {
-        return enviarPreview({ res, item, origin, id, rotaDestino, rotaCompartilhavel, nomeSite, fallbackImagem });
+        return enviarPreview({ res, item, origin, id, rotaDestino, rotaCompartilhavel, nomeSite, fallbackImagem, tipoImagem });
       }
       if (dadosDoLink) {
-        return enviarPreview({ res, item: dadosDoLink, origin, id, rotaDestino, rotaCompartilhavel, nomeSite, fallbackImagem });
+        return enviarPreview({ res, item: dadosDoLink, origin, id, rotaDestino, rotaCompartilhavel, nomeSite, fallbackImagem, tipoImagem });
       }
       return res.redirect(302, rotaDestino.replace(/\.html$/, ".html"));
     } catch (erro) {
       console.error("Erro ao gerar prévia de compartilhamento:", erro);
       if (dadosDoLink) {
-        return enviarPreview({ res, item: dadosDoLink, origin, id, rotaDestino, rotaCompartilhavel, nomeSite, fallbackImagem });
+        return enviarPreview({ res, item: dadosDoLink, origin, id, rotaDestino, rotaCompartilhavel, nomeSite, fallbackImagem, tipoImagem });
       }
       return res.redirect(302, destino);
     }
