@@ -11,6 +11,18 @@ import { servicoTemImagem, ordenarServicos, normalizarTexto } from "../services/
 const NOME_SALAO = "Espaço Viviane Vargas";
 const CHAVE_FAVORITOS = "evv_favoritos_servicos";
 
+function linkServicoComPreview(servico) {
+  if (!servico?.id) return "";
+  const imagem = [servico.imagem, ...(Array.isArray(servico.imagens) ? servico.imagens : [])]
+    .find(valor => typeof valor === "string" && valor.trim() && !valor.startsWith("data:")) || "";
+  const dados = new URLSearchParams({
+    n: String(servico.nome || "Serviço").slice(0, 160),
+    d: String(servico.descricaoCurta || servico.descricao || "Confira este serviço no Espaço Viviane Vargas.").slice(0, 180)
+  });
+  if (imagem) dados.set("i", imagem);
+  return `${window.location.origin}/s/${encodeURIComponent(servico.id)}?${dados}`;
+}
+
 // ---------- FAVORITOS (localStorage) ----------
 export function obterIdsFavoritosServicos() {
   try {
@@ -29,7 +41,8 @@ export function alternarFavoritoServico(id) {
 
 // ---------- WHATSAPP / COMPARTILHAR ----------
 export function linkAgendarServico(servico) {
-  const link = servico.id ? `\n🔗 Link do serviço: ${window.location.origin}/s/${encodeURIComponent(servico.id)}` : "";
+  const endereco = linkServicoComPreview(servico);
+  const link = endereco ? `\n🔗 Link do serviço: ${endereco}` : "";
   return linkWhatsApp(`Olá! Vim do site do ${NOME_SALAO} e gostaria de agendar o serviço:\n*${servico.nome}*${link}\n\nPoderia me passar mais informações?`);
 }
 

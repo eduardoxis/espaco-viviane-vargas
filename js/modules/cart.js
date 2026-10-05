@@ -8,6 +8,21 @@ const CART_KEY = "papelaria_carrinho";
 const LEAD_KEY = "papelaria_ultimo_lead";
 let leadSalvo = false;
 
+function linkProdutoComPreview(produto) {
+  if (!produto?.id) return "";
+  const imagemDaCor = Array.isArray(produto.cores)
+    ? produto.cores.flatMap(cor => Array.isArray(cor?.imagens) ? cor.imagens : [cor?.imagem]).find(Boolean)
+    : "";
+  const imagem = [produto.imagem, ...(Array.isArray(produto.imagens) ? produto.imagens : []), imagemDaCor]
+    .find(valor => typeof valor === "string" && valor.trim() && !valor.startsWith("data:")) || "";
+  const dados = new URLSearchParams({
+    n: String(produto.nome || "Produto").slice(0, 160),
+    d: String(produto.descricaoCurta || produto.descricao || "Confira este produto no Espaço Viviane Vargas.").slice(0, 180)
+  });
+  if (imagem) dados.set("i", imagem);
+  return `${window.location.origin}/p/${encodeURIComponent(produto.id)}?${dados}`;
+}
+
 export function obterCarrinho() {
   try {
     return JSON.parse(localStorage.getItem(CART_KEY)) || [];
@@ -123,7 +138,8 @@ export function finalizarPedidoWhatsApp(nomeCliente = "") {
  */
 export function falarSobreProduto(produto) {
   const marcaStr = produto.marca ? ` [${produto.marca}]` : "";
-  const link = produto.id ? `\n🔗 Link do produto: ${window.location.origin}/p/${encodeURIComponent(produto.id)}` : "";
+  const endereco = linkProdutoComPreview(produto);
+  const link = endereco ? `\n🔗 Link do produto: ${endereco}` : "";
   const mensagem = `Olá!\nTenho interesse neste produto:\n*${produto.nome}*${marcaStr}${link}\n\nPoderia me passar mais informações?`;
   const url = `https://wa.me/${STORE_CONFIG.whatsapp}?text=${encodeURIComponent(mensagem)}`;
   window.open(url, "_blank");
