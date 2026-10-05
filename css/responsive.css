@@ -248,7 +248,7 @@
 
   .section__title { font-size: 1.7rem; }
   .category-card__icon { width: 68px; height: 68px; }
-  .promo-banner, .empresa-cta, .whatsapp-cta { border-radius: 22px; }
+  .promo-banner, .whatsapp-cta { border-radius: 22px; }
   .whatsapp-cta { flex-direction: column; }
   .newsletter__form { flex-direction: column; }
 }

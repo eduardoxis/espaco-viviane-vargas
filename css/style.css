@@ -580,55 +580,6 @@ button {
 }
 .brands__badge img { max-width: 140px; max-height: 60px; width: auto; height: auto; object-fit: contain; }
 
-/* ===== EMPRESA CTA ===== */
-.empresa-cta {
-  position: relative; overflow: hidden;
-  background: var(--azul-900);
-  border-radius: var(--raio-lg);
-  padding: 3rem clamp(1.5rem, 5vw, 4rem);
-  color: var(--branco);
-}
-.empresa-cta::before {
-  content: none;
-}
-.empresa-cta__content { position: relative; max-width: 720px; }
-.empresa-cta__eyebrow {
-  display: inline-flex; align-items: center; gap: 0.4rem;
-  font-size: 0.75rem; font-weight: 700; letter-spacing: 0.14em; text-transform: uppercase;
-  color: #d9b9a6; margin-bottom: 0.75rem;
-}
-.empresa-cta__title {
-  font-family: var(--fonte-display); font-weight: 800; letter-spacing: -0.02em;
-  font-size: clamp(1.9rem, 4vw, 2.6rem); margin: 0 0 0.6rem;
-}
-.empresa-cta__subtitle {
-  font-family: var(--fonte-display); font-weight: 600; font-size: clamp(1.2rem, 2.4vw, 1.5rem);
-  margin: 0 0 0.6rem; color: #f0e3da;
-}
-.empresa-cta__subtitle strong { color: #e6c9b5; }
-.empresa-cta__desc { color: #cdb4a6; font-size: 0.95rem; max-width: 480px; margin: 0 0 2rem; }
-
-.empresa-cta__features {
-  list-style: none; margin: 0 0 2rem; padding: 0;
-  display: grid; grid-template-columns: repeat(auto-fit, minmax(140px, 1fr)); gap: 1.25rem;
-}
-.empresa-cta__features li { display: flex; align-items: center; gap: 0.7rem; }
-.empresa-cta__features strong { display: block; font-size: 0.9rem; font-weight: 700; }
-.empresa-cta__features small { display: block; font-size: 0.8rem; color: #bfa596; }
-.empresa-cta__feature-icon {
-  width: 44px; height: 44px; border-radius: 50%; flex-shrink: 0;
-  background: rgba(255,255,255,0.1); border: 1px solid rgba(255,255,255,0.14);
-  display: grid; place-items: center; color: #e3c3ae;
-}
-.empresa-cta__feature-icon .icon { width: 20px; height: 20px; }
-
-.empresa-cta__actions { position: relative; }
-.empresa-cta .btn-whatsapp-lg { box-shadow: var(--sombra-lg); }
-
-@media (max-width: 640px) {
-  .empresa-cta { padding: 2rem 1.25rem; border-radius: var(--raio-md); }
-}
-
 /* ===== TESTIMONIALS ===== */
 .testimonials__grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 1.25rem; }
 .testimonial-card { background: var(--branco); border: 1px solid var(--cinza-100); border-radius: var(--raio-md); padding: 1.25rem; }
@@ -899,7 +850,7 @@ body { background: var(--cinza-050); color: var(--cinza-900); font-size: 15px; l
 .btn-whatsapp-lg, .btn-secondary { background: transparent; color: var(--azul-700); border: 1px solid var(--azul-700); box-shadow: none; }
 .btn-whatsapp-lg:hover, .btn-secondary:hover { background: var(--azul-700); color: #fff; box-shadow: none; }
 .btn-secondary { padding: 0.65rem 1.3rem; }
-.empresa-cta .btn-whatsapp-lg, .promo-banner .btn-primary { box-shadow: none; }
+.promo-banner .btn-primary { box-shadow: none; }
 
 /* ----- Hero ----- */
 .hero {
@@ -983,20 +934,13 @@ body { background: var(--cinza-050); color: var(--cinza-900); font-size: 15px; l
 .color-variants__item.is-active { box-shadow: 0 0 0 2px var(--azul-700); }
 .qty-stepper { border-color: var(--cinza-300); }
 
-/* ----- Faixas (promo / empresa) ----- */
-.promo-banner, .empresa-cta { background: #6b0e12; border-radius: 28px; }
+/* ----- Faixa promocional ----- */
+.promo-banner { background: #6b0e12; border-radius: 28px; }
 .promo-banner h3 { font-weight: 500; font-size: clamp(1.6rem, 3vw, 2.3rem); }
 .promo-banner h3 strong { color: #e8c9a0; font-weight: 600; font-style: italic; }
-.promo-banner__eyebrow, .empresa-cta__eyebrow { color: #e3c3ae; letter-spacing: 0.26em; font-weight: 500; }
+.promo-banner__eyebrow { color: #e3c3ae; letter-spacing: 0.26em; font-weight: 500; }
 .promo-banner__cta { background: var(--branco); color: var(--azul-700); }
 .promo-banner__cta:hover { background: var(--nude); color: var(--azul-900); }
-.empresa-cta__title { font-weight: 500; letter-spacing: 0; }
-.empresa-cta__subtitle { font-weight: 500; color: #f0e3da; }
-.empresa-cta__subtitle strong { color: #e8c9a0; font-style: italic; }
-.empresa-cta__feature-icon { color: #e8c9a0; background: rgba(255, 253, 251, 0.08); }
-.empresa-cta .btn-whatsapp-lg { background: var(--branco); color: var(--azul-700); border-color: var(--branco); }
-.empresa-cta .btn-whatsapp-lg:hover { background: var(--nude); border-color: var(--nude); }
-
 .whatsapp-cta { background: var(--azul-100); border: 1px solid var(--cinza-200); border-radius: 28px; }
 .whatsapp-cta__icon { background: var(--azul-700); }
 .whatsapp-cta__content h3 { font-weight: 500; font-size: clamp(1.5rem, 2.4vw, 1.9rem); color: var(--azul-700); }
