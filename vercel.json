@@ -1,4 +1,8 @@
 {
+  "rewrites": [
+    { "source": "/p/:id", "destination": "/api/p/:id" },
+    { "source": "/s/:id", "destination": "/api/s/:id" }
+  ],
   "headers": [
     {
       "source": "/assets/(.*)",
