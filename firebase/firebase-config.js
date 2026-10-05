@@ -28,7 +28,7 @@ export const db = typeof window !== "undefined"
 export const STORE_CONFIG = {
   nome: "Espaço Viviane Vargas",
   whatsapp: "5561995072128", // DDI+DDD+numero, sem espaços/símbolos
-  endereco: "R. Dr. Ézio Carneiro, 158 - St. Aeroporto, Luziânia - GO, 72800-420",
+  endereco: "R. Benjamin Roriz - St. Aeroporto, Luziânia - GO, 72800-380",
   email: "vivianefvargas@hotmail.com",
   instagram: "https://www.instagram.com/vivianefvargas/"
 };
