@@ -26,9 +26,9 @@ export const db = typeof window !== "undefined"
 
 // Configurações gerais da loja — edite aqui
 export const STORE_CONFIG = {
-  nome: "Livraria Papelaria Futura",
-  whatsapp: "5561999184452", // DDI+DDD+numero, sem espaços/símbolos
+  nome: "Espaço Viviane Vargas",
+  whatsapp: "5561995072128", // DDI+DDD+numero, sem espaços/símbolos
   endereco: "R. Dr. Ézio Carneiro, 158 - St. Aeroporto, Luziânia - GO, 72800-420",
-  email: "futuralza@gmail.com",
-  instagram: "https://www.instagram.com/futurapapelaria/"
+  email: "vivianefvargas@hotmail.com",
+  instagram: "https://www.instagram.com/vivianefvargas/"
 };
