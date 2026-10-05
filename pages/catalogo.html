@@ -124,13 +124,6 @@
       <button type="submit" class="search-bar__btn" aria-label="Pesquisar"><span data-icon="search"></span></button>
     </form>
 
-    <div class="select-pill">
-      <select id="filtro-categoria" aria-label="Filtrar por categoria">
-        <option value="">Todas as categorias</option>
-      </select>
-      <span class="select-pill__chevron" data-icon="chevronRight"></span>
-    </div>
-
     <div class="header-actions">
       <a href="/pages/catalogo.html" class="header-action header-action--nav is-active" aria-label="Catálogo"><span data-icon="shoppingBag"></span><span>Catálogo</span></a>
       <a href="/pages/servicos.html" class="header-action header-action--nav" aria-label="Serviços"><span data-icon="calendar"></span><span>Serviços</span></a>
@@ -410,7 +403,6 @@ document.querySelector("#btn-limpar-filtros").addEventListener("click", () => {
   estado.disponibilidade = "";
   estado.termo = "";
   document.querySelector("#busca-header").value = "";
-  document.querySelector("#filtro-categoria").value = "";
   reiniciarPaginacao();
   desenharFiltrosLaterais();
   render();
@@ -444,10 +436,9 @@ function desenharFiltrosLaterais() {
 
   document.querySelector("#filtros-categorias").querySelectorAll("input").forEach(el => {
     el.addEventListener("change", () => {
-      // Uma categoria por vez (bate com o <select> do cabeçalho).
+      // Uma categoria por vez.
       estado.categorias.clear();
       if (el.checked) estado.categorias.add(el.value);
-      document.querySelector("#filtro-categoria").value = el.checked ? el.value : "";
       reiniciarPaginacao();
       desenharFiltrosLaterais();
       render();
@@ -685,18 +676,6 @@ function configurarNomeConvidado() {
 async function iniciar() {
   configurarNomeConvidado();
   [CATEGORIAS, MARCAS] = await Promise.all([listarCategorias(), listarMarcas()]);
-
-  const selectCategoria = document.querySelector("#filtro-categoria");
-  selectCategoria.innerHTML = `<option value="">Todas as categorias</option>` +
-    CATEGORIAS.map(c => `<option value="${escHtml(c.nome)}">${escHtml(c.nome)}</option>`).join("");
-  if (paramCategoria) selectCategoria.value = paramCategoria;
-  selectCategoria.addEventListener("change", () => {
-    estado.categorias.clear();
-    if (selectCategoria.value) estado.categorias.add(selectCategoria.value);
-    reiniciarPaginacao();
-    desenharFiltrosLaterais();
-    render();
-  });
 
   desenharFiltrosLaterais();
   await render();

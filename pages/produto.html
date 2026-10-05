@@ -128,7 +128,7 @@
   </div>
 
   <section class="related-section" id="secao-relacionados" hidden>
-    <div class="section__head"><h2 class="section__title">Você também pode gostar</h2></div>
+    <div class="section__head"><h2 class="section__title">Produtos relacionados</h2></div>
     <div class="products-grid" id="grade-relacionados"></div>
     <div class="related-section__footer">
       <button type="button" class="btn-secondary" id="btn-ver-catalogo">Ver catálogo</button>
@@ -176,7 +176,7 @@
 </aside>
 
 <script type="module">
-import { obterProduto, invalidarCachePublico, listarProdutosPorCategoria, incrementarVisualizacao } from "../js/services/firestore.js";
+import { obterProduto, invalidarCachePublico, listarProdutosPorCategoria, listarProdutosVitrine, incrementarVisualizacao } from "../js/services/firestore.js";
 import { escHtml, getQueryParam, formatBRL, toast, podeExecutar, imgPos, registrarErroCliente } from "../js/utils/utils.js";
 import { renderizarGrade, cartaoProduto, compartilharProduto, obterIdsFavoritos, alternarFavorito, produtoTemImagem } from "../js/modules/products.js";
 import { ouvirEstadoAuth, ehAdmin, sair } from "../js/services/auth.js";
@@ -265,14 +265,18 @@ function renderizarSeletorCores(produto) {
 
 async function renderizarRelacionados(produto) {
   try {
-    // Antes baixava TODO o catálogo só pra filtrar por categoria no
-    // navegador. Trocado por uma consulta já filtrada e limitada no
-    // Firestore (mesma função usada em outras vitrines) — resultado
-    // idêntico, mas sem baixar produtos que nunca seriam usados aqui.
-    const daCategoria = await listarProdutosPorCategoria(produto.categoria, 7);
-    const relacionados = daCategoria
+    // Prioriza itens da mesma categoria. Se não houver outros itens nela,
+    // mantém a seção útil com produtos em destaque do catálogo.
+    const daCategoria = produto.categoria
+      ? await listarProdutosPorCategoria(produto.categoria, 7)
+      : [];
+    let relacionados = daCategoria
       .filter(p => p.id !== produto.id)
       .slice(0, 6);
+    if (!relacionados.length) {
+      const vitrine = await listarProdutosVitrine(7);
+      relacionados = vitrine.filter(p => p.id !== produto.id).slice(0, 6);
+    }
     if (!relacionados.length) return;
     document.querySelector("#secao-relacionados").hidden = false;
     renderizarGrade(document.querySelector("#grade-relacionados"), relacionados);
