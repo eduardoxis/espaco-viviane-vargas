@@ -192,6 +192,17 @@ function produtoCombinaComBusca(produto, termo) {
   return palavras.every(palavra => texto.split(/[^a-z0-9]+/).some(item => item.startsWith(palavra)));
 }
 
+// Produtos podem guardar fotos na capa, na galeria ou nas variações de cor.
+// Este teste é usado apenas no filtro administrativo "Sem fotos", evitando
+// uma consulta composta que exigiria um índice extra no Firebase.
+function produtoTemFotoCadastrada(produto = {}) {
+  const temUrl = (valor) => typeof valor === "string" && valor.trim().length > 0;
+  return temUrl(produto.imagem) ||
+    (Array.isArray(produto.imagens) && produto.imagens.some(temUrl)) ||
+    (Array.isArray(produto.cores) && produto.cores.some(cor =>
+      temUrl(cor?.imagem) || (Array.isArray(cor?.imagens) && cor.imagens.some(temUrl))));
+}
+
 // ---------- PRODUTOS ----------
 export function listarProdutos({ apenasAtivos = true } = {}) {
   return withLoading("listarProdutos", async () => {
@@ -226,22 +237,36 @@ export function listarProdutosPagina({ tamanho = 20, cursor = null, categoria = 
     const col = collection(db, "produtos");
     const clausulas = [orderBy(ordenarPor, direcao)];
     if (categoria) clausulas.unshift(where("categoria", "==", categoria));
-    if (semFoto) clausulas.unshift(where("imagem", "==", ""));
     if (apenasAtivos) clausulas.unshift(where("status", "in", STATUS_PUBLICOS));
-    // Buscamos 1 a mais do que o pedido só pra saber se existe próxima página,
-    // sem precisar de uma segunda consulta count().
-    clausulas.push(limit(tamanho + 1));
-    if (cursor) clausulas.push(startAfter(cursor));
+    // O filtro sem fotos é pouco usado e precisa considerar galeria/cores. A
+    // filtragem ocorre no painel para não exigir índice composto no Firebase.
+    const tamanhoLeitura = semFoto ? Math.max(50, tamanho + 1) : tamanho + 1;
+    const encontrados = [];
+    let cursorLeitura = cursor;
+    let acabou = false;
 
-    const snap = await getDocs(query(col, ...clausulas));
-    let docs = snap.docs;
-    const temMais = docs.length > tamanho;
-    docs = docs.slice(0, tamanho);
+    while (!acabou && encontrados.length <= tamanho) {
+      const restricoes = [...clausulas, limit(tamanhoLeitura)];
+      if (cursorLeitura) restricoes.push(startAfter(cursorLeitura));
+      const snap = await getDocs(query(col, ...restricoes));
+      if (!snap.docs.length) { acabou = true; break; }
 
-    let produtos = docs.map(d => ({ id: d.id, ...d.data() }));
-    if (apenasAtivos) produtos = produtos.filter(p => p.status !== "oculto");
+      snap.docs.forEach(docProduto => {
+        const produto = { id: docProduto.id, ...docProduto.data() };
+        if (!semFoto || !produtoTemFotoCadastrada(produto)) encontrados.push({ docProduto, produto });
+      });
+      cursorLeitura = snap.docs.at(-1);
+      acabou = snap.docs.length < tamanhoLeitura;
+      if (!semFoto) break;
+    }
 
-    return { produtos, cursor: docs.at(-1) || cursor, temMais };
+    const pagina = encontrados.slice(0, tamanho);
+    const temMais = encontrados.length > tamanho || !acabou;
+    return {
+      produtos: pagina.map(item => item.produto),
+      cursor: pagina.at(-1)?.docProduto || cursorLeitura || cursor,
+      temMais
+    };
   });
 }
 
@@ -282,7 +307,8 @@ function buscarProdutosPorPrefixoNoServidor(termo, { tamanho = 20, cursor = null
     ));
     const encontradosPorCodigo = (porCodigo?.docs || [])
       .map(docProduto => ({ id: docProduto.id, ...docProduto.data() }))
-      .filter(produto => normalizarTermoBusca(produto.codigo) === termoLimpo).filter(produto => !semFoto || !String(produto.imagem || "").trim());
+      .filter(produto => normalizarTermoBusca(produto.codigo) === termoLimpo)
+      .filter(produto => !semFoto || !produtoTemFotoCadastrada(produto));
     if (encontradosPorCodigo.length) {
       return { produtos: encontradosPorCodigo.slice(0, tamanho), cursor: null, temMais: false };
     }
@@ -291,7 +317,6 @@ function buscarProdutosPorPrefixoNoServidor(termo, { tamanho = 20, cursor = null
     // O filtro final permite digitar mais de uma palavra sem novas leituras.
     const clausulasIndexados = [
       where("buscaTokens", "array-contains", primeiraPalavra),
-      ...(semFoto ? [where("imagem", "==", "")] : []),
       limit(tamanho + 1)
     ];
     if (cursor) clausulasIndexados.splice(1, 0, startAfter(cursor));
@@ -300,6 +325,7 @@ function buscarProdutosPorPrefixoNoServidor(termo, { tamanho = 20, cursor = null
     const encontradosIndexados = indexados.docs
       .map(docProduto => ({ id: docProduto.id, ...docProduto.data() }))
       .filter(produto => produtoCombinaComBusca(produto, termoLimpo))
+      .filter(produto => !semFoto || !produtoTemFotoCadastrada(produto))
       .slice(0, tamanho);
 
     if (encontradosIndexados.length || cursor) {
@@ -324,7 +350,6 @@ function buscarProdutosPorPrefixoNoServidor(termo, { tamanho = 20, cursor = null
     const resultados = await Promise.all(variantes.map(inicio => getDocs(query(
       col,
       orderBy("nome"),
-      ...(semFoto ? [where("imagem", "==", "")] : []),
       where("nome", ">=", inicio),
       where("nome", "<=", inicio + "\uf8ff"),
       limit(tamanho)
@@ -334,6 +359,7 @@ function buscarProdutosPorPrefixoNoServidor(termo, { tamanho = 20, cursor = null
       porId.set(docProduto.id, { id: docProduto.id, ...docProduto.data() });
     });
     const produtos = [...porId.values()]
+      .filter(produto => !semFoto || !produtoTemFotoCadastrada(produto))
       .sort((a, b) => COLATOR_NOMES.compare(String(a.nome), String(b.nome)))
       .slice(0, tamanho);
     return {
