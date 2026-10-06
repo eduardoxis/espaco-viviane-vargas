@@ -1078,9 +1078,17 @@ async function importarServicosJson(container, arquivo) {
         }
       }
 
-      const existente = servicos.find(s =>
+      const existenteNaCategoria = servicos.find(s =>
         normalizarTexto(s.nome) === normalizarTexto(r.dados.nome) &&
         (s.categoriaId || "") === categoriaId && (s.subcategoriaId || "") === subcategoriaId);
+      // Arquivos antigos podiam criar serviços sem categoria. Ao importar o
+      // mesmo nome em uma categoria válida, move esse registro em vez de criar
+      // outro igual ou deixá-lo invisível na categoria escolhida.
+      const existenteSemCategoria = categoriaId && !subcategoriaId
+        ? servicos.find(s => normalizarTexto(s.nome) === normalizarTexto(r.dados.nome) &&
+          !(s.categoriaId || "") && !(s.subcategoriaId || ""))
+        : null;
+      const existente = existenteNaCategoria || existenteSemCategoria;
 
       const dados = { ...r.dados, categoriaId, subcategoriaId, ordem: ordem++ };
       // Reimportar o mesmo arquivo deve corrigir o cadastro existente, e não
