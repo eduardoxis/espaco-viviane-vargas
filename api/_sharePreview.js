@@ -6,6 +6,11 @@ const escapeHtml = (value = "") => String(value)
   .replace(/>/g, "&gt;")
   .replace(/"/g, "&quot;");
 
+const textoMeta = (value, limite, fallback = "") => String(value || fallback)
+  .replace(/\s+/g, " ")
+  .trim()
+  .slice(0, limite);
+
 export function obterImagemDoItem(item) {
   const imagemDaCor = Array.isArray(item.cores)
     ? item.cores.flatMap(cor => Array.isArray(cor?.imagens) ? cor.imagens : [cor?.imagem]).find(Boolean)
@@ -30,9 +35,13 @@ function itemDoLink(req) {
 }
 
 function enviarPreview({ res, item, origin, id, rotaDestino, rotaCompartilhavel, nomeSite, fallbackImagem, tipoImagem }) {
-  const titulo = escapeHtml(item.nome || nomeSite);
-  const descricao = escapeHtml(String(item.descricaoCurta || item.descricao || "Entre em contato para saber mais.").slice(0, 180));
-  const imagemPorId = `${origin}/api/share-image?tipo=${encodeURIComponent(tipoImagem)}&id=${encodeURIComponent(id)}`;
+  const tituloOriginal = textoMeta(item.nome, 160, nomeSite);
+  const descricaoOriginal = textoMeta(item.descricaoCurta || item.descricao, 160, "Entre em contato para saber mais.");
+  const titulo = escapeHtml(tituloOriginal);
+  const descricao = escapeHtml(descricaoOriginal);
+  const imagemPorId = tipoImagem === "produto"
+    ? `${origin}/api/img/${encodeURIComponent(id)}`
+    : `${origin}/api/img/${encodeURIComponent(id)}?tipo=${encodeURIComponent(tipoImagem)}`;
   const imagem = obterImagem(item, origin, fallbackImagem, imagemPorId);
   const urlCompartilhavel = `${origin}${rotaCompartilhavel}/${encodeURIComponent(id)}`;
   const destino = `${origin}${rotaDestino}?id=${encodeURIComponent(id)}`;
@@ -48,13 +57,14 @@ function enviarPreview({ res, item, origin, id, rotaDestino, rotaCompartilhavel,
 <meta property="og:description" content="${descricao}">
 <meta property="og:image" content="${escapeHtml(imagem)}">
 <meta property="og:image:secure_url" content="${escapeHtml(imagem)}">
-<meta property="og:url" content="${urlCompartilhavel}">
+<meta property="og:image:alt" content="${titulo}">
+<meta property="og:url" content="${escapeHtml(urlCompartilhavel)}">
 <meta property="og:site_name" content="${escapeHtml(nomeSite)}">
 <meta name="twitter:card" content="summary_large_image">
 <meta name="twitter:title" content="${titulo}">
 <meta name="twitter:description" content="${descricao}">
 <meta name="twitter:image" content="${escapeHtml(imagem)}">
-</head><body><p>Abrindo <a href="${destino}">${titulo}</a>...</p><script>location.replace(${JSON.stringify(destino)});</script></body></html>`);
+</head><body><p>Abrindo <a href="${escapeHtml(destino)}">${titulo}</a>...</p><script>location.replace(${JSON.stringify(destino)});</script></body></html>`);
 }
 
 export function criarPreview({ colecao, rotaDestino, rotaCompartilhavel, nomeSite, fallbackImagem, tipoImagem, validar }) {
