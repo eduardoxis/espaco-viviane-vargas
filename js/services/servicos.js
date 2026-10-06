@@ -256,10 +256,10 @@ export function criarServico(dados, { silencioso = false } = {}) {
   });
 }
 
-export function atualizarServico(id, dados) {
+export function atualizarServico(id, dados, { silencioso = false } = {}) {
   return withLoading("atualizarServico", async () => {
     await updateDoc(doc(db, COL_SERVICOS, id), dados);
-    await notificarMudancaPublica();
+    if (!silencioso) await notificarMudancaPublica();
   });
 }
 

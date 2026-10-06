@@ -1039,6 +1039,7 @@ async function importarServicosJson(container, arquivo) {
   const criadasCats = [];
   const invalidos = [];
   let importados = 0;
+  let atualizados = 0;
   let ordem = Date.now();
 
   // Busca categoria por nome (ignora maiúsculas/acentos). Só cria se o JSON
@@ -1077,12 +1078,19 @@ async function importarServicosJson(container, arquivo) {
         }
       }
 
-      const jaExiste = servicos.some(s =>
+      const existente = servicos.find(s =>
         normalizarTexto(s.nome) === normalizarTexto(r.dados.nome) &&
         (s.categoriaId || "") === categoriaId && (s.subcategoriaId || "") === subcategoriaId);
-      if (jaExiste) { invalidos.push({ linha: i + 1, nome: r.dados.nome, erros: ["serviço já cadastrado nesta categoria"] }); continue; }
 
       const dados = { ...r.dados, categoriaId, subcategoriaId, ordem: ordem++ };
+      // Reimportar o mesmo arquivo deve corrigir o cadastro existente, e não
+      // escondê-lo atrás de uma mensagem de duplicidade.
+      if (existente) {
+        await atualizarServico(existente.id, dados, { silencioso: true });
+        Object.assign(existente, dados);
+        atualizados++;
+        continue;
+      }
       const id = await criarServico(dados, { silencioso: true });
       servicos.push({ id, ...dados });
       importados++;
@@ -1095,6 +1103,7 @@ async function importarServicosJson(container, arquivo) {
 
   resultado.innerHTML = `
     <p><strong>${importados}</strong> serviço(s) importado(s) com sucesso.</p>
+    ${atualizados ? `<p><strong>${atualizados}</strong> serviço(s) existente(s) atualizado(s) e deixado(s) como disponível(is).</p>` : ""}
     ${criadasCats.length ? `<p><strong>${criadasCats.length}</strong> categoria(s)/subcategoria(s) criada(s): ${criadasCats.map(escHtml).join(", ")}.</p>` : ""}
     ${invalidos.length ? `
       <p><strong>${invalidos.length}</strong> ignorado(s):</p>
