@@ -265,17 +265,25 @@ function renderizarSeletorCores(produto) {
 
 async function renderizarRelacionados(produto) {
   try {
+    const limiteRelacionados = 8;
     // Prioriza itens da mesma categoria. Se não houver outros itens nela,
     // mantém a seção útil com produtos em destaque do catálogo.
     const daCategoria = produto.categoria
-      ? await listarProdutosPorCategoria(produto.categoria, 7)
+      ? await listarProdutosPorCategoria(produto.categoria, limiteRelacionados + 1)
       : [];
     let relacionados = daCategoria
       .filter(p => p.id !== produto.id)
-      .slice(0, 6);
-    if (!relacionados.length) {
-      const vitrine = await listarProdutosVitrine(7);
-      relacionados = vitrine.filter(p => p.id !== produto.id).slice(0, 6);
+      .slice(0, limiteRelacionados);
+
+    // Completa a grade com itens da vitrine quando a categoria possuir menos
+    // que oito produtos, sem repetir o produto aberto ou itens já exibidos.
+    if (relacionados.length < limiteRelacionados) {
+      const vitrine = await listarProdutosVitrine(limiteRelacionados + 4);
+      const idsJaUsados = new Set([produto.id, ...relacionados.map(p => p.id)]);
+      const faltantes = limiteRelacionados - relacionados.length;
+      relacionados = relacionados.concat(
+        vitrine.filter(p => !idsJaUsados.has(p.id)).slice(0, faltantes)
+      );
     }
     if (!relacionados.length) return;
     document.querySelector("#secao-relacionados").hidden = false;
