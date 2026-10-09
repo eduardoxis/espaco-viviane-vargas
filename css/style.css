@@ -1023,14 +1023,14 @@ body { background: var(--cinza-050); color: var(--cinza-900); font-size: 15px; l
 /* No celular esses atalhos ficam na barra inferior (bottom-nav). */
 @media (max-width: 760px) { .header-action--nav { display: none; } }
 
-/* Na home os cards ficam mais compactos, como a vitrine de referência. O
-   catálogo interno continua usando a largura completa disponível. */
+/* As grades da home ocupam toda a largura do container, sem deixar uma
+   faixa vazia ao lado dos cards. */
 #destaques .products-grid,
 #recentes .products-grid,
 #resultados-busca .products-grid,
 #produtos .products-grid {
   grid-template-columns: repeat(4, minmax(0, 1fr));
-  width: min(100%, 1000px);
+  width: 100%;
   gap: 1.4rem;
 }
 
