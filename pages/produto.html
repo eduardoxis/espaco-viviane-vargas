@@ -330,7 +330,7 @@ async function iniciarProduto() {
 
         <div class="product-detail__meta">
           ${produto.codigo ? `<span>Código: ${escHtml(produto.codigo)}</span>` : ""}
-          <span class="${semEstoque ? "" : "product-detail__meta--ok"}">${semEstoque ? "Sem estoque no momento" : `${produto.quantidade ?? 0} disponíveis`}</span>
+          <span class="${semEstoque ? "" : "product-detail__meta--ok"}">${semEstoque ? "Sem estoque no momento" : "Disponível"}</span>
         </div>
 
         ${!semEstoque ? `
