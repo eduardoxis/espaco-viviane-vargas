@@ -8,7 +8,7 @@
 <link rel="icon" href="/assets/icons/favicon.ico">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Figtree:wght@400;500;600&family=Newsreader:ital,opsz,wght@0,6..72,400;0,6..72,500;0,6..72,600;1,6..72,400;1,6..72,500&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Figtree:wght@400;500;600;700;800&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="/css/style.css">
 <link rel="stylesheet" href="/css/modal.css">
 <link rel="stylesheet" href="/css/responsive.css?v=5">
@@ -178,12 +178,13 @@
 <script type="module">
 import { obterProduto, invalidarCachePublico, listarProdutosPorCategoria, listarProdutosVitrine, incrementarVisualizacao } from "../js/services/firestore.js";
 import { escHtml, getQueryParam, formatBRL, toast, podeExecutar, imgPos, registrarErroCliente } from "../js/utils/utils.js";
-import { renderizarGrade, cartaoProduto, compartilharProduto, obterIdsFavoritos, alternarFavorito, produtoTemImagem } from "../js/modules/products.js";
+import { renderizarGrade, cartaoProduto, compartilharProduto, obterFavoritos, obterIdsFavoritos, alternarFavorito, aplicarFavoritosSincronizados, produtoTemImagem } from "../js/modules/products.js";
 import { ouvirEstadoAuth, ehAdmin, sair } from "../js/services/auth.js";
 import {
   obterCarrinho, adicionarAoCarrinho, atualizarQuantidade, calcularTotais,
-  atualizarBadgeCarrinho, falarSobreProduto, finalizarPedidoWhatsApp
+  atualizarBadgeCarrinho, falarSobreProduto, finalizarPedidoWhatsApp, aplicarCarrinhoSincronizado
 } from "../js/modules/cart.js";
+import { iniciarSincronizacaoConta } from "../js/services/contaSync.js";
 import { ICONS, icon } from "../js/utils/icons.js";
 import { iniciarLoadingGlobal } from "../js/utils/loadingUI.js";
 import { observarAtualizacaoPublica } from "../js/services/public-sync.js";
@@ -582,6 +583,15 @@ function configurarCarrinhoUI() {
 
 function configurarLogin() {
   ouvirEstadoAuth((usuario) => {
+    // Mantém carrinho e favoritos desta página sincronizados com a conta,
+    // para que itens favoritados aqui apareçam imediatamente em "Minha conta".
+    iniciarSincronizacaoConta(usuario?.uid, {
+      carrinhoLocal: obterCarrinho,
+      favoritosLocais: obterFavoritos,
+      aplicarCarrinho: aplicarCarrinhoSincronizado,
+      aplicarFavoritos: aplicarFavoritosSincronizados
+    });
+
     const btnAdmin = document.querySelector("#abrir-admin");
     const btnEntrar = document.querySelector("#btn-entrar");
     const btnSair = document.querySelector("#btn-sair");

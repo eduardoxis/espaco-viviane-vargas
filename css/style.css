@@ -32,7 +32,7 @@
   --sombra-md: 0 6px 20px rgba(74, 40, 28, 0.08);
   --sombra-lg: 0 18px 44px rgba(74, 40, 28, 0.12);
 
-  --fonte-display: "Newsreader", "Source Serif 4", Georgia, "Times New Roman", serif;
+  --fonte-display: "Figtree", "Inter", "Segoe UI", Roboto, Arial, sans-serif;
   --fonte-corpo: "Figtree", "Inter", "Segoe UI", Roboto, Arial, sans-serif;
 
   --vidro-fundo: rgba(255, 253, 251, 0.7);
@@ -1022,6 +1022,17 @@ body { background: var(--cinza-050); color: var(--cinza-900); font-size: 15px; l
 .header-action--nav.is-active { color: var(--azul-700); font-weight: 600; }
 /* No celular esses atalhos ficam na barra inferior (bottom-nav). */
 @media (max-width: 760px) { .header-action--nav { display: none; } }
+
+/* Na home os cards ficam mais compactos, como a vitrine de referência. O
+   catálogo interno continua usando a largura completa disponível. */
+#destaques .products-grid,
+#recentes .products-grid,
+#resultados-busca .products-grid,
+#produtos .products-grid {
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  width: min(100%, 1000px);
+  gap: 1.4rem;
+}
 
 
 /* =====================================================================

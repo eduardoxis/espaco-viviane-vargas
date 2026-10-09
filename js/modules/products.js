@@ -34,8 +34,18 @@ function salvarFavoritos(lista) {
   salvarFavoritosNuvem(lista).catch(() => {});
 }
 
+function atualizarBotoesFavoritos() {
+  const favoritos = new Set(obterIdsFavoritos());
+  document.querySelectorAll("[data-fav-id]").forEach(botao => {
+    const ativo = favoritos.has(botao.dataset.favId);
+    botao.classList.toggle("is-active", ativo);
+    botao.setAttribute("aria-pressed", String(ativo));
+  });
+}
+
 export function aplicarFavoritosSincronizados(lista) {
   localStorage.setItem(CHAVE_FAVORITOS, JSON.stringify(Array.isArray(lista) ? lista : []));
+  atualizarBotoesFavoritos();
 }
 
 export function alternarFavorito(id, produto = null) {
@@ -44,7 +54,9 @@ export function alternarFavorito(id, produto = null) {
   if (idx >= 0) lista.splice(idx, 1);
   else lista.push(produto ? resumoFavorito(produto) : id);
   salvarFavoritos(lista);
-  return lista.some(item => (typeof item === "string" ? item : item?.id) === id);
+  const ativo = lista.some(item => (typeof item === "string" ? item : item?.id) === id);
+  atualizarBotoesFavoritos();
+  return ativo;
 }
 
 // Migração gradual dos favoritos antigos (que guardavam apenas o ID). Uma

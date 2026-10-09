@@ -28,6 +28,7 @@
   .product-detail__image img { object-fit: contain; padding: 1.25rem; box-sizing: border-box; background: var(--branco); }
   .header-nav__links { display: none; }
   .products-grid, .products-grid--5col { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+  #destaques .products-grid, #recentes .products-grid, #resultados-busca .products-grid, #produtos .products-grid { grid-template-columns: repeat(3, minmax(0, 1fr)); }
   .search-page__layout { grid-template-columns: 1fr; }
   .search-page__filters { position: static; }
 }
@@ -146,6 +147,7 @@
   /* ---- catálogo/busca: filtros viram painel recolhível ---- */
   .search-page__btn-filtros { display: flex; }
   .products-grid, .products-grid--5col { grid-template-columns: repeat(2, 1fr); }
+  #destaques .products-grid, #recentes .products-grid, #resultados-busca .products-grid, #produtos .products-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); width: 100%; gap: 0.7rem; }
   .search-page__filters {
     display: none;
     margin-bottom: 1.25rem;
