@@ -217,18 +217,18 @@ async function iniciar() {
   // carregamento de página, o que é suficiente para uma vitrine.
   const gradeProdutos = document.querySelector("#grade-produtos");
   carregarAoAproximar(gradeProdutos, async () => {
-    renderizarGrade(gradeProdutos, await listarProdutosVitrine(8));
+    renderizarGrade(gradeProdutos, await listarProdutosVitrine(10));
   });
   const gradeDestaques = document.querySelector("#grade-destaques");
   carregarAoAproximar(gradeDestaques, async () => {
-    // Oito itens formam duas linhas completas de quatro no desktop.
-    renderizarGrade(gradeDestaques, await listarProdutosDestaque(8));
+    // Dez itens formam duas linhas completas de cinco no desktop.
+    renderizarGrade(gradeDestaques, await listarProdutosDestaque(10));
   });
   const secaoServicosHome = document.querySelector("#servicos-home");
   carregarAoAproximar(secaoServicosHome, () => renderizarServicosHome(secaoServicosHome));
   const gradeRecentes = document.querySelector("#grade-recentes");
   carregarAoAproximar(gradeRecentes, async () => {
-    renderizarGrade(gradeRecentes, await listarProdutosRecentes(8));
+    renderizarGrade(gradeRecentes, await listarProdutosRecentes(10));
   });
 
   listarCategorias().then((categorias) => {
