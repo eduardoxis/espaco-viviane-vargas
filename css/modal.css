@@ -124,7 +124,7 @@
 .favorito-card img { width: 52px; height: 52px; border-radius: var(--raio-sm); object-fit: cover; flex-shrink: 0; }
 .favorito-card__info, .endereco-card__info { flex: 1; min-width: 0; }
 .favorito-card__info strong, .endereco-card__info strong { display: block; }
-.favorito-card__acoes { display: flex; gap: 0.4rem; flex-shrink: 0; }
+.favorito-card__acoes, .endereco-card__acoes { display: flex; gap: 0.4rem; flex-shrink: 0; }
 
 /* ---- pedidos: seleção e remoção segura ---- */
 .modal__panel--orders { width: min(760px, 100%); max-height: min(820px, 90vh); }

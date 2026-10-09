@@ -1221,6 +1221,13 @@ export function criarEndereco(usuarioId, dados) {
     return resultado;
   });
 }
+export function atualizarEndereco(id, dados) {
+  return withLoading("atualizarEndereco", async () => {
+    const resultado = await updateDoc(doc(db, "enderecos", id), { ...dados, atualizadoEm: serverTimestamp() });
+    invalidarCache("listarEnderecos");
+    return resultado;
+  });
+}
 export function excluirEndereco(id) {
   return withLoading("excluirEndereco", async () => {
     const resultado = await deleteDoc(doc(db, "enderecos", id));

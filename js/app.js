@@ -2,7 +2,7 @@
 import {
   listarEtiquetas, listarProdutosVitrine, listarProdutosDestaque,
   listarProdutosRecentes, listarProdutosPorCategoria, obterProduto, listarCategorias, listarMarcas,
-  criarPedido, listarPedidosUsuario, listarEnderecos, criarEndereco, excluirEndereco, excluirPedido, excluirPedidos,
+  criarPedido, listarPedidosUsuario, listarEnderecos, criarEndereco, atualizarEndereco, excluirEndereco, excluirPedido, excluirPedidos,
   atualizarPerfilUsuario, invalidarCachePublico
 } from "./services/firestore.js";
 import { renderizarGrade, obterFavoritos, alternarFavorito, migrarFavoritosLegados, aplicarFavoritosSincronizados } from "./modules/products.js";
@@ -815,6 +815,7 @@ function abrirSubModalConta(idModal) {
 }
 
 const pedidosSelecionados = new Set();
+let enderecoEditandoId = null;
 
 function atualizarAcoesPedidos(total) {
   const selecionados = pedidosSelecionados.size;
@@ -894,7 +895,10 @@ async function renderizarEnderecos() {
         <strong>${escHtml(e.apelido)}</strong>
         <span>${escHtml(e.rua)}, ${escHtml(e.numero)} - ${escHtml(e.bairro)}, ${escHtml(e.cidade)}${e.cep ? " - " + escHtml(e.cep) : ""}</span>
       </div>
-      <button type="button" data-excluir-endereco="${e.id}" class="account-menu__icon">${icon("trash")}</button>
+      <div class="endereco-card__acoes">
+        <button type="button" data-editar-endereco="${e.id}" class="account-menu__icon" aria-label="Editar endereço">${icon("pencil")}</button>
+        <button type="button" data-excluir-endereco="${e.id}" class="account-menu__icon" aria-label="Apagar endereço">${icon("trash")}</button>
+      </div>
     </li>`).join("") : `<div class="empty-state">Nenhum endereço cadastrado ainda.</div>`;
 
   lista.querySelectorAll("[data-excluir-endereco]").forEach(btn => {
@@ -907,6 +911,24 @@ async function renderizarEnderecos() {
       await excluirEndereco(btn.dataset.excluirEndereco);
       toast("Endereço removido.", "success");
       renderizarEnderecos();
+    });
+  });
+
+  lista.querySelectorAll("[data-editar-endereco]").forEach(btn => {
+    btn.addEventListener("click", () => {
+      const endereco = enderecos.find(item => item.id === btn.dataset.editarEndereco);
+      const form = document.querySelector("#form-endereco");
+      if (!endereco || !form) return;
+
+      enderecoEditandoId = endereco.id;
+      ["apelido", "rua", "numero", "bairro", "cidade", "cep"].forEach(campo => {
+        form[campo].value = endereco[campo] || "";
+      });
+      const titulo = form.querySelector(".stacked-form__title");
+      const submit = form.querySelector('button[type="submit"]');
+      if (titulo) titulo.textContent = "Editar endereço";
+      if (submit) submit.textContent = "Salvar alteração";
+      form.scrollIntoView({ behavior: "smooth", block: "nearest" });
     });
   });
 }
@@ -1026,6 +1048,13 @@ function configurarMenuConta() {
   });
   document.querySelector("#btn-abrir-enderecos")?.addEventListener("click", () => {
     abrirSubModalConta("#modal-enderecos");
+    const form = document.querySelector("#form-endereco");
+    if (form) {
+      enderecoEditandoId = null;
+      form.reset();
+      form.querySelector(".stacked-form__title").textContent = "Novo endereço";
+      form.querySelector('button[type="submit"]').textContent = "Salvar endereço";
+    }
     renderizarEnderecos();
   });
 
@@ -1059,15 +1088,20 @@ function configurarMenuConta() {
     e.preventDefault();
     if (!usuarioAtual) return;
     const form = e.target;
-    await criarEndereco(usuarioAtual.uid, {
+    const dadosEndereco = {
       apelido: form.apelido.value.trim(),
       rua: form.rua.value.trim(),
       numero: form.numero.value.trim(),
       bairro: form.bairro.value.trim(),
       cidade: form.cidade.value.trim(),
       cep: form.cep.value.trim()
-    });
+    };
+    if (enderecoEditandoId) await atualizarEndereco(enderecoEditandoId, dadosEndereco);
+    else await criarEndereco(usuarioAtual.uid, dadosEndereco);
     form.reset();
+    enderecoEditandoId = null;
+    form.querySelector(".stacked-form__title").textContent = "Novo endereço";
+    form.querySelector('button[type="submit"]').textContent = "Salvar endereço";
     renderizarEnderecos();
     toast("Endereço salvo.");
   });
