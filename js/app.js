@@ -67,6 +67,48 @@ function carregarAoAproximar(alvo, tarefa) {
   observer.observe(alvo);
 }
 
+/** Anima entradas sem bloquear a navegação e respeita a preferência do usuário. */
+function iniciarEfeitosVisuais() {
+  if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) return;
+
+  document.documentElement.classList.add("motion-enabled");
+  const seletor = ".section, .whatsapp-cta, .newsletter, .site-footer, .product-card, .category-card, .sv-home__card";
+  const observados = new WeakSet();
+  const observer = new IntersectionObserver((entradas) => {
+    entradas.forEach(({ target, isIntersecting }) => {
+      if (!isIntersecting) return;
+      target.classList.add("reveal-item--visible");
+      observer.unobserve(target);
+    });
+  }, { threshold: 0.08, rootMargin: "0px 0px -28px" });
+
+  const preparar = (raiz = document) => {
+    const itens = [];
+    if (raiz instanceof Element && raiz.matches(seletor)) itens.push(raiz);
+    if (raiz.querySelectorAll) itens.push(...raiz.querySelectorAll(seletor));
+
+    itens.forEach((item, indice) => {
+      if (observados.has(item) || item.hidden) return;
+      observados.add(item);
+      item.classList.add("reveal-item");
+      item.style.setProperty("--reveal-delay", `${Math.min(indice % 5, 4) * 70}ms`);
+      observer.observe(item);
+    });
+  };
+
+  preparar();
+  new MutationObserver((mudancas) => {
+    mudancas.forEach((mudanca) => {
+      mudanca.addedNodes.forEach((no) => {
+        if (no.nodeType === Node.ELEMENT_NODE) preparar(no);
+      });
+      if (mudanca.type === "attributes" && mudanca.target instanceof Element && !mudanca.target.hidden) {
+        preparar(mudanca.target);
+      }
+    });
+  }).observe(document.body, { childList: true, subtree: true, attributes: true, attributeFilter: ["hidden"] });
+}
+
 // ---------- Seção "Cuidados para você" (home) ----------
 const SVG_SV = (d) => `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">${d}</svg>`;
 const ICONES_SERVICO_HOME = {
@@ -210,6 +252,7 @@ async function iniciar() {
   iniciarModais();
   aplicarIconesEstaticos();
   atualizarBadgeCarrinho();
+  iniciarEfeitosVisuais();
 
   // Home mostra só prévias — cada seção busca só o que precisa direto do
   // Firestore (nada de baixar o catálogo inteiro pra montar 3 vitrines de

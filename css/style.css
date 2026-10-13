@@ -341,6 +341,55 @@ button {
    responsivo — ver breakpoints em responsive.css. O nome "5col" é histórico. */
 .products-grid--5col { grid-template-columns: repeat(5, minmax(0, 1fr)); }
 
+/* ===== EFEITOS VISUAIS ===== */
+@media (prefers-reduced-motion: no-preference) {
+  .motion-enabled .reveal-item {
+    opacity: 0;
+    filter: blur(5px);
+    transform: translateY(26px) scale(0.985);
+    transition:
+      opacity 620ms ease,
+      transform 620ms cubic-bezier(0.22, 1, 0.36, 1),
+      filter 620ms ease;
+    transition-delay: var(--reveal-delay, 0ms);
+    will-change: opacity, transform, filter;
+  }
+
+  .motion-enabled .reveal-item.reveal-item--visible {
+    opacity: 1;
+    filter: none;
+    transform: none;
+  }
+
+  .motion-enabled .product-card.reveal-item--visible:hover {
+    transform: translateY(-7px) scale(1.012);
+    box-shadow: 0 16px 30px rgba(74, 40, 28, 0.14);
+  }
+
+  .btn-primary, .btn-secondary, .btn-whatsapp-lg, .product-card__ask {
+    transition: transform var(--transicao), box-shadow var(--transicao), background-color var(--transicao), border-color var(--transicao);
+  }
+
+  .btn-primary:hover, .btn-whatsapp-lg:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 9px 20px rgba(107, 14, 18, 0.22);
+  }
+
+  .btn-secondary:hover, .product-card__ask:hover { transform: translateY(-2px); }
+
+  .hero__content > * {
+    animation: hero-entrada 680ms cubic-bezier(0.22, 1, 0.36, 1) both;
+  }
+  .hero__content > :nth-child(2) { animation-delay: 90ms; }
+  .hero__content > :nth-child(3) { animation-delay: 180ms; }
+  .hero__content > :nth-child(4) { animation-delay: 270ms; }
+
+  @keyframes hero-entrada {
+    from { opacity: 0; transform: translateY(20px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+}
+
 .section__cta { display: flex; justify-content: center; margin-top: 2rem; }
 
 .product-card {
