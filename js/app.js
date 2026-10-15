@@ -13,8 +13,8 @@ import {
 } from "./modules/cart.js";
 import { iniciarSincronizacaoConta } from "./services/contaSync.js";
 import { formatBRL, escHtml, getQueryParam, toast, podeExecutar, podeExecutarPersistente, mascararCPF, mascararCNPJ, mascararTelefone, pareceEmail, imgPos, registrarErroCliente, confirmarAcao } from "./utils/utils.js";
-import { ouvirEstadoAuth, ehAdmin, entrar, cadastrar, sair, usuarioAtual, perfilAtual, redefinirSenha, atualizarNomeAuth } from "./services/auth.js";
-import { iniciarModais, abrirModal, fecharModal, trocarAba } from "./utils/modal.js";
+import { ouvirEstadoAuth, entrar, cadastrar, sair, usuarioAtual, perfilAtual, redefinirSenha, atualizarNomeAuth } from "./services/auth.js";
+import { iniciarModais, abrirModal, fecharModal } from "./utils/modal.js";
 import { iniciarOrcamento } from "./modules/orcamento.js";
 import { ICONS, icon } from "./utils/icons.js";
 import { STORE_CONFIG } from "../firebase/firebase-config.js";
@@ -41,13 +41,6 @@ iniciarLoadingGlobal();
 })();
 
 let filtrosAtivos = {};
-let moduloPainelAdmin;
-
-async function iniciarPainelAdminSobDemanda(root) {
-  moduloPainelAdmin ||= import("./modules/dashboard.js");
-  const { iniciarPainelAdmin } = await moduloPainelAdmin;
-  return iniciarPainelAdmin(root);
-}
 
 /** Executa uma busca somente quando a seção estiver perto da área visível. */
 function carregarAoAproximar(alvo, tarefa) {
@@ -287,11 +280,8 @@ async function iniciar() {
   configurarEventosCategorias();
   iniciarOrcamento();
 
-  // "F5" automático para visitantes após um CRUD público no painel. Se o
-  // próprio painel estiver aberto, aguardamos ele fechar para não interromper
-  // um formulário; em qualquer outra aba a recarga é imediata.
+  // Atualiza a vitrine quando dados públicos forem alterados.
   let recargaPublicaAgendada = false;
-  let atualizacaoPendenteNoPainel = false;
   const agendarRecargaPublica = () => {
     if (recargaPublicaAgendada) return;
     recargaPublicaAgendada = true;
@@ -300,16 +290,7 @@ async function iniciar() {
     toast("A loja foi atualizada.");
     window.setTimeout(() => window.location.reload(), 700);
   };
-  observarAtualizacaoPublica(() => {
-    if (document.querySelector("#modal-admin.is-open")) {
-      atualizacaoPendenteNoPainel = true;
-      return;
-    }
-    agendarRecargaPublica();
-  });
-  document.querySelector("#modal-admin")?.addEventListener("modal:fechado", () => {
-    if (atualizacaoPendenteNoPainel) agendarRecargaPublica();
-  });
+  observarAtualizacaoPublica(agendarRecargaPublica);
 
   document.querySelector("#btn-sair-conta")?.addEventListener("click", () => {
     sair();
@@ -602,7 +583,6 @@ function configurarLogin() {
       aplicarCarrinho: aplicarCarrinhoSincronizado,
       aplicarFavoritos: aplicarFavoritosSincronizados
     });
-    const btnAdmin = document.querySelector("#abrir-admin");
     const btnEntrar = document.querySelector("#btn-entrar");
     const btnSair = document.querySelector("#btn-sair");
     const btnMinhaConta = document.querySelector("#btn-minha-conta");
@@ -615,22 +595,10 @@ function configurarLogin() {
       const emailEl = document.querySelector("#conta-email");
       if (nomeEl) nomeEl.textContent = usuario.displayName ? `Olá, ${usuario.displayName}!` : "Olá!";
       if (emailEl) emailEl.textContent = usuario.email || "";
-      if (ehAdmin()) {
-        btnAdmin?.removeAttribute("hidden");
-        if (btnAdmin && !btnAdmin.dataset.bound) {
-          btnAdmin.dataset.bound = "1";
-          btnAdmin.addEventListener("click", async () => {
-            const modal = document.querySelector("#modal-admin");
-            abrirModal(modal);
-            await iniciarPainelAdminSobDemanda(modal);
-          });
-        }
-      }
     } else {
       btnEntrar?.removeAttribute("hidden");
       btnSair?.setAttribute("hidden", "");
       btnMinhaConta?.setAttribute("hidden", "");
-      btnAdmin?.setAttribute("hidden", "");
     }
 
     if (btnSair && !btnSair.dataset.bound) {
@@ -648,10 +616,6 @@ function configurarLogin() {
       } else if (abrir === "conta") {
         // Vindo do botão "Conta" de outra página: abre a conta se logado, senão o login.
         abrirModal(document.querySelector(usuario ? "#modal-conta" : "#modal-login"));
-      } else if (abrir === "admin" && usuario && ehAdmin()) {
-        const modal = document.querySelector("#modal-admin");
-        abrirModal(modal);
-        iniciarPainelAdminSobDemanda(modal);
       }
       if (abrir) {
         const url = new URL(window.location.href);
@@ -659,10 +623,6 @@ function configurarLogin() {
         window.history.replaceState({}, "", url);
       }
     }
-  });
-
-  document.querySelectorAll("[data-tab-trigger]").forEach(tab => {
-    tab.addEventListener("click", () => trocarAba(document.querySelector("#modal-admin"), tab.dataset.tabTrigger));
   });
 }
 

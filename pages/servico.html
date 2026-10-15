@@ -108,9 +108,6 @@
       <button id="btn-minha-conta" class="header-action" hidden data-modal-target="#modal-conta" aria-label="Minha conta">
         <span data-icon="user"></span><span>Minha conta</span>
       </button>
-      <button id="abrir-admin" class="header-action" hidden aria-label="Painel Admin">
-        <span data-icon="home"></span><span>Painel Admin</span>
-      </button>
       <button class="menu-toggle" aria-label="Abrir menu"><span data-icon="menu"></span></button>
     </div>
   </div>
@@ -166,7 +163,7 @@ import {
   renderizarGradeServicos, compartilharServico, obterIdsFavoritosServicos,
   alternarFavoritoServico, linkAgendarServico, textoPrecoServico
 } from "../js/modules/servicos-publico.js";
-import { ouvirEstadoAuth, ehAdmin, sair } from "../js/services/auth.js";
+import { ouvirEstadoAuth, sair } from "../js/services/auth.js";
 import { ICONS, icon } from "../js/utils/icons.js";
 import { iniciarLoadingGlobal } from "../js/utils/loadingUI.js";
 import { observarAtualizacaoPublica } from "../js/services/public-sync.js";
@@ -393,7 +390,6 @@ document.querySelector("#form-busca-servico").addEventListener("submit", (e) => 
 });
 
 ouvirEstadoAuth((usuario) => {
-  const btnAdmin = document.querySelector("#abrir-admin");
   const btnEntrar = document.querySelector("#btn-entrar");
   const btnSair = document.querySelector("#btn-sair");
   const btnMinhaConta = document.querySelector("#btn-minha-conta");
@@ -401,18 +397,14 @@ ouvirEstadoAuth((usuario) => {
     btnEntrar?.setAttribute("hidden", "");
     btnSair?.removeAttribute("hidden");
     btnMinhaConta?.removeAttribute("hidden");
-    if (ehAdmin()) btnAdmin?.removeAttribute("hidden");
-    else btnAdmin?.setAttribute("hidden", "");
   } else {
     btnEntrar?.removeAttribute("hidden");
     btnSair?.setAttribute("hidden", "");
     btnMinhaConta?.setAttribute("hidden", "");
-    btnAdmin?.setAttribute("hidden", "");
   }
 });
 document.querySelector("#btn-entrar")?.addEventListener("click", () => { window.location.href = "/?abrir=login"; });
 document.querySelector("#btn-minha-conta")?.addEventListener("click", () => { window.location.href = "/?abrir=conta"; });
-document.querySelector("#abrir-admin")?.addEventListener("click", () => { window.location.href = "/?abrir=admin"; });
 document.querySelector("#btn-sair")?.addEventListener("click", sair);
 
 iniciarServico();

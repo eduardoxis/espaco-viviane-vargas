@@ -139,9 +139,6 @@
       <button id="btn-minha-conta" class="header-action" hidden data-modal-target="#modal-conta" aria-label="Minha conta">
         <span data-icon="user"></span><span>Minha conta</span>
       </button>
-      <button id="abrir-admin" class="header-action" hidden aria-label="Painel Admin">
-        <span data-icon="home"></span><span>Painel Admin</span>
-      </button>
       <button class="menu-toggle" aria-label="Abrir menu"><span data-icon="menu"></span></button>
     </div>
   </div>
@@ -193,7 +190,7 @@
 import { listarServicosPublico, montarArvoreCategorias, resolverNomesServicos, invalidarCacheServicos, normalizarTexto, ordenarServicos } from "../js/services/servicos.js";
 import { escHtml, getQueryParam, toast, debounce, registrarErroCliente } from "../js/utils/utils.js";
 import { renderizarServicosCatalogo } from "../js/modules/servicos-publico.js";
-import { ouvirEstadoAuth, ehAdmin, sair } from "../js/services/auth.js";
+import { ouvirEstadoAuth, sair } from "../js/services/auth.js";
 import { ICONS } from "../js/utils/icons.js";
 import { iniciarLoadingGlobal } from "../js/utils/loadingUI.js";
 import { observarAtualizacaoPublica } from "../js/services/public-sync.js";
@@ -452,7 +449,6 @@ inputBusca.addEventListener("input", (e) => {
 // ---------- conta ----------
 function configurarContaUI() {
   ouvirEstadoAuth((usuario) => {
-    const btnAdmin = document.querySelector("#abrir-admin");
     const btnEntrar = document.querySelector("#btn-entrar");
     const btnSair = document.querySelector("#btn-sair");
     const btnMinhaConta = document.querySelector("#btn-minha-conta");
@@ -461,21 +457,17 @@ function configurarContaUI() {
       btnEntrar?.setAttribute("hidden", "");
       btnSair?.removeAttribute("hidden");
       btnMinhaConta?.removeAttribute("hidden");
-      if (ehAdmin()) btnAdmin?.removeAttribute("hidden");
-      else btnAdmin?.setAttribute("hidden", "");
     } else {
       btnEntrar?.removeAttribute("hidden");
       btnSair?.setAttribute("hidden", "");
       btnMinhaConta?.setAttribute("hidden", "");
-      btnAdmin?.setAttribute("hidden", "");
     }
   });
 
-  // "Entrar", "Minha conta" e "Painel Admin" abrem modais que só existem
-  // na página inicial — aqui redireciona pra lá já sinalizando qual abrir.
+  // Os modais de entrar e de conta existem na página inicial; daqui, o
+  // visitante é redirecionado para ela já sinalizando qual deve abrir.
   document.querySelector("#btn-entrar")?.addEventListener("click", () => { window.location.href = "/?abrir=login"; });
   document.querySelector("#btn-minha-conta")?.addEventListener("click", () => { window.location.href = "/?abrir=conta"; });
-  document.querySelector("#abrir-admin")?.addEventListener("click", () => { window.location.href = "/?abrir=admin"; });
   document.querySelector("#btn-sair")?.addEventListener("click", sair);
 }
 
