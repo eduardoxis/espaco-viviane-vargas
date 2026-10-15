@@ -255,16 +255,24 @@ async function iniciar() {
   carregarAoAproximar(gradeProdutos, async () => {
     renderizarGrade(gradeProdutos, await listarProdutosVitrine(10));
   });
+  // Recentes é a referência usada para impedir que a vitrine de destaques
+  // repita os mesmos itens. A Promise compartilhada evita uma segunda leitura.
+  let recentesHomePromise;
+  const carregarRecentesHome = () => {
+    recentesHomePromise ||= listarProdutosRecentes(10);
+    return recentesHomePromise;
+  };
   const gradeDestaques = document.querySelector("#grade-destaques");
   carregarAoAproximar(gradeDestaques, async () => {
     // Dez itens formam duas linhas completas de cinco no desktop.
-    renderizarGrade(gradeDestaques, await listarProdutosDestaque(10));
+    const recentes = await carregarRecentesHome();
+    renderizarGrade(gradeDestaques, await listarProdutosDestaque(10, recentes.map(produto => produto.id)));
   });
   const secaoServicosHome = document.querySelector("#servicos-home");
   carregarAoAproximar(secaoServicosHome, () => renderizarServicosHome(secaoServicosHome));
   const gradeRecentes = document.querySelector("#grade-recentes");
   carregarAoAproximar(gradeRecentes, async () => {
-    renderizarGrade(gradeRecentes, await listarProdutosRecentes(10));
+    renderizarGrade(gradeRecentes, await carregarRecentesHome());
   });
 
   listarCategorias().then((categorias) => {

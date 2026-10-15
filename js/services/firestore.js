@@ -494,52 +494,83 @@ export const listarProdutosVitrine = comCache("listarProdutosVitrine", 3 * 60 * 
 const ETIQUETAS_DESTAQUE = ["Mais Vendido", "Promoção"];
 
 /** Lê somente produtos que TÊM a etiqueta (um índice composto status + etiquetas atende). */
-async function buscarDestaquesPorEtiqueta(tamanho) {
+async function buscarDestaquesPorEtiqueta(tamanho, idsExcluidos = new Set()) {
   const col = collection(db, "produtos");
+  // Busca alguns itens extras porque os mais novos podem já estar na seção de
+  // recentes. Assim, a home continua mostrando vitrines diferentes.
+  const limiteBusca = Math.min(tamanho + idsExcluidos.size, 60);
   const snaps = await Promise.all(ETIQUETAS_DESTAQUE.map(etiqueta => getDocs(query(
     col,
     where("status", "in", STATUS_PUBLICOS),
     where("etiquetas", "array-contains", etiqueta),
-    limit(tamanho)
+    limit(limiteBusca)
   ))));
   const porId = new Map();
   snaps.forEach(snap => snap.docs.forEach(d => porId.set(d.id, { id: d.id, ...d.data() })));
-  return [...porId.values()].filter(p => p.status !== "oculto").slice(0, tamanho);
+  return [...porId.values()]
+    .filter(produtoTemImagemPublica)
+    .filter(p => p.status !== "oculto" && !idsExcluidos.has(p.id))
+    .slice(0, tamanho);
 }
 
 /** Caminho antigo (sem índice novo): lê alguns produtos e filtra a etiqueta no navegador. */
-async function buscarDestaquesLegado(tamanho) {
+async function buscarDestaquesLegado(tamanho, idsExcluidos = new Set()) {
+  const limiteBusca = Math.min(Math.max(tamanho + idsExcluidos.size + 16, 24), 80);
   const snap = await getDocs(query(
     collection(db, "produtos"),
     where("status", "in", STATUS_PUBLICOS),
-    limit(Math.max(tamanho + 16, 24))
+    limit(limiteBusca)
   ));
   return snap.docs
     .map(d => ({ id: d.id, ...d.data() }))
+    .filter(produtoTemImagemPublica)
+    .filter(p => !idsExcluidos.has(p.id))
     .filter(p => Array.isArray(p.etiquetas) && p.etiquetas.some(etiqueta => ETIQUETAS_DESTAQUE.includes(etiqueta)))
     .slice(0, tamanho);
 }
 
+async function buscarAlternativasParaDestaques(tamanho, idsExcluidos) {
+  // Sem etiquetas de destaque, mostra outros produtos públicos — nunca a
+  // mesma seleção recém-carregada na seção "Adicionados recentemente".
+  const candidatos = await listarProdutosRecentes(tamanho + idsExcluidos.size);
+  const alternativas = candidatos.filter(produto => !idsExcluidos.has(produto.id));
+  if (alternativas.length >= tamanho) return alternativas.slice(0, tamanho);
+
+  const snap = await getDocs(query(
+    collection(db, "produtos"),
+    where("status", "in", STATUS_PUBLICOS),
+    limit(Math.min(Math.max(tamanho + idsExcluidos.size + 16, 24), 80))
+  ));
+  const porId = new Map(alternativas.map(produto => [produto.id, produto]));
+  snap.docs
+    .map(d => ({ id: d.id, ...d.data() }))
+    .filter(produtoTemImagemPublica)
+    .filter(produto => !idsExcluidos.has(produto.id))
+    .forEach(produto => porId.set(produto.id, produto));
+  return [...porId.values()].slice(0, tamanho);
+}
+
 /** Produtos com etiqueta "Mais Vendido" ou "Promoção" — usado na home ("Destaques"). */
-export const listarProdutosDestaque = comCache("listarProdutosDestaque", 3 * 60 * 1000, (tamanho = 8) =>
+export const listarProdutosDestaque = comCache("listarProdutosDestaque", 3 * 60 * 1000, (tamanho = 8, excluirIds = []) =>
   withLoading("listarProdutosDestaque", async () => {
+    const idsExcluidos = new Set((Array.isArray(excluirIds) ? excluirIds : []).filter(Boolean));
     // A leitura pública sempre é limitada a produtos visíveis. Filtramos as
     // etiquetas no navegador para não combinar dois filtros disjuntivos
     // (array-contains-any + in), combinação que o Firestore não aceita.
     let produtos;
     try {
-      produtos = await buscarDestaquesPorEtiqueta(tamanho);
+      produtos = await buscarDestaquesPorEtiqueta(tamanho, idsExcluidos);
     } catch (erro) {
       // Índice composto ainda não publicado (ou consulta recusada): volta ao
       // caminho antigo, que funciona sem índice novo.
       if (!["failed-precondition", "invalid-argument"].includes(erro?.code)) throw erro;
-      produtos = await buscarDestaquesLegado(tamanho);
+      produtos = await buscarDestaquesLegado(tamanho, idsExcluidos);
     }
     if (produtos.length) return produtos;
 
     try {
-      const recentes = await listarProdutosRecentes(tamanho);
-      if (recentes.length) return recentes;
+      const alternativas = await buscarAlternativasParaDestaques(tamanho, idsExcluidos);
+      if (alternativas.length) return alternativas;
     } catch { /* segue pro fallback final abaixo */ }
 
     // Último fallback: se nada tiver etiqueta de destaque nem campo
@@ -550,7 +581,11 @@ export const listarProdutosDestaque = comCache("listarProdutosDestaque", 3 * 60 
       where("status", "in", STATUS_PUBLICOS),
       limit(tamanho + 4)
     ));
-    return snapTodos.docs.map(d => ({ id: d.id, ...d.data() })).filter(p => p.status !== "oculto").slice(0, tamanho);
+    return snapTodos.docs
+      .map(d => ({ id: d.id, ...d.data() }))
+      .filter(produtoTemImagemPublica)
+      .filter(p => p.status !== "oculto" && !idsExcluidos.has(p.id))
+      .slice(0, tamanho);
   }, {
     // Destaques são carregados ao aproximar a seção da tela. Em rede lenta,
     // damos mais tempo à leitura sem travar a navegação ou exibir um alerta
