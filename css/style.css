@@ -926,17 +926,21 @@ body { background: var(--cinza-050); color: var(--cinza-900); font-size: 15px; l
 .hero__art { flex: 1 1 400px; max-width: 600px; }
 .hero__art-img { border-radius: var(--raio-lg); box-shadow: var(--sombra-lg); }
 
-/* Carrossel de banners administrado pelo painel. */
-.hero-carousel { position: relative; width: 100%; overflow: hidden; border-radius: var(--raio-lg); background: var(--champagne, #efe3d4); box-shadow: var(--sombra-lg); touch-action: pan-y; }
-.hero-carousel__viewport { position: relative; aspect-ratio: 1.75 / 1; min-height: 260px; }
+/* Carrossel de banners administrado pelo painel. Ele ocupa toda a área visual
+   do hero, por trás do texto e dos atalhos da página inicial. */
+.hero > .hero-carousel { position: absolute; inset: 0; z-index: 0; width: 100%; height: 100%; overflow: hidden; background: var(--champagne, #efe3d4); touch-action: pan-y; }
+.hero__inner { position: relative; z-index: 2; }
+.hero--with-banner::before { content: ""; position: absolute; inset: 0; z-index: 1; background: linear-gradient(90deg, rgba(250,247,242,.90) 0%, rgba(250,247,242,.62) 43%, rgba(250,247,242,.08) 76%); pointer-events: none; }
+.hero--with-banner::after { z-index: 1; opacity: .25; }
+.hero-carousel__viewport { position: relative; width: 100%; height: 100%; min-height: 100%; }
 .hero-carousel picture, .hero-carousel img { display: block; width: 100%; height: 100%; }
 .hero-carousel img { object-fit: cover; transition: opacity var(--transicao-banner, 500ms) ease, transform var(--transicao-banner, 500ms) ease; }
 .hero-carousel--fade img { animation: bannerFade var(--transicao-banner, 500ms) ease; }
 .hero-carousel--slide img { animation: bannerSlide var(--transicao-banner, 500ms) ease; }
-.hero-carousel__caption { position: absolute; inset: auto 0 0; padding: 1.4rem; display: grid; gap: .25rem; color: #fff; background: linear-gradient(transparent, rgba(56, 41, 32, .78)); }
+.hero-carousel__caption { position: absolute; inset: auto 0 0; padding: 1.4rem; display: grid; gap: .25rem; color: #fff; background: linear-gradient(transparent, rgba(56, 41, 32, .78)); z-index: 3; }
 .hero-carousel__caption strong { font-size: clamp(1.1rem, 2vw, 1.6rem); }.hero-carousel__caption span { font-size: .9rem; }
-.hero-carousel__arrow { position: absolute; top: 50%; transform: translateY(-50%); width: 38px; height: 38px; border: 0; border-radius: 50%; background: rgba(250,247,242,.9); color: var(--azul-900); font-size: 2rem; line-height: 1; cursor: pointer; }.hero-carousel__arrow--prev { left: .8rem; }.hero-carousel__arrow--next { right: .8rem; }
-.hero-carousel__dots { position: absolute; display: flex; gap: .45rem; justify-content: center; left: 0; right: 0; bottom: .9rem; }.hero-carousel__dots button { width: 8px; height: 8px; padding: 0; border-radius: 100px; border: 1px solid #fff; background: transparent; cursor: pointer; }.hero-carousel__dots button.is-active { width: 25px; background: #fff; }
+.hero-carousel__arrow { position: absolute; z-index: 4; top: 50%; transform: translateY(-50%); width: 38px; height: 38px; border: 0; border-radius: 50%; background: rgba(250,247,242,.9); color: var(--azul-900); font-size: 2rem; line-height: 1; cursor: pointer; }.hero-carousel__arrow--prev { left: .8rem; }.hero-carousel__arrow--next { right: .8rem; }
+.hero-carousel__dots { position: absolute; z-index: 4; display: flex; gap: .45rem; justify-content: center; left: 0; right: 0; bottom: .9rem; }.hero-carousel__dots button { width: 8px; height: 8px; padding: 0; border-radius: 100px; border: 1px solid #fff; background: transparent; cursor: pointer; }.hero-carousel__dots button.is-active { width: 25px; background: #fff; }
 @keyframes bannerFade { from { opacity: .25; } to { opacity: 1; } } @keyframes bannerSlide { from { transform: translateX(4%); opacity: .6; } to { transform: translateX(0); opacity: 1; } }
 
 .hero__features {

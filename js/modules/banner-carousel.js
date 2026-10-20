@@ -7,8 +7,9 @@ export function iniciarCarrosselBanners(elemento) {
   const pausar = () => { clearInterval(temporizador); temporizador = null; };
   const renderizar = () => {
     pausar();
-    if (!banners.length) { elemento.hidden = true; return; }
+    if (!banners.length) { elemento.hidden = true; elemento.closest(".hero")?.classList.remove("hero--with-banner"); return; }
     elemento.hidden = false;
+    elemento.closest(".hero")?.classList.add("hero--with-banner");
     atual = Math.min(atual, banners.length - 1);
     const banner = banners[atual];
     elemento.className = `hero-carousel hero-carousel--${config.efeito || "fade"}`;
