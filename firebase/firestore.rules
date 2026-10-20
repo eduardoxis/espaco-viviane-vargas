@@ -67,6 +67,17 @@ service cloud.firestore {
       allow list: if false;
       allow write: if ehAdmin();
     }
+
+    // Banners: visitantes consultam somente itens ativos; o painel administra.
+    match /banners/{id} {
+      allow get: if resource.data.ativo == true || ehAdmin();
+      allow list: if resource.data.ativo == true || ehAdmin();
+      allow create, update, delete: if ehAdmin();
+    }
+    match /configuracoes/banners {
+      allow get: if true;
+      allow create, update, delete: if ehAdmin();
+    }
     match /clientes/{id} {
       allow read, write: if ehAdmin();
     }

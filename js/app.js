@@ -21,6 +21,7 @@ import { STORE_CONFIG } from "../firebase/firebase-config.js";
 import { iniciarLoadingGlobal } from "./utils/loadingUI.js";
 import { observarAtualizacaoPublica } from "./services/public-sync.js";
 import { listarCategoriasHomeServicos, invalidarCacheServicos, normalizarTexto } from "./services/servicos.js";
+import { iniciarCarrosselBanners } from "./modules/banner-carousel.js";
 
 iniciarLoadingGlobal();
 
@@ -246,6 +247,7 @@ async function iniciar() {
   aplicarIconesEstaticos();
   atualizarBadgeCarrinho();
   iniciarEfeitosVisuais();
+  iniciarCarrosselBanners(document.querySelector("#carrossel-banners"));
 
   // Home mostra só prévias — cada seção busca só o que precisa direto do
   // Firestore (nada de baixar o catálogo inteiro pra montar 3 vitrines de
