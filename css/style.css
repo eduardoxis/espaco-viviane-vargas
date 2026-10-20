@@ -3,26 +3,25 @@
 
 /* ===== TOKENS ===== */
 :root {
-  /* Identidade Espaço Viviane Vargas.
-     Os nomes das variáveis (azul-*, cinza-*) foram mantidos para não mexer em
-     nenhum seletor/JS; apenas os VALORES mudaram: azul-* = bordô/vinho,
-     cinza-* = marrom/nude. */
-  --azul-900: #4a0a0f;   /* vinho profundo */
-  --azul-700: #6b0e12;   /* bordô da logo */
-  --azul-500: #8a2a2f;
-  --azul-100: #f4e8df;   /* nude claro */
+  /* Identidade Espaço Viviane Vargas: paleta taupe/bege amadeirada.
+     Os nomes antigos foram preservados para manter todos os componentes. */
+  --azul-900: #4f3e35;
+  --azul-700: #765e50;
+  --azul-600: #886e5e;
+  --azul-500: #b79d8b;
+  --azul-100: #f3ebe6;
   --branco: #ffffff;
   --cinza-050: #ffffff;
-  --cinza-100: #efe4da;
-  --cinza-200: #e6d8cc;
-  --cinza-300: #dccbbd;
-  --cinza-400: #b9a699;
-  --cinza-500: #8f7b6e;
-  --cinza-600: #6f5d53;
-  --cinza-700: #5b4a41;
-  --cinza-900: #2b1d18;
-  --marrom: #7a4a2e;
-  --nude: #e9d3c3;
+  --cinza-100: #eaded6;
+  --cinza-200: #dccbc0;
+  --cinza-300: #cfb8aa;
+  --cinza-400: #b79d8b;
+  --cinza-500: #998072;
+  --cinza-600: #765f53;
+  --cinza-700: #59483f;
+  --cinza-900: #302722;
+  --marrom: #8e725f;
+  --nude: #e7d6cc;
 
   --raio-sm: 10px;
   --raio-md: 16px;
@@ -413,7 +412,7 @@ button {
 }
 .product-card__fav .icon { width: 15px; height: 15px; }
 .product-card__fav:hover { transform: scale(1.08); }
-.product-card__fav.is-active { color: #8a1c22; }
+.product-card__fav.is-active { color: var(--azul-700); }
 .product-card__fav.is-active svg { fill: currentColor; }
 
 .product-card__image { position: relative; aspect-ratio: 411 / 732; background: var(--branco); }
@@ -827,7 +826,7 @@ button {
 .auth-error { color: #b42318; font-size: 0.82rem; min-height: 1.1em; margin: 0; }
 .campo-consentimento { display: flex; align-items: flex-start; gap: 0.5rem; font-size: 0.82rem; color: var(--cinza-600, #5b4a41); cursor: pointer; margin: 0.4rem 0; }
 .campo-consentimento input { margin-top: 0.2rem; flex-shrink: 0; }
-.campo-consentimento a { color: var(--azul-600, #6b0e12); }
+.campo-consentimento a { color: var(--azul-600); }
 .auth-success { color: #1a7f4e; font-size: 0.82rem; margin: 0; line-height: 1.5; background: #eafaf1; border-radius: var(--raio-sm); padding: 0.6rem 0.75rem; }
 .auth-info { color: var(--cinza-500); font-size: 0.85rem; margin: 0 0 -0.3rem; line-height: 1.5; }
 #form-entrar-modal .checkbox-inline, #form-cadastrar-modal .checkbox-inline {
@@ -983,7 +982,7 @@ body { background: var(--cinza-050); color: var(--cinza-900); font-size: 15px; l
 .qty-stepper { border-color: var(--cinza-300); }
 
 /* ----- Faixa promocional ----- */
-.promo-banner { background: #6b0e12; border-radius: 28px; }
+.promo-banner { background: var(--azul-900); border-radius: 28px; }
 .promo-banner h3 { font-weight: 500; font-size: clamp(1.6rem, 3vw, 2.3rem); }
 .promo-banner h3 strong { color: #e8c9a0; font-weight: 600; font-style: italic; }
 .promo-banner__eyebrow { color: #e3c3ae; letter-spacing: 0.26em; font-weight: 500; }
@@ -1021,7 +1020,7 @@ body { background: var(--cinza-050); color: var(--cinza-900); font-size: 15px; l
 .cart-item img { background: #fbf7f3; }
 .summary-row--total { color: var(--azul-700); }
 .toast { background: var(--azul-900); border-radius: 999px; }
-.toast-error { background: #8a1c22; }
+.toast-error { background: var(--azul-900); }
 .auth-tabs button { background: var(--cinza-050); font-weight: 500; }
 .auth-tabs button.is-active { background: var(--azul-700); color: #fff; }
 .account-profile, .perfil-hero { background: var(--azul-100); }
@@ -1030,8 +1029,8 @@ body { background: var(--cinza-050); color: var(--cinza-900); font-size: 15px; l
 .account-menu__item:hover { background: var(--cinza-050); }
 .account-menu__icon, .perfil-item__icon { background: var(--azul-100); color: var(--azul-700); }
 .account-menu__item--danger { border-color: #ecc9c4; }
-.account-menu__item--danger .account-menu__icon { background: #f8e4e1; color: #8a1c22; }
-.account-menu__item--danger strong { color: #8a1c22; }
+.account-menu__item--danger .account-menu__icon { background: var(--azul-100); color: var(--azul-700); }
+.account-menu__item--danger strong { color: var(--azul-700); }
 .empty-state { color: var(--cinza-500); }
 .bottom-nav { background: rgba(255, 253, 251, 0.96); backdrop-filter: blur(10px); }
 .bottom-nav__item.is-active { color: var(--azul-700); }
