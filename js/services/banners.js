@@ -34,8 +34,12 @@ export async function listarBannersAdmin() {
 }
 
 export function observarBannersAtivos(aoAtualizar, aoErro = console.error) {
-  return onSnapshot(query(collection(db, COLECAO), where("ativo", "==", true), orderBy("ordem", "asc")),
-    snap => aoAtualizar(snap.docs.map(item => ({ id: item.id, ...item.data() }))), aoErro);
+  // A ordenação é feita no navegador. Assim o carrossel não depende de um
+  // índice composto do Firestore para combinar "ativo" e "ordem".
+  return onSnapshot(query(collection(db, COLECAO), where("ativo", "==", true)),
+    snap => aoAtualizar(snap.docs
+      .map(item => ({ id: item.id, ...item.data() }))
+      .sort((a, b) => (Number(a.ordem) || 0) - (Number(b.ordem) || 0))), aoErro);
 }
 
 export function observarConfiguracaoBanners(aoAtualizar, aoErro = console.error) {
