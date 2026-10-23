@@ -66,6 +66,7 @@
 .home-page .menu-toggle { display: none; }
 .beauty-hero { position: relative; isolation: isolate; overflow: hidden; background: #f8f1eb; }
 .beauty-hero__visual { position: absolute; inset: 0; z-index: -1; }
+.beauty-hero__visual picture { display: block; width: 100%; height: 100%; }
 .beauty-hero__visual img { width: 100%; height: 100%; object-fit: cover; object-position: center top; }
 .beauty-hero__inner { width: min(1600px, 100%); min-height: clamp(640px, 49.7vw, 900px); margin: auto; display: flex; align-items: center; }
 .beauty-hero__content { width: 63%; padding: 60px 3% 90px 6%; text-align: center; }
@@ -112,7 +113,8 @@
   .beauty-hero__title { font-size: clamp(38px, 10.4vw, 62px); line-height: 1.02; }
   .beauty-hero__description { margin-top: 22px; font-size: 16px; line-height: 1.55; max-width: 440px; }
   .beauty-hero__visual { position: relative; order: 2; height: clamp(320px, 95vw, 520px); overflow: hidden; }
-  .beauty-hero__visual img { width: 210%; max-width: none; height: 100%; object-fit: cover; object-position: right; margin-left: -110%; }
+  .beauty-hero__visual picture { display: block; width: 100%; height: 100%; }
+.beauty-hero__visual img { width: 210%; max-width: none; height: 100%; object-fit: cover; object-position: right; margin-left: -110%; }
 }
 
 .home-page #btn-entrar:not([hidden]), .home-page #btn-minha-conta:not([hidden]) { display: inline-flex !important; }
