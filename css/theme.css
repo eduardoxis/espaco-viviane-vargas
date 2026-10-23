@@ -1,0 +1,18 @@
+/* Paleta compartilhada com Serviços: branco, creme e marrom amadeirado. */
+:root, body.home-page {
+  --azul-900: #705443;
+  --azul-700: #705443;
+  --azul-600: #8c6954;
+  --azul-500: #a98168;
+  --azul-100: #efe3d4;
+  --branco: #ffffff;
+  --cinza-050: #ffffff;
+  --marrom: #705443;
+  --nude: #a98168;
+}
+html { scrollbar-width: none; -ms-overflow-style: none; }
+html::-webkit-scrollbar, body::-webkit-scrollbar { display: none; width: 0; height: 0; }
+body { background-color: #ffffff; }
+.logo__mark { filter: grayscale(1) sepia(.8); }
+.site-header { background-color: #ffffff; }
+.bottom-nav { background: #ffffff; }

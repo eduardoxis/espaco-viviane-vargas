@@ -21,7 +21,6 @@ import { STORE_CONFIG } from "../firebase/firebase-config.js";
 import { iniciarLoadingGlobal } from "./utils/loadingUI.js";
 import { observarAtualizacaoPublica } from "./services/public-sync.js";
 import { listarCategoriasHomeServicos, invalidarCacheServicos, normalizarTexto } from "./services/servicos.js";
-import { iniciarCarrosselBanners } from "./modules/banner-carousel.js";
 
 iniciarLoadingGlobal();
 
@@ -196,15 +195,15 @@ const COR_POR_CATEGORIA = {
 };
 
 const TEXTO_POR_CATEGORIA = {
-  backpack: "#6b0e12",
+  backpack: "#705443",
   laptop: "#7a4a2e",
-  palette: "#8a2a2f",
+  palette: "#705443",
   printer: "#5b4a41",
-  notebook: "#6b0e12",
+  notebook: "#705443",
   pen: "#7a4a2e",
   briefcase: "#8a5a2b",
   archive: "#7a6558",
-  gift: "#6b0e12",
+  gift: "#705443",
   tag: "#5b4a41",
 };
 
@@ -247,7 +246,6 @@ async function iniciar() {
   aplicarIconesEstaticos();
   atualizarBadgeCarrinho();
   iniciarEfeitosVisuais();
-  iniciarCarrosselBanners(document.querySelector("#carrossel-banners"));
 
   // Home mostra só prévias — cada seção busca só o que precisa direto do
   // Firestore (nada de baixar o catálogo inteiro pra montar 3 vitrines de
