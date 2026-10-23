@@ -1,0 +1,124 @@
+/* Página inicial: composição editorial; os demais templates mantêm seus estilos. */
+.home-page {
+  --azul-900: #801827;
+  --azul-700: #801827;
+  --azul-600: #9a3443;
+  --azul-100: #f3e4df;
+  --branco: #fffaf6;
+  --cinza-050: #fffaf6;
+  --cinza-900: #292929;
+  background: #fffaf6;
+}
+.home-page .site-header {
+  background: #fdf8f3;
+  border-bottom: 1px solid #eadbd3;
+  border-radius: 0;
+  box-shadow: none;
+}
+.home-page .header-top {
+  width: min(1400px, 92%);
+  min-height: 100px;
+  padding: 16px 0;
+  display: flex;
+  flex-wrap: nowrap;
+  gap: clamp(24px, 4vw, 70px);
+}
+.home-page .logo { flex: 0 0 auto; gap: 16px; }
+.home-page .logo__mark { width: 66px; height: 66px; border-radius: 0; }
+.home-page .logo__text { display: grid; gap: 4px; }
+.home-page .logo__t1 { font: 500 14px / 1 Inter, Arial, sans-serif; letter-spacing: .28em; color: #805b48; }
+.home-page .logo__t2 { font: 400 clamp(20px, 1.7vw, 28px) / 1.1 Inter, Arial, sans-serif; letter-spacing: .045em; color: #805b48; }
+.home-page .logo__t3 { margin: 0; font: 500 8px / 1.2 Inter, Arial, sans-serif; letter-spacing: .23em; color: #805b48; }
+.home-page .search-bar {
+  flex: 1 1 360px;
+  min-width: 160px;
+  max-width: 480px;
+  min-height: 50px;
+  padding: 0 14px 0 22px;
+  border: 1px solid #e6d5cb;
+  background: transparent;
+  border-radius: 999px;
+}
+.home-page .search-bar input { font: 15px / 1.55 Inter, Arial, sans-serif; padding: 10px 8px; color: #292929; }
+.home-page .search-bar input::placeholder { color: #9c9691; opacity: 1; }
+.home-page .search-bar__btn { width: 30px; height: 38px; padding: 0; order: -1; color: #89624d; background: transparent; flex-shrink: 0; }
+.home-page .search-bar__leading { display: none; }
+.home-page .header-actions { display: flex; flex: 0 0 auto; gap: clamp(18px, 2.4vw, 40px); margin: 0; }
+.home-page .header-action {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: auto;
+  height: auto;
+  min-height: 44px;
+  padding: 0;
+  border: 0;
+  border-radius: 0;
+  color: #292929;
+  font: 15px / 1.55 Inter, Arial, sans-serif;
+}
+.home-page .header-action span:last-child { display: inline; }
+.home-page .header-action .icon { display: none; }
+.home-page .header-action:hover { color: #801827; }
+.home-page #abrir-carrinho { width: 58px; height: 44px; border-left: 1px solid #e5d4ca; border-radius: 0; padding-left: 22px; color: #89624d; }
+.home-page #abrir-carrinho .icon { width: 28px; height: 28px; }
+.home-page .cart-badge { display: flex !important; background: #dca99b; color: #fff; font: 11px / 1 Inter, Arial, sans-serif; }
+.home-page .menu-toggle { display: none; }
+.beauty-hero { position: relative; isolation: isolate; overflow: hidden; background: #f8f1eb; }
+.beauty-hero__visual { position: absolute; inset: 0; z-index: -1; }
+.beauty-hero__visual img { width: 100%; height: 100%; object-fit: cover; object-position: center top; }
+.beauty-hero__inner { width: min(1600px, 100%); min-height: clamp(640px, 49.7vw, 900px); margin: auto; display: flex; align-items: center; }
+.beauty-hero__content { width: 63%; padding: 60px 3% 90px 6%; text-align: center; }
+.beauty-hero__eyebrow { margin: 0 0 30px; color: #a74b48; font: 400 15px / 1.55 Inter, Arial, sans-serif; letter-spacing: .27em; }
+.beauty-hero__eyebrow::after { content: ""; display: block; width: 72px; height: 1px; margin: 26px auto 0; background: #c78070; }
+.beauty-hero__title { margin: 0; font: 400 clamp(56px, 6.3vw, 106px) / .94 "Bodoni Moda", "Times New Roman", serif; letter-spacing: -.045em; color: #292929; }
+.beauty-hero__title span, .beauty-hero__title em { display: block; }
+.beauty-hero__title em { color: #801827; font-weight: 400; }
+.beauty-hero__description { max-width: 720px; margin: 30px auto 0; color: #5b5b58; font: 400 clamp(16px, 1.4vw, 23px) / 1.4 Inter, Arial, sans-serif; }
+@media (max-width: 1250px) {
+  .home-page .header-top { gap: 24px; }
+  .home-page .logo { gap: 10px; }
+  .home-page .logo__mark { width: 52px; height: 52px; }
+  .home-page .logo__t2 { font-size: 20px; }
+  .home-page .logo__t1 { font-size: 11px; }
+  .home-page .logo__t3 { font-size: 7px; }
+  .home-page .header-actions { gap: 20px; }
+}
+@media (max-width: 1000px) {
+  .home-page .header-top { flex-wrap: wrap; gap: 14px 24px; min-height: 0; }
+  .home-page .logo { flex: 1 1 270px; }
+  .home-page .header-actions { order: 2; }
+  .home-page .search-bar { order: 3; flex: 1 1 100%; max-width: none; }
+  .beauty-hero__content { width: 64%; padding-left: 4%; }
+  .beauty-hero__title { font-size: clamp(48px, 6.6vw, 66px); }
+  .beauty-hero__eyebrow { font-size: 11px; letter-spacing: .2em; }
+  .beauty-hero__inner { min-height: 580px; }
+}
+@media (max-width: 600px) {
+  .home-page .header-top { width: 92%; padding: 12px 0; gap: 10px; }
+  .home-page .logo { flex-basis: 100%; justify-content: center; }
+  .home-page .logo__mark { width: 48px; height: 48px; }
+  .home-page .logo__t2 { font-size: 20px; }
+  .home-page .header-actions { order: 3; width: 100%; justify-content: space-between; gap: 10px; }
+  .home-page .header-action { font-size: 15px; }
+  .home-page #abrir-carrinho { width: 50px; padding-left: 14px; }
+  .home-page .search-bar { order: 2; min-height: 44px; padding-left: 12px; }
+  .home-page .search-bar input { font-size: 16px !important; }
+  .beauty-hero { display: flex; flex-direction: column; }
+  .beauty-hero__inner { min-height: 0; width: 100%; }
+  .beauty-hero__content { width: 100%; padding: 42px 20px 28px; background: linear-gradient(#f8f1eb, #fbf3ed); }
+  .beauty-hero__eyebrow { font-size: 10px; letter-spacing: .19em; margin-bottom: 24px; }
+  .beauty-hero__eyebrow::after { margin-top: 18px; width: 52px; }
+  .beauty-hero__title { font-size: clamp(38px, 10.4vw, 62px); line-height: 1.02; }
+  .beauty-hero__description { margin-top: 22px; font-size: 16px; line-height: 1.55; max-width: 440px; }
+  .beauty-hero__visual { position: relative; order: 2; height: clamp(320px, 95vw, 520px); overflow: hidden; }
+  .beauty-hero__visual img { width: 210%; max-width: none; height: 100%; object-fit: cover; object-position: right; margin-left: -110%; }
+}
+
+.home-page #btn-entrar:not([hidden]), .home-page #btn-minha-conta:not([hidden]) { display: inline-flex !important; }
+
+.home-page .logo__t3 { display: block; }
+.home-page .search-bar { box-shadow: none; }
+@media (max-width: 1000px) {
+  .beauty-hero__break { display: none; }
+}

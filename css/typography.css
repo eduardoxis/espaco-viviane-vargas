@@ -1,0 +1,38 @@
+/* Tipografia global: escala inspirada na referência, com adaptação para celular. */
+:root {
+  --fonte-display: Inter, Arial, sans-serif;
+  --fonte-corpo: Inter, Arial, sans-serif;
+}
+html { font-size: 15px; }
+body { font: 15px / 1.55 var(--fonte-corpo); }
+button, input, select, textarea { font-family: var(--fonte-corpo); }
+h1, h2, h3, h4, h5, h6 { font-family: var(--fonte-display); }
+.hero__title, .cat-titulo, .sv-titulo {
+  font-size: clamp(36px, 5vw, 72px);
+  font-weight: 800;
+  line-height: 1.04;
+  letter-spacing: -0.045em;
+  overflow-wrap: anywhere;
+}
+.section__title, .sv-home__title, .politica-privacidade h1 {
+  font-size: clamp(28px, 3vw, 40px);
+  font-weight: 700;
+  line-height: 1.15;
+  letter-spacing: -0.03em;
+}
+.hero__subtitle, .cat-sub, .sv-resumo, .sv-home__sub {
+  font-size: clamp(16px, 1.2vw, 18px);
+  line-height: 1.55;
+}
+.btn-primary, .btn-secondary, .btn-whatsapp-lg, .sv-btn, .svc-card__agendar {
+  font-size: 14px;
+  font-weight: 700;
+  line-height: 1.4;
+  min-height: 44px;
+}
+.header-action--nav { font-size: 14px; }
+.hero__eyebrow, .sv-home__eyebrow, .cat-eyebrow {
+  font-size: 12px;
+  font-weight: 700;
+  letter-spacing: 0.14em;
+}
