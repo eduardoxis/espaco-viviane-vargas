@@ -1,8 +1,11 @@
 {
-  "name": "futura-papelaria",
+  "name": "espaco-viviane-vargas",
   "private": true,
   "version": "1.0.0",
-  "description": "Loja virtual Papelaria Futura — frontend estático + backend em Vercel Functions (/api)",
+  "description": "Espaço Viviane Vargas — catálogo, serviços e atendimento pelo WhatsApp.",
+  "scripts": {
+    "test": "node --experimental-vm-modules --test"
+  },
   "dependencies": {
     "firebase-admin": "^12.3.1"
   }

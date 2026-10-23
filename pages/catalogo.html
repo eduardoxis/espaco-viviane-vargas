@@ -108,6 +108,7 @@
 </style>
 <link rel="stylesheet" href="/css/typography.css?v=20261023">
 <link rel="stylesheet" href="/css/theme.css?v=20261023-rolagem">
+<link rel="stylesheet" href="/css/header-mobile.css?v=20261023-2" media="(max-width: 760px)">
 </head>
 <body>
 
@@ -286,12 +287,13 @@
 
 <script type="module">
 import { listarCategorias, listarMarcas, buscarProdutosCatalogo, invalidarCachePublico } from "../js/services/firestore.js";
-import { escHtml, getQueryParam, formatBRL, toast, podeExecutar, debounce, registrarErroCliente, imgPos } from "../js/utils/utils.js";
-import { renderizarGrade } from "../js/modules/products.js";
+import { escHtml, getQueryParam, formatBRL, toast, podeExecutar, debounce, registrarErroCliente, imgPos, mostrarFalhaCarregamento } from "../js/utils/utils.js";
+import { renderizarGrade, obterFavoritos, aplicarFavoritosSincronizados } from "../js/modules/products.js";
 import {
   obterCarrinho, adicionarAoCarrinho, atualizarQuantidade, calcularTotais,
-  atualizarBadgeCarrinho, falarSobreProduto, finalizarPedidoWhatsApp
+  atualizarBadgeCarrinho, falarSobreProduto, finalizarPedidoWhatsApp, aplicarCarrinhoSincronizado
 } from "../js/modules/cart.js";
+import { iniciarSincronizacaoConta } from "../js/services/contaSync.js";
 import { ouvirEstadoAuth, usuarioAtual, sair } from "../js/services/auth.js";
 import { ICONS } from "../js/utils/icons.js";
 import { iniciarLoadingGlobal } from "../js/utils/loadingUI.js";
@@ -535,7 +537,7 @@ async function render() {
     console.error(erro);
     // Erro mais comum aqui é o Firestore pedindo um índice composto novo —
     // o link pra criar aparece no console do navegador (F12).
-    grade.innerHTML = `<div class="empty-state">Não foi possível carregar os produtos agora. Tente novamente em instantes.</div>`;
+    mostrarFalhaCarregamento(grade, "Não foi possível carregar os produtos. Confira sua conexão e tente novamente.", render);
     toast("Erro ao carregar produtos.", "error");
   } finally {
     // Só a requisição mais recente controla o estado visual de "carregando".
@@ -567,7 +569,7 @@ function configurarCarrinhoUI() {
     const { subtotal, total } = calcularTotais(carrinho);
     lista.innerHTML = carrinho.map(item => `
       <div class="cart-item" data-chave="${escHtml(item.chave || item.id)}">
-        <img src="${imgPos(item.imagem, 160).src || "/assets/images/placeholder.svg"}" alt="${escHtml(item.nome)}" loading="lazy" decoding="async">
+        <img src="${escHtml(imgPos(item.imagem, 160).src || "/assets/images/placeholder.svg")}" alt="${escHtml(item.nome)}" loading="lazy" decoding="async">
         <div>
           <div class="cart-item__name">${escHtml(item.nome)}</div>
           <div class="cart-item__brand">${escHtml(item.marca)}${item.cor ? ` • Cor: ${escHtml(item.cor)}` : ""}</div>
@@ -597,7 +599,8 @@ function configurarCarrinhoUI() {
         atualizarBadgeCarrinho();
       });
       input.addEventListener("change", () => {
-        atualizarQuantidade(chave, parseInt(input.value, 10) || 0);
+        if (!input.value.trim()) { renderCarrinho(); return; }
+        atualizarQuantidade(chave, Number(input.value));
         renderCarrinho();
         atualizarBadgeCarrinho();
       });
@@ -617,6 +620,11 @@ function configurarCarrinhoUI() {
   abrirBtn?.addEventListener("click", abrir);
   fecharBtn?.addEventListener("click", fechar);
   overlay?.addEventListener("click", fechar);
+  window.addEventListener("carrinho-atualizado", () => { if (drawer?.classList.contains("is-open")) renderCarrinho(); });
+  if (getQueryParam("carrinho") === "1") {
+    abrir();
+    const url = new URL(window.location.href); url.searchParams.delete("carrinho"); history.replaceState(null, "", url);
+  }
 
   document.querySelector("#finalizar-pedido")?.addEventListener("click", () => {
     const carrinho = obterCarrinho();
@@ -627,7 +635,7 @@ function configurarCarrinhoUI() {
     }
     const nomeDigitado = document.querySelector("#nome-cliente")?.value?.trim();
     const nomeParaPedido = usuarioAtual ? (nomeDigitado || usuarioAtual.displayName || "") : nomeDigitado;
-    finalizarPedidoWhatsApp(nomeParaPedido);
+    if (!finalizarPedidoWhatsApp(nomeParaPedido)) return;
     fechar();
   });
 }
@@ -636,6 +644,10 @@ function configurarCarrinhoUI() {
  * o nome dele automaticamente na mensagem — sem precisar digitar de novo. */
 function configurarNomeConvidado() {
   ouvirEstadoAuth((usuario) => {
+    iniciarSincronizacaoConta(usuario?.uid, {
+      carrinhoLocal: obterCarrinho, favoritosLocais: obterFavoritos,
+      aplicarCarrinho: aplicarCarrinhoSincronizado, aplicarFavoritos: aplicarFavoritosSincronizados
+    });
     const campoNome = document.querySelector("#campo-nome-convidado");
     if (campoNome) campoNome.hidden = !!usuario;
 
@@ -667,7 +679,10 @@ function configurarNomeConvidado() {
 
 async function iniciar() {
   configurarNomeConvidado();
-  [CATEGORIAS, MARCAS] = await Promise.all([listarCategorias(), listarMarcas()]);
+  const filtros = await Promise.allSettled([listarCategorias(), listarMarcas()]);
+  CATEGORIAS = filtros[0].status === "fulfilled" ? filtros[0].value : [];
+  MARCAS = filtros[1].status === "fulfilled" ? filtros[1].value : [];
+  if (filtros.some(filtro => filtro.status === "rejected")) toast("Alguns filtros não carregaram. Você ainda pode buscar produtos.", "error");
 
   desenharFiltrosLaterais();
   await render();
@@ -677,5 +692,6 @@ async function iniciar() {
 
 iniciar();
 </script>
+<script type="module" src="/js/utils/header.js"></script>
 </body>
 </html>

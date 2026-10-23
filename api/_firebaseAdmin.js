@@ -20,6 +20,7 @@
 //   4. NUNCA suba esse .json baixado pro GitHub.
 
 import { initializeApp, getApps, cert } from "firebase-admin/app";
+import { getAuth } from "firebase-admin/auth";
 import { getFirestore } from "firebase-admin/firestore";
 
 function normalizarChavePrivada(valor) {
@@ -51,4 +52,8 @@ function obterApp() {
 
 export function obterDbAdmin() {
   return getFirestore(obterApp());
+}
+
+export function obterAuthAdmin() {
+  return getAuth(obterApp());
 }

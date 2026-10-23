@@ -1,12 +1,17 @@
 // js/modules/cart.js
-import { formatBRL, escHtml, podeExecutar } from "../utils/utils.js";
-import { salvarLeadPerdido } from "../services/firestore.js";
+import { formatBRL, escHtml, podeExecutar, toast, pareceEmail, registrarErroCliente } from "../utils/utils.js";
+import { salvarLeadPerdido, criarPedido } from "../services/firestore.js";
 import { salvarCarrinhoNuvem } from "../services/contaSync.js";
-import { STORE_CONFIG } from "../../firebase/firebase-config.js";
+
+import { lerLista, salvarJSON } from "../utils/storage.js";
+import { abrirWhatsApp } from "../utils/whatsapp.js";
+
+import { usuarioAtual, perfilAtual } from "../services/auth.js";
 
 const CART_KEY = "papelaria_carrinho";
 const LEAD_KEY = "papelaria_ultimo_lead";
 let leadSalvo = false;
+let ultimoEnvio = { assinatura: "", quando: 0 };
 
 function linkProdutoComPreview(produto) {
   if (!produto?.id) return "";
@@ -23,23 +28,28 @@ function linkProdutoComPreview(produto) {
   return `${window.location.origin}/p/${encodeURIComponent(produto.id)}?${dados}`;
 }
 
+function normalizarCarrinho(lista) {
+  if (!Array.isArray(lista)) return [];
+  return lista.filter(item => item && typeof item.id === "string" && item.id.trim() && item.preco != null && item.preco !== "" && item.quantidade != null)
+    .map(item => ({ ...item, preco: Number(item.preco), quantidade: Number(item.quantidade) }))
+    .filter(item => Number.isFinite(item.preco) && item.preco >= 0 &&
+      Number.isSafeInteger(item.quantidade) && item.quantidade > 0 &&
+      Number.isFinite(item.preco * item.quantidade));
+}
+
 export function obterCarrinho() {
-  try {
-    return JSON.parse(localStorage.getItem(CART_KEY)) || [];
-  } catch {
-    return [];
-  }
+  return normalizarCarrinho(lerLista(CART_KEY));
 }
 
 function salvarCarrinho(carrinho) {
-  localStorage.setItem(CART_KEY, JSON.stringify(carrinho));
+  salvarJSON(CART_KEY, carrinho);
   atualizarBadgeCarrinho();
   salvarCarrinhoNuvem(carrinho).catch(() => {});
   leadSalvo = false; // qualquer mudança reabre a possibilidade de novo lead
 }
 
 export function aplicarCarrinhoSincronizado(carrinho) {
-  localStorage.setItem(CART_KEY, JSON.stringify(Array.isArray(carrinho) ? carrinho : []));
+  salvarJSON(CART_KEY, normalizarCarrinho(carrinho));
   atualizarBadgeCarrinho();
   window.dispatchEvent(new Event("carrinho-atualizado"));
 }
@@ -55,10 +65,13 @@ export function chaveItemCarrinho(id, cor = "") {
 }
 
 export function adicionarAoCarrinho(produto, quantidade = 1, cor = "") {
+  quantidade = Number(quantidade);
+  if (!normalizarCarrinho([{ ...produto, quantidade }]).length) return false;
   const carrinho = obterCarrinho();
   const chave = chaveItemCarrinho(produto.id, cor);
   const existente = carrinho.find(i => (i.chave || i.id) === chave);
   if (existente) {
+    if (!Number.isSafeInteger(existente.quantidade + quantidade)) return false;
     existente.quantidade += quantidade;
   } else {
     carrinho.push({
@@ -66,7 +79,7 @@ export function adicionarAoCarrinho(produto, quantidade = 1, cor = "") {
       id: produto.id,
       nome: produto.nome,
       marca: produto.marca || "",
-      preco: produto.preco,
+      preco: Number(produto.preco),
       imagem: produto.imagem || "",
       cor: cor || "",
       quantidade
@@ -76,6 +89,8 @@ export function adicionarAoCarrinho(produto, quantidade = 1, cor = "") {
 }
 
 export function atualizarQuantidade(chave, quantidade) {
+  quantidade = Number(quantidade);
+  if (!Number.isSafeInteger(quantidade) || quantidade < 0) return false;
   let carrinho = obterCarrinho();
   if (quantidade <= 0) {
     carrinho = carrinho.filter(i => (i.chave || i.id) !== chave);
@@ -96,8 +111,9 @@ export function limparCarrinho() {
 }
 
 export function calcularTotais(carrinho = obterCarrinho()) {
+  carrinho = normalizarCarrinho(carrinho);
   const quantidadeItens = carrinho.reduce((acc, i) => acc + i.quantidade, 0);
-  const subtotal = carrinho.reduce((acc, i) => acc + i.quantidade * i.preco, 0);
+  const subtotal = carrinho.reduce((acc, i) => acc + i.quantidade * Math.round(i.preco * 100), 0) / 100;
   return { quantidadeItens, subtotal, total: subtotal };
 }
 
@@ -124,10 +140,31 @@ export function montarMensagemWhatsApp(nomeCliente = "") {
 }
 
 export function finalizarPedidoWhatsApp(nomeCliente = "") {
-  const mensagem = montarMensagemWhatsApp(nomeCliente);
-  const url = `https://wa.me/${STORE_CONFIG.whatsapp}?text=${encodeURIComponent(mensagem)}`;
-  limparCarrinho();
-  window.open(url, "_blank");
+  const carrinho = obterCarrinho();
+  if (!carrinho.length) { toast("Seu carrinho está vazio.", "error"); return false; }
+  const nome = [nomeCliente, usuarioAtual?.displayName, perfilAtual?.nome, perfilAtual?.responsavel, perfilAtual?.razaoSocial]
+    .find(valor => typeof valor === "string" && valor.trim() && !pareceEmail(valor))?.trim() || "";
+  const assinatura = `${usuarioAtual?.uid || "visitante"}:${carrinho.map(i => `${i.chave || i.id}:${i.quantidade}:${i.preco}`).sort().join("|")}`;
+  if (ultimoEnvio.assinatura === assinatura && Date.now() - ultimoEnvio.quando < 5000) {
+    toast("O WhatsApp já foi aberto. Confira a conversa antes de enviar novamente.");
+    return false;
+  }
+  // Abrir uma conversa não comprova envio nem confirmação do pedido.
+  // Conserva os itens mesmo se o navegador bloquear a nova aba.
+  if (!abrirWhatsApp(montarMensagemWhatsApp(nome))) return false;
+  ultimoEnvio = { assinatura, quando: Date.now() };
+  leadSalvo = true;
+  salvarJSON(LEAD_KEY, { assinatura: carrinho.map(i => `${i.chave || i.id}:${i.quantidade}`).sort().join("|"), expiraEm: Date.now() + 30 * 60_000 });
+  if (usuarioAtual) {
+    const usuarioId = usuarioAtual.uid;
+    const { total } = calcularTotais(carrinho);
+    criarPedido({ usuarioId, nomeCliente: nome, total, itens: carrinho.map(i => ({ id: i.id, nome: i.nome || "Produto", quantidade: i.quantidade, preco: i.preco, cor: i.cor || "" })) })
+      .catch(erro => {
+        toast("O WhatsApp foi aberto, mas não foi possível salvar o histórico. Seus itens foram mantidos.", "error");
+        registrarErroCliente("checkout-criarPedido", erro, { usuarioId });
+      });
+  }
+  return true;
 }
 
 /**
@@ -141,8 +178,7 @@ export function falarSobreProduto(produto) {
   const endereco = linkProdutoComPreview(produto);
   const link = endereco ? `\n🔗 Link do produto: ${endereco}` : "";
   const mensagem = `Olá!\nTenho interesse neste produto:\n*${produto.nome}*${marcaStr}${link}\n\nPoderia me passar mais informações?`;
-  const url = `https://wa.me/${STORE_CONFIG.whatsapp}?text=${encodeURIComponent(mensagem)}`;
-  window.open(url, "_blank");
+  return abrirWhatsApp(mensagem);
 }
 
 /**

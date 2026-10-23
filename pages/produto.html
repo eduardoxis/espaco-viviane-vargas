@@ -75,6 +75,7 @@
 </style>
 <link rel="stylesheet" href="/css/typography.css?v=20261023">
 <link rel="stylesheet" href="/css/theme.css?v=20261023-rolagem">
+<link rel="stylesheet" href="/css/header-mobile.css?v=20261023-2" media="(max-width: 760px)">
 </head>
 <body>
 
@@ -176,7 +177,7 @@
 
 <script type="module">
 import { obterProduto, invalidarCachePublico, listarProdutosPorCategoria, listarProdutosVitrine, incrementarVisualizacao } from "../js/services/firestore.js";
-import { escHtml, getQueryParam, formatBRL, toast, podeExecutar, imgPos, registrarErroCliente } from "../js/utils/utils.js";
+import { escHtml, getQueryParam, formatBRL, toast, podeExecutar, imgPos, registrarErroCliente, mostrarFalhaCarregamento } from "../js/utils/utils.js";
 import { renderizarGrade, cartaoProduto, compartilharProduto, obterFavoritos, obterIdsFavoritos, alternarFavorito, aplicarFavoritosSincronizados, produtoTemImagem } from "../js/modules/products.js";
 import { ouvirEstadoAuth, sair } from "../js/services/auth.js";
 import {
@@ -235,11 +236,11 @@ function renderizarGaleriaHtml(imgs, nomeProduto) {
     <div class="product-detail__thumbs" id="galeria-thumbs">
       ${imgs.map((img, i) => `
         <button type="button" class="product-detail__thumb ${i === 0 ? "is-active" : ""}" data-thumb="${i}">
-          <img src="${imgPos(img, 180).src}" style="object-position:${imgPos(img).pos}" alt="${escHtml(nomeProduto)} - imagem ${i + 1}" loading="lazy" decoding="async">
+          <img src="${escHtml(imgPos(img, 180).src)}" style="object-position:${imgPos(img).pos}" alt="${escHtml(nomeProduto)} - imagem ${i + 1}" loading="lazy" decoding="async">
         </button>`).join("")}
     </div>` : ""}
     <div class="product-detail__image">
-      <img id="imagem-principal" src="${imgPos(imgs[0], 960).src || "/assets/images/placeholder.svg"}" style="object-position:${imgPos(imgs[0]).pos}" alt="${escHtml(nomeProduto)}" decoding="async" fetchpriority="high">
+      <img id="imagem-principal" src="${escHtml(imgPos(imgs[0], 960).src || "/assets/images/placeholder.svg")}" style="object-position:${imgPos(imgs[0]).pos}" alt="${escHtml(nomeProduto)}" decoding="async" fetchpriority="high">
     </div>`;
 }
 
@@ -516,7 +517,7 @@ function configurarCarrinhoUI() {
     const { subtotal, total } = calcularTotais(carrinho);
     lista.innerHTML = carrinho.map(item => `
       <div class="cart-item" data-chave="${escHtml(item.chave || item.id)}">
-        <img src="${imgPos(item.imagem, 160).src || "/assets/images/placeholder.svg"}" alt="${escHtml(item.nome)}" loading="lazy" decoding="async">
+        <img src="${escHtml(imgPos(item.imagem, 160).src || "/assets/images/placeholder.svg")}" alt="${escHtml(item.nome)}" loading="lazy" decoding="async">
         <div>
           <div class="cart-item__name">${escHtml(item.nome)}</div>
           <div class="cart-item__brand">${escHtml(item.marca)}${item.cor ? ` • Cor: ${escHtml(item.cor)}` : ""}</div>
@@ -546,7 +547,8 @@ function configurarCarrinhoUI() {
         atualizarBadgeCarrinho();
       });
       input.addEventListener("change", () => {
-        atualizarQuantidade(chave2, parseInt(input.value, 10) || 0);
+        if (!input.value.trim()) { renderCarrinho(); return; }
+        atualizarQuantidade(chave2, Number(input.value));
         renderCarrinho();
         atualizarBadgeCarrinho();
       });
@@ -566,6 +568,7 @@ function configurarCarrinhoUI() {
   abrirBtn?.addEventListener("click", abrir);
   fecharBtn?.addEventListener("click", fechar);
   overlay?.addEventListener("click", fechar);
+  window.addEventListener("carrinho-atualizado", () => { if (drawer?.classList.contains("is-open")) renderCarrinho(); });
 
   document.querySelector("#finalizar-pedido")?.addEventListener("click", () => {
     const carrinho = obterCarrinho();
@@ -575,7 +578,7 @@ function configurarCarrinhoUI() {
       return;
     }
     const nome = document.querySelector("#nome-cliente")?.value?.trim();
-    finalizarPedidoWhatsApp(nome);
+    if (!finalizarPedidoWhatsApp(nome)) return;
     fechar();
   });
 }
@@ -620,7 +623,11 @@ function configurarLogin() {
 configurarCarrinhoUI();
 configurarLogin();
 atualizarBadgeCarrinho();
-iniciarProduto();
+iniciarProduto().catch(erro => {
+  console.error("Falha ao carregar produto:", erro);
+  mostrarFalhaCarregamento(container, "Não foi possível carregar este produto. Confira sua conexão e tente novamente.", iniciarProduto);
+});
 </script>
+<script type="module" src="/js/utils/header.js"></script>
 </body>
 </html>

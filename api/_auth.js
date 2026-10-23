@@ -8,8 +8,8 @@
 // quando o admin faz várias ações seguidas (ex: subir várias imagens),
 // sem abrir mão de reverificar com frequência.
 
-import { getAuth } from "firebase-admin/auth";
-import { obterDbAdmin } from "./_firebaseAdmin.js";
+
+import { obterDbAdmin, obterAuthAdmin } from "./_firebaseAdmin.js";
 
 const TTL_CACHE_CARGO_MS = 60 * 1000;
 const cacheCargo = new Map(); // uid -> { ehAdmin, expiraEm }
@@ -23,9 +23,10 @@ export async function exigirAdmin(req) {
     throw erro;
   }
 
+  const auth = obterAuthAdmin();
   let decodificado;
   try {
-    decodificado = await getAuth().verifyIdToken(token);
+    decodificado = await auth.verifyIdToken(token);
   } catch (causa) {
     // Loga o motivo real (ex: auth/argument-error, "incorrect aud" = projeto
     // do Firebase Admin diferente do projeto do site) nos logs da Vercel.
@@ -45,7 +46,7 @@ export async function exigirAdmin(req) {
     const db = obterDbAdmin();
     const snap = await db.collection("usuarios").doc(uid).get();
     const cargos = snap.exists ? snap.data()?.cargos || [] : [];
-    ehAdmin = cargos.includes("admin");
+    ehAdmin = Array.isArray(cargos) && cargos.includes("admin");
     cacheCargo.set(uid, { ehAdmin, expiraEm: Date.now() + TTL_CACHE_CARGO_MS });
   }
 

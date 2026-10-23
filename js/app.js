@@ -2,7 +2,7 @@
 import {
   listarEtiquetas, listarProdutosVitrine, listarProdutosDestaque,
   listarProdutosRecentes, listarProdutosPorCategoria, obterProduto, listarCategorias, listarMarcas,
-  criarPedido, listarPedidosUsuario, listarEnderecos, criarEndereco, atualizarEndereco, excluirEndereco, excluirPedido, excluirPedidos,
+  listarPedidosUsuario, listarEnderecos, criarEndereco, atualizarEndereco, excluirEndereco, excluirPedido, excluirPedidos,
   atualizarPerfilUsuario, invalidarCachePublico
 } from "./services/firestore.js";
 import { renderizarGrade, obterFavoritos, alternarFavorito, migrarFavoritosLegados, aplicarFavoritosSincronizados } from "./modules/products.js";
@@ -12,7 +12,7 @@ import {
   finalizarPedidoWhatsApp, falarSobreProduto, registrarLeadPerdidoSeNecessario, aplicarCarrinhoSincronizado
 } from "./modules/cart.js";
 import { iniciarSincronizacaoConta } from "./services/contaSync.js";
-import { formatBRL, escHtml, getQueryParam, toast, podeExecutar, podeExecutarPersistente, mascararCPF, mascararCNPJ, mascararTelefone, pareceEmail, imgPos, registrarErroCliente, confirmarAcao } from "./utils/utils.js";
+import { formatBRL, escHtml, getQueryParam, toast, podeExecutar, podeExecutarPersistente, mascararCPF, mascararCNPJ, mascararTelefone, pareceEmail, imgPos, registrarErroCliente, confirmarAcao, mostrarFalhaCarregamento } from "./utils/utils.js";
 import { ouvirEstadoAuth, entrar, cadastrar, sair, usuarioAtual, perfilAtual, redefinirSenha, atualizarNomeAuth } from "./services/auth.js";
 import { iniciarModais, abrirModal, fecharModal } from "./utils/modal.js";
 import { iniciarOrcamento } from "./modules/orcamento.js";
@@ -49,8 +49,13 @@ function carregarAoAproximar(alvo, tarefa) {
   const executar = () => {
     if (iniciado) return;
     iniciado = true;
-    Promise.resolve(tarefa()).catch((erro) => console.error("Falha ao carregar seção:", erro));
+    return Promise.resolve().then(tarefa).catch((erro) => {
+      console.error("Falha ao carregar seção:", erro);
+      const area = alvo.querySelector('[id^="grade-"]') || alvo;
+      mostrarFalhaCarregamento(area, "Não foi possível carregar esta seção. Confira sua conexão.", executarNovamente);
+    });
   };
+  const executarNovamente = () => { iniciado = false; return executar(); };
   if (!("IntersectionObserver" in window)) { executar(); return; }
   const observer = new IntersectionObserver((entradas) => {
     if (!entradas.some(e => e.isIntersecting)) return;
@@ -218,7 +223,7 @@ function corTextoParaCategoria(nome = "") {
 function conteudoIconeCategoria(c) {
   if (c.imagem) {
     const { src, pos } = imgPos(c.imagem, 192);
-    return `<img class="category-card__img" src="${src}" style="object-position:${pos}" alt="" loading="lazy" decoding="async" width="96" height="96">`;
+    return `<img class="category-card__img" src="${escHtml(src)}" style="object-position:${pos}" alt="" loading="lazy" decoding="async" width="96" height="96">`;
   }
   const custom = (c.emoji || "").trim();
   if (!custom) return icon(iconeParaCategoria(c.nome));
@@ -282,7 +287,7 @@ async function iniciar() {
       window.__categoriaAplicadaDaUrl = true;
       selecionarCategoria(decodeURIComponent(catUrl));
     }
-  });
+  }).catch(erro => console.warn("Filtros de categorias indisponíveis:", erro));
 
   configurarLinksEstaticos();
   configurarEventosCategorias();
@@ -361,9 +366,10 @@ async function iniciar() {
     return { nome, telefone };
   }
 
-  window.addEventListener("beforeunload", () => registrarLeadPerdidoSeNecessario(dadosLeadAtual()));
+  const registrarSaida = () => registrarLeadPerdidoSeNecessario(dadosLeadAtual()).catch(() => {});
+  window.addEventListener("beforeunload", registrarSaida);
   document.addEventListener("visibilitychange", () => {
-    if (document.visibilityState === "hidden") registrarLeadPerdidoSeNecessario(dadosLeadAtual());
+    if (document.visibilityState === "hidden") registrarSaida();
   });
 }
 
@@ -483,7 +489,7 @@ function configurarLinksEstaticos() {
       const marcas = await listarMarcas();
       const lista = [...marcas].filter(m => m.visivel !== false).sort((a, b) => (a.ordem || 0) - (b.ordem || 0));
       marcasEl.innerHTML = lista
-        .map(m => `<span class="brands__badge"><img src="${imgPos(m.logo, 240).src || "/assets/images/placeholder.svg"}" alt="${escHtml(m.nome)}" loading="lazy" decoding="async"></span>`)
+        .map(m => `<span class="brands__badge"><img src="${escHtml(imgPos(m.logo, 240).src || "/assets/images/placeholder.svg")}" alt="${escHtml(m.nome)}" loading="lazy" decoding="async"></span>`)
         .join("") || "";
     });
   }
@@ -502,7 +508,7 @@ function configurarCarrinhoUI() {
     const { subtotal, total } = calcularTotais(carrinho);
     lista.innerHTML = carrinho.map(item => `
       <div class="cart-item" data-chave="${escHtml(item.chave || item.id)}">
-        <img src="${imgPos(item.imagem, 160).src || "/assets/images/placeholder.svg"}" alt="${escHtml(item.nome)}" loading="lazy" decoding="async">
+        <img src="${escHtml(imgPos(item.imagem, 160).src || "/assets/images/placeholder.svg")}" alt="${escHtml(item.nome)}" loading="lazy" decoding="async">
         <div>
           <div class="cart-item__name">${escHtml(item.nome)}</div>
           <div class="cart-item__brand">${escHtml(item.marca)}${item.cor ? ` • Cor: ${escHtml(item.cor)}` : ""}</div>
@@ -530,7 +536,8 @@ function configurarCarrinhoUI() {
         renderCarrinho();
       });
       input.addEventListener("change", () => {
-        atualizarQuantidade(chave, parseInt(input.value, 10) || 0);
+        if (!input.value.trim()) { renderCarrinho(); return; }
+        atualizarQuantidade(chave, Number(input.value));
         renderCarrinho();
       });
     });
@@ -551,6 +558,7 @@ function configurarCarrinhoUI() {
   abrirBtn?.addEventListener("click", abrir);
   fecharBtn?.addEventListener("click", fechar);
   overlay?.addEventListener("click", fechar);
+  window.addEventListener("carrinho-atualizado", () => { if (drawer?.classList.contains("is-open")) renderCarrinho(); });
 
   document.querySelector("#finalizar-pedido")?.addEventListener("click", async () => {
     const carrinho = obterCarrinho();
@@ -565,19 +573,7 @@ function configurarCarrinhoUI() {
     const nomeParaPedido = usuarioAtual
       ? ((nome && !pareceEmail(nome)) ? nome : nomeDoPerfil)
       : (nome && !pareceEmail(nome) ? nome : "");
-    if (usuarioAtual) {
-      const { total } = calcularTotais(carrinho);
-      criarPedido({
-        usuarioId: usuarioAtual.uid,
-        nomeCliente: nomeParaPedido,
-        itens: carrinho.map(i => ({ id: i.id, nome: i.nome, quantidade: i.quantidade, preco: i.preco, cor: i.cor || "" })),
-        total
-      }).catch((erro) => {
-        toast("Pedido não foi salvo no seu histórico, mas o WhatsApp vai abrir normalmente.", "error");
-        registrarErroCliente("checkout-criarPedido", erro, { usuarioId: usuarioAtual.uid });
-      });
-    }
-    finalizarPedidoWhatsApp(nomeParaPedido);
+    if (!finalizarPedidoWhatsApp(nomeParaPedido)) return;
     fechar();
   });
 }
@@ -959,7 +955,7 @@ async function renderizarFavoritos() {
   const produtos = [...produtosSalvos, ...produtosLegados];
   container.innerHTML = produtos.length ? produtos.map(p => `
     <div class="favorito-card" data-id="${p.id}">
-      <img src="${imgPos(p.imagem, 240).src || "/assets/images/placeholder.svg"}" style="object-position:center center" alt="${escHtml(p.nome)}" loading="lazy" decoding="async">
+      <img src="${escHtml(imgPos(p.imagem, 240).src || "/assets/images/placeholder.svg")}" style="object-position:center center" alt="${escHtml(p.nome)}" loading="lazy" decoding="async">
       <div class="favorito-card__info">
         <strong>${escHtml(p.nome)}</strong>
         <span>${formatBRL(p.preco)}</span>

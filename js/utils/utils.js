@@ -1,3 +1,4 @@
+import { lerLista, salvarJSON } from "./storage.js";
 // js/utils/utils.js
 
 // Grava um erro do lado do cliente em "logsErros" (Firestore), pro admin
@@ -147,16 +148,18 @@ export function pareceEmail(valor = "") {
   return /\S+@\S+\.\S+/.test(valor);
 }
 
-export function podeExecutar(chave, limite = 5, janelaMs = 60_000) {
+function limitarAcao(chave, limite, janelaMs, area) {
   const agora = Date.now();
-  const registro = JSON.parse(sessionStorage.getItem(`ratelimit_${chave}`) || "[]")
-    .filter(t => agora - t < janelaMs);
-
+  const registro = lerLista(`ratelimit_${chave}`, area).map(Number)
+    .filter(t => Number.isFinite(t) && t <= agora && agora - t < janelaMs);
   if (registro.length >= limite) return false;
-
   registro.push(agora);
-  sessionStorage.setItem(`ratelimit_${chave}`, JSON.stringify(registro));
+  salvarJSON(`ratelimit_${chave}`, registro, area);
   return true;
+}
+
+export function podeExecutar(chave, limite = 5, janelaMs = 60_000) {
+  return limitarAcao(chave, limite, janelaMs, "session");
 }
 
 /**
@@ -165,15 +168,7 @@ export function podeExecutar(chave, limite = 5, janelaMs = 60_000) {
  * pedidos de redefinição de senha, dificultando spam mesmo reabrindo o site.
  */
 export function podeExecutarPersistente(chave, limite = 5, janelaMs = 60 * 60_000) {
-  const agora = Date.now();
-  const registro = JSON.parse(localStorage.getItem(`ratelimit_${chave}`) || "[]")
-    .filter(t => agora - t < janelaMs);
-
-  if (registro.length >= limite) return false;
-
-  registro.push(agora);
-  localStorage.setItem(`ratelimit_${chave}`, JSON.stringify(registro));
-  return true;
+  return limitarAcao(chave, limite, janelaMs, "local");
 }
 
 /**
@@ -324,5 +319,19 @@ export function compressImageToBase64(file, maxWidth = 800, quality = 0.7, forma
     };
     reader.onerror = reject;
     reader.readAsDataURL(file);
+  });
+}
+
+/** Falha recuperável: mostra uma ação explícita sem deixar a seção em branco. */
+export function mostrarFalhaCarregamento(container, mensagem, tentarNovamente) {
+  if (!container) return;
+  container.innerHTML = `<div class="empty-state" role="status"><p>${escHtml(mensagem)}</p><button type="button" class="btn-secondary">Tentar novamente</button></div>`;
+  const botao = container.querySelector("button");
+  botao.addEventListener("click", async () => {
+    botao.disabled = true;
+    botao.textContent = "Tentando novamente...";
+    try { await tentarNovamente(); }
+    catch { mostrarFalhaCarregamento(container, mensagem, tentarNovamente); }
+    finally { botao.disabled = false; botao.textContent = "Tentar novamente"; }
   });
 }

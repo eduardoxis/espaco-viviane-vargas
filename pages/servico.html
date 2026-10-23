@@ -80,6 +80,7 @@
 </style>
 <link rel="stylesheet" href="/css/typography.css?v=20261023">
 <link rel="stylesheet" href="/css/theme.css?v=20261023-rolagem">
+<link rel="stylesheet" href="/css/header-mobile.css?v=20261023-2" media="(max-width: 760px)">
 </head>
 <body>
 
@@ -220,7 +221,7 @@ function renderizarGaleriaHtml(imgs, nome, favoritado) {
   const principal = imgPos(imgs[0], 1200);
   return `
     <div class="sv-foto">
-      <img id="imagem-principal" src="${principal.src || "/assets/images/placeholder.svg"}" style="object-position:${principal.pos}" alt="${escHtml(nome)}" decoding="async" fetchpriority="high">
+      <img id="imagem-principal" src="${escHtml(principal.src || "/assets/images/placeholder.svg")}" style="object-position:${principal.pos}" alt="${escHtml(nome)}" decoding="async" fetchpriority="high">
       <div class="sv-foto__acoes">
         <button type="button" class="sv-foto__btn ${favoritado ? "is-active" : ""}" id="fav-servico" aria-label="Favoritar serviço" aria-pressed="${favoritado}">${icon("heart")}</button>
         <button type="button" class="sv-foto__btn" id="compartilhar" aria-label="Compartilhar serviço">${icon("messageSquare")}</button>
@@ -230,7 +231,7 @@ function renderizarGaleriaHtml(imgs, nome, favoritado) {
     <div class="sv-thumbs" id="galeria-thumbs">
       ${imgs.map((img, i) => `
         <button type="button" class="sv-thumb ${i === 0 ? "is-active" : ""}" data-thumb="${i}" aria-label="Foto ${i + 1}">
-          <img src="${imgPos(img, 180).src}" style="object-position:${imgPos(img).pos}" alt="" loading="lazy" decoding="async">
+          <img src="${escHtml(imgPos(img, 180).src)}" style="object-position:${imgPos(img).pos}" alt="" loading="lazy" decoding="async">
         </button>`).join("")}
     </div>` : ""}`;
 }
@@ -411,5 +412,6 @@ document.querySelector("#btn-sair")?.addEventListener("click", sair);
 
 iniciarServico();
 </script>
+<script type="module" src="/js/utils/header.js"></script>
 </body>
 </html>

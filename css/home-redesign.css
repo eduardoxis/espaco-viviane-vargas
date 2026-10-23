@@ -62,7 +62,7 @@
 .home-page .header-action:hover { color: #705443; }
 .home-page #abrir-carrinho { width: 58px; height: 44px; border-left: 1px solid #e5d4ca; border-radius: 0; padding-left: 22px; color: #89624d; }
 .home-page #abrir-carrinho .icon { width: 28px; height: 28px; }
-.home-page .cart-badge { display: flex !important; background: #a98168; color: #fff; font: 11px / 1 Inter, Arial, sans-serif; }
+.home-page .cart-badge { background: #a98168; color: #fff; font: 11px / 1 Inter, Arial, sans-serif; }
 .home-page .menu-toggle { display: none; }
 .beauty-hero { position: relative; isolation: isolate; overflow: hidden; background: #f8f1eb; }
 .beauty-hero__visual { position: absolute; inset: 0; z-index: -1; }

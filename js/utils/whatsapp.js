@@ -1,5 +1,6 @@
 // js/utils/whatsapp.js
 // Helpers genéricos e reutilizáveis para montar links e abrir o WhatsApp.
+import { toast } from "./utils.js";
 import { STORE_CONFIG } from "../../firebase/firebase-config.js";
 
 /** Saudação automática conforme o horário local do visitante. */
@@ -17,5 +18,16 @@ export function linkWhatsApp(mensagem, numero = STORE_CONFIG.whatsapp) {
 
 /** Abre o WhatsApp (nova aba) com a mensagem informada. */
 export function abrirWhatsApp(mensagem, numero = STORE_CONFIG.whatsapp) {
-  window.open(linkWhatsApp(mensagem, numero), "_blank", "noopener");
+  const url = linkWhatsApp(mensagem, numero);
+  try {
+    const aba = window.open(url, "_blank");
+    if (aba) { aba.opener = null; return true; }
+  } catch { /* Navegadores podem bloquear a nova janela. */ }
+  try {
+    window.location.assign(url);
+    return true;
+  } catch {
+    toast("Não foi possível abrir o WhatsApp. Seu carrinho foi mantido. Tente novamente.", "error");
+    return false;
+  }
 }

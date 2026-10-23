@@ -4,11 +4,12 @@ import { incrementarCompartilhamento } from "../services/firestore.js";
 import { salvarFavoritosNuvem } from "../services/contaSync.js";
 import { icon } from "../utils/icons.js";
 
+import { lerLista, salvarJSON } from "../utils/storage.js";
+
 const CHAVE_FAVORITOS = "futura_favoritos";
 
 export function obterFavoritos() {
-  try { return JSON.parse(localStorage.getItem(CHAVE_FAVORITOS)) || []; }
-  catch { return []; }
+  return lerLista(CHAVE_FAVORITOS).filter(item => typeof item === "string" || (item && typeof item.id === "string"));
 }
 
 export function obterIdsFavoritos() {
@@ -30,7 +31,7 @@ function resumoFavorito(produto) {
 }
 
 function salvarFavoritos(lista) {
-  localStorage.setItem(CHAVE_FAVORITOS, JSON.stringify(lista));
+  salvarJSON(CHAVE_FAVORITOS, lista);
   salvarFavoritosNuvem(lista).catch(() => {});
 }
 
@@ -44,7 +45,7 @@ function atualizarBotoesFavoritos() {
 }
 
 export function aplicarFavoritosSincronizados(lista) {
-  localStorage.setItem(CHAVE_FAVORITOS, JSON.stringify(Array.isArray(lista) ? lista : []));
+  salvarJSON(CHAVE_FAVORITOS, Array.isArray(lista) ? lista : []);
   atualizarBotoesFavoritos();
 }
 
@@ -84,7 +85,7 @@ export function cartaoProduto(produto, favoritos = null) {
       <button class="product-card__fav ${favoritado ? "is-active" : ""}" data-fav-id="${produto.id}" aria-label="Favoritar produto" aria-pressed="${favoritado}">${icon("heart")}</button>
       <a class="product-card__link" href="/pages/produto.html?id=${produto.id}">
         <div class="product-card__image">
-          <img src="${imagem}" style="object-position:center center" alt="${escHtml(produto.nome)}" loading="lazy" decoding="async" width="411" height="732">
+          <img src="${escHtml(imagem)}" style="object-position:center center" alt="${escHtml(produto.nome)}" loading="lazy" decoding="async" width="411" height="732">
           ${etiquetasHtml ? `<div class="product-card__tags">${etiquetasHtml}</div>` : ""}
           ${semEstoque ? `<span class="badge-outofstock">Sem estoque</span>` : ""}
         </div>
