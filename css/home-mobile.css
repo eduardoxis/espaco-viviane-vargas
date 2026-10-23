@@ -1,15 +1,15 @@
 /* Home mobile: composição da referência com textos e controles reais. */
 @media (max-width: 760px) {
   .home-page .beauty-hero {
-    display: block; min-height: 0; aspect-ratio: 941 / 1155;
+    display: block; min-height: 0; aspect-ratio: 941 / 1324;
     background: #f8f1eb;
   }
   .home-page .beauty-hero__visual { position: absolute; inset: 0; width: 100%; height: 100%; z-index: -1; }
   .home-page .beauty-hero__visual picture { display: block; width: 100%; height: 100%; }
-  .home-page .beauty-hero__visual img { position: absolute; top: -46vw; left: 0; width: 100%; max-width: 100%; height: auto; aspect-ratio: 941 / 1672; margin: 0; object-fit: contain; object-position: center; }
+  .home-page .beauty-hero__visual img { position: absolute; top: -19vw; left: 0; width: 100%; max-width: 100%; height: auto; aspect-ratio: 941 / 1672; margin: 0; object-fit: contain; object-position: center; }
   .home-page .beauty-hero__inner { display: block; width: 100%; min-height: 0; }
   .home-page .beauty-hero__content {
-    width: 56%; max-width: none; padding: 4vw 0 0 6.3vw;
+    width: 56%; max-width: none; padding: 22vw 0 0 6.3vw;
     text-align: left; background: none;
   }
   .home-page .beauty-hero__eyebrow {
@@ -23,7 +23,7 @@
   }
   .home-page .beauty-hero__title > span { display: contents; }
   .home-page .beauty-hero__mobile-break { display: block; }
-  .home-page .beauty-hero__title em { display: block; margin-top: .5vw; font-weight: 400; color: #7d172f; white-space: nowrap; }
+  .home-page .beauty-hero__title em { display: block; margin-top: .5vw; font-size: .94em; font-weight: 400; letter-spacing: -.06em; color: #7d172f; white-space: nowrap; }
   .home-page .beauty-hero__title::after { content: ""; display: block; width: 9.4vw; height: 1.5px; margin-top: 3.5vw; background: #c77f68; }
   .home-page .beauty-hero__description {
     margin: 3.5vw 0 0; width: 35vw; max-width: 100%;
@@ -41,7 +41,7 @@
   }
   .home-page .bottom-nav__item { position: relative; flex: 1; min-width: 0; padding: 1px 2px; gap: 3px; font: 400 13px / 1.55 Inter, Arial, sans-serif; color: #77716d; border-radius: 0; }
   .home-page .bottom-nav__item .icon { width: 23px; height: 23px; color: #705443; }
-  .home-page .bottom-nav__item.is-active, .home-page .bottom-nav__item.is-active .icon { color: #705443; }
+  .home-page .bottom-nav__item.is-active, .home-page .bottom-nav__item.is-active .icon { color: #7d172f; }
   .home-page .bottom-nav__item.is-active::before { display: none; }
   .home-page .bottom-nav__item.is-active [data-icon="home"] svg { fill: currentColor; }
 }

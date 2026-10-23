@@ -1,12 +1,12 @@
 /* Um único cabeçalho mobile para home, catálogo, produto, serviços e privacidade. */
 @media (max-width: 760px) {
   body .site-header, body.home-page .site-header { background: #fff; border: 0; border-radius: 0; box-shadow: none; position: relative; top: 0; overflow: visible; }
-  body .site-header .header-top { width: calc(100% - 36px); min-height: 0; margin: auto; padding: 6px 0 8px; display: grid; grid-template-columns: minmax(0, 1fr) 44px; gap: 4px 10px; align-items: center; }
-  body .site-header .logo { grid-column: 1; grid-row: 1; width: auto; min-width: 0; margin: 0; gap: 9px; justify-content: flex-start; }
-  body .site-header .logo__mark { width: 32px; height: 32px; border-radius: 0; }
+  body .site-header .header-top { width: 92%; min-height: 0; margin: auto; padding: 8px 0 9px; display: grid; grid-template-columns: minmax(0, 1fr) 44px; gap: clamp(6px, 2.3vw, 12px) 10px; align-items: center; }
+  body .site-header .logo { grid-column: 1; grid-row: 1; width: auto; min-width: 0; margin: 0; gap: 9px; justify-content: flex-start; padding-left: 1.4vw; }
+  body .site-header .logo__mark { width: clamp(26px, 8vw, 56px); height: clamp(26px, 8vw, 56px); border-radius: 0; }
   body .site-header .logo__text { display: grid; gap: 2px; min-width: 0; }
-  body .site-header .logo__t1 { font: 500 8px / 1.1 Inter, Arial, sans-serif; letter-spacing: .25em; color: #705443; }
-  body .site-header .logo__t2 { font: 400 clamp(13px, 3.8vw, 20px) / 1.2 Georgia, "Times New Roman", serif; letter-spacing: .01em; color: #705443; }
+  body .site-header .logo__t1 { font: 500 clamp(8px, 2.1vw, 12px) / 1.1 Inter, Arial, sans-serif; letter-spacing: .25em; color: #7d172f; }
+  body .site-header .logo__t2 { font: 600 clamp(13px, 3.8vw, 22px) / 1.15 "Times New Roman", Georgia, serif; letter-spacing: .01em; color: #7d172f; }
   body .site-header .logo__t3 { display: none; }
   body .site-header .header-actions { grid-column: 2; grid-row: 1; order: initial; display: flex; width: 44px; margin: 0; gap: 0; }
   body .site-header .header-action,
@@ -14,7 +14,7 @@
   body.home-page .site-header #btn-minha-conta:not([hidden]),
   body .site-header .menu-toggle { display: none !important; }
   body .site-header #abrir-carrinho { width: 44px; height: 44px; border: 0; padding: 0; color: #705443; border-radius: 0; background: transparent; }
-  body .site-header #abrir-carrinho .icon { width: 21px; height: 21px; }
+  body .site-header #abrir-carrinho .icon { width: clamp(24px, 6vw, 32px); height: clamp(24px, 6vw, 32px); }
   body .site-header .cart-badge { width: 17px; height: 17px; right: 0; top: 1px; font-size: 10px; background: #705443; }
   body .site-header .search-bar { grid-column: 1 / -1; grid-row: 2; order: initial; display: flex; width: 100%; max-width: none; min-width: 0; min-height: 44px; margin: 0; padding: 4px 4px 4px 12px; gap: 4px; border: 1px solid #e4d2bf; border-radius: 999px; background: #fff; box-shadow: 0 2px 8px #7054430d; }
   body .site-header .search-bar input { width: 0; min-width: 0; flex: 1; padding: 6px 0; color: #705443; background: transparent; font: 15px / 1.55 Inter, Arial, sans-serif !important; }
