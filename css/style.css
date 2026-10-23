@@ -87,7 +87,7 @@ button {
 
 /* ===== HEADER ===== */
 .site-header {
-  position: sticky;
+  position: relative;
   top: 0;
   z-index: 40;
   background: var(--branco);
