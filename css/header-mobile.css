@@ -1,12 +1,12 @@
 /* Um único cabeçalho mobile para home, catálogo, produto, serviços e privacidade. */
 @media (max-width: 760px) {
-  body .site-header, body.home-page .site-header { background: #fff; border: 1px solid #e9e5e1; border-radius: 10px; box-shadow: none; position: relative; top: 0; overflow: visible; }
-  body .site-header .header-top { width: calc(100% - 36px); min-height: 0; margin: auto; padding: 8px 0 10px; display: grid; grid-template-columns: minmax(0, 1fr) 44px; gap: 6px 10px; align-items: center; }
+  body .site-header, body.home-page .site-header { background: #fff; border: 0; border-radius: 0; box-shadow: none; position: relative; top: 0; overflow: visible; }
+  body .site-header .header-top { width: calc(100% - 36px); min-height: 0; margin: auto; padding: 6px 0 8px; display: grid; grid-template-columns: minmax(0, 1fr) 44px; gap: 4px 10px; align-items: center; }
   body .site-header .logo { grid-column: 1; grid-row: 1; width: auto; min-width: 0; margin: 0; gap: 9px; justify-content: flex-start; }
-  body .site-header .logo__mark { width: 36px; height: 36px; border-radius: 0; }
+  body .site-header .logo__mark { width: 32px; height: 32px; border-radius: 0; }
   body .site-header .logo__text { display: grid; gap: 2px; min-width: 0; }
   body .site-header .logo__t1 { font: 500 8px / 1.1 Inter, Arial, sans-serif; letter-spacing: .25em; color: #705443; }
-  body .site-header .logo__t2 { font: 500 clamp(11px, 3.45vw, 15px) / 1.2 Inter, Arial, sans-serif; letter-spacing: .01em; color: #705443; }
+  body .site-header .logo__t2 { font: 400 clamp(13px, 3.8vw, 20px) / 1.2 Georgia, "Times New Roman", serif; letter-spacing: .01em; color: #705443; }
   body .site-header .logo__t3 { display: none; }
   body .site-header .header-actions { grid-column: 2; grid-row: 1; order: initial; display: flex; width: 44px; margin: 0; gap: 0; }
   body .site-header .header-action,
