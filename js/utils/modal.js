@@ -1,8 +1,13 @@
 // js/utils/modal.js
+function sincronizarRolagem() {
+  const temModalAberto = !!document.querySelector(".modal.is-open");
+  document.documentElement.classList.toggle("no-scroll", temModalAberto);
+  document.body.classList.toggle("no-scroll", temModalAberto);
+  document.body.style.overflow = temModalAberto ? "hidden" : "";
+}
 export function abrirModal(modalEl) {
   modalEl.classList.add("is-open");
-  document.body.classList.add("no-scroll");
-  document.body.style.overflow = "hidden";
+  sincronizarRolagem();
   const focoInicial = modalEl.querySelector("[data-modal-autofocus]") || modalEl;
   focoInicial.focus?.();
 }
@@ -10,12 +15,13 @@ export function abrirModal(modalEl) {
 export function fecharModal(modalEl) {
   if (!modalEl?.classList.contains("is-open")) return;
   modalEl.classList.remove("is-open");
-  document.body.classList.remove("no-scroll");
-  document.body.style.overflow = "";
+  sincronizarRolagem();
   modalEl.dispatchEvent(new CustomEvent("modal:fechado"));
 }
 
 export function iniciarModais() {
+  sincronizarRolagem();
+  window.addEventListener("pageshow", sincronizarRolagem);
   document.querySelectorAll("[data-modal-target]").forEach(trigger => {
     trigger.addEventListener("click", () => {
       const modal = document.querySelector(trigger.dataset.modalTarget);

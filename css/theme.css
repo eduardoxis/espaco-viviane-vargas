@@ -10,7 +10,10 @@
   --marrom: #705443;
   --nude: #a98168;
 }
-html { scrollbar-width: none; -ms-overflow-style: none; }
+/* A janela principal controla a rolagem; o body não cria outra área rolável. */
+html { overflow-x: hidden; overflow-y: auto; scrollbar-width: none; -ms-overflow-style: none; }
+body:not(.no-scroll) { overflow-x: clip; overflow-y: visible; }
+html.no-scroll { overflow-y: hidden; }
 html::-webkit-scrollbar, body::-webkit-scrollbar { display: none; width: 0; height: 0; }
 body { background-color: #ffffff; }
 .logo__mark { filter: grayscale(1) sepia(.8); }

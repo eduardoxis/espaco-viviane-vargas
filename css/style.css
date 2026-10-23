@@ -971,7 +971,7 @@ body { background: var(--cinza-050); color: var(--cinza-900); font-size: 15px; l
 /* ----- Produtos ----- */
 .product-card { background: var(--branco); border: 1px solid var(--cinza-100); border-radius: 18px; }
 .product-card:hover { transform: translateY(-3px); box-shadow: var(--sombra-md); border-color: var(--cinza-200); }
-.product-card__image { background: #fbf7f3; }
+.product-card__image { background: #ffffff; }
 .product-card__fav { background: rgba(255, 253, 251, 0.95); color: var(--cinza-400); box-shadow: none; border: 1px solid var(--cinza-100); }
 .product-card__fav.is-active { color: var(--azul-700); }
 .product-card__brand { color: var(--marrom); letter-spacing: 0.12em; font-size: 0.64rem; }
