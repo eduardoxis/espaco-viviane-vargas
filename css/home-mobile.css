@@ -28,9 +28,9 @@
   .home-page .search-bar input { font: 15px / 1.55 Inter, Arial, sans-serif !important; padding: 8px 5px; }
   .home-page .search-bar__btn { width: 23px; height: 38px; color: #382920; }
   .home-page .search-bar__btn .icon { width: 20px; height: 20px; }
-  .home-page .beauty-hero { display: block; min-height: 0; aspect-ratio: 941 / 1218; background: #f8f1eb; }
+  .home-page .beauty-hero { display: block; min-height: 0; aspect-ratio: 941 / 1672; background: #f8f1eb; }
   .home-page .beauty-hero__visual { position: absolute; inset: 0; width: 100%; height: 100%; z-index: -1; }
-  .home-page .beauty-hero__visual picture { display: block; width: 108%; height: 100%; }
+  .home-page .beauty-hero__visual picture { display: block; width: 100%; height: 100%; }
   .home-page .beauty-hero__visual img { width: 100%; max-width: 100%; height: 100%; margin: 0; object-fit: cover; object-position: center; }
   .home-page .beauty-hero__inner { display: block; width: 100%; min-height: 0; }
   .home-page .beauty-hero__content {
