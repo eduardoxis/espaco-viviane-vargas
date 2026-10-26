@@ -112,6 +112,7 @@
 <link rel="stylesheet" href="/css/typography.css?v=20261023">
 <link rel="stylesheet" href="/css/theme.css?v=20261023-rolagem">
 <link rel="stylesheet" href="/css/header-mobile.css?v=20261023-referencia-sorriso" media="(max-width: 760px)">
+<link rel="stylesheet" href="/css/service-category-cards.css?v=20261026">
 </head>
 <body>
 
@@ -195,6 +196,7 @@ import { escHtml, getQueryParam, toast, debounce, registrarErroCliente } from ".
 import { renderizarServicosCatalogo } from "../js/modules/servicos-publico.js";
 import { ouvirEstadoAuth, sair } from "../js/services/auth.js";
 import { ICONS } from "../js/utils/icons.js";
+import { apresentacaoCategoriaServico } from "../js/modules/categorias-servicos-visual.js";
 import { iniciarLoadingGlobal } from "../js/utils/loadingUI.js";
 import { observarAtualizacaoPublica } from "../js/services/public-sync.js";
 
@@ -306,7 +308,25 @@ function cabecalho({ voltarPara = null, titulo, subtitulo = "" }) {
   topo.querySelector("[data-voltar]")?.addEventListener("click", voltarPara?.acao || (() => {}));
 }
 
+function cartaoCategoriaDestaque(item) {
+  const visual = apresentacaoCategoriaServico(item.nome);
+  const imagem = visual?.imagem || item.imagem || '';
+  const posicao = visual?.posicao || `50% ${Math.max(0, Math.min(100, Number(item.imagemPosY) || 50))}%`;
+  return `<a class="cat-card cat-card--editorial" href="${escHtml(item.href)}" data-nav-cat="${escHtml(item.catId)}" data-nav-sub="${escHtml(item.subId || '')}">
+    <div class="cat-card__img ${imagem ? '' : 'cat-card__img--vazia'}">
+      ${imagem ? `<img src="${escHtml(imagem)}" alt="${escHtml(visual?.alt || '')}" style="object-position:${escHtml(posicao)}" width="1200" height="900" loading="lazy" decoding="async">` : SVG_FOLHA}
+    </div>
+    <div class="cat-card__body">
+      <span class="cat-card__category-icon" aria-hidden="true">${visual?.icone || SVG_FOLHA}</span>
+      <div class="cat-card__summary"><h2 class="cat-card__nome">${escHtml(item.nome)}</h2><p class="cat-card__desc">${escHtml(textoQuantidade(item.total))}</p></div>
+      <span class="cat-card__link">Ver serviços <span class="cat-card__arrow">${SVG_SETA}</span></span>
+    </div>
+  </a>`;
+}
+
+
 function cartaoCategoria(item) {
+  if (item.destaque) return cartaoCategoriaDestaque(item);
   const total = item.total;
   const desc = item.descricao || textoQuantidade(total);
   const posY = Number.isFinite(Number(item.imagemPosY)) ? Number(item.imagemPosY) : 50;
@@ -326,10 +346,10 @@ function cartaoCategoria(item) {
     </a>`;
 }
 
-function desenharCards(itens) {
+function desenharCards(itens, destaque = false) {
   const grade = document.createElement("div");
-  grade.className = "cat-grid";
-  grade.innerHTML = itens.map(cartaoCategoria).join("");
+  grade.className = destaque ? "cat-grid cat-grid--editorial" : "cat-grid";
+  grade.innerHTML = itens.map(item => cartaoCategoria({ ...item, destaque })).join("");
   grade.addEventListener("click", (e) => {
     const link = e.target.closest("[data-nav-cat]");
     if (!link || e.metaKey || e.ctrlKey || e.shiftKey || e.button === 1) return;
@@ -360,7 +380,7 @@ function renderRaiz() {
   conteudo.append(desenharCards(arvore.map(c => ({
     ...c, catId: c.id, total: servicosDe(c.id).length,
     href: `?categoria=${encodeURIComponent(c.id)}`
-  }))));
+  })), true));
 }
 
 function renderCategoria(cat) {

@@ -1,0 +1,59 @@
+/* Somente os cards principais de categorias na página de serviços. */
+.catalogo:has(.cat-grid--editorial) { width: min(1664px, 92vw); }
+.cat-grid.cat-grid--editorial { grid-template-columns: repeat(3, minmax(0, 1fr)); gap: clamp(20px, 1.4vw, 28px); }
+.cat-card.cat-card--editorial {
+  min-width: 0; border-radius: 24px; border: 1px solid #efdccc; background: #fffaf6;
+  box-shadow: 0 14px 30px #76534012; isolation: isolate;
+}
+.cat-card--editorial .cat-card__img { display: block; height: clamp(330px, 29vw, 500px); aspect-ratio: auto; background: #f1e5da; }
+.cat-card--editorial .cat-card__img img { width: 100%; height: 100%; object-fit: cover; }
+.cat-card--editorial .cat-card__body {
+  position: relative; display: grid; flex: 1; padding: 20px 28px 22px; margin-top: -24px;
+  min-height: 156px; border-radius: 34px 34px 0 0;
+  background: linear-gradient(110deg, #fffaf6, #fbf5ef); z-index: 1;
+}
+.cat-card--editorial .cat-card__body::before {
+  content: ""; position: absolute; bottom: 0; left: 0; width: 180px; height: 72px; z-index: -1; pointer-events: none;
+  background: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 180 72' fill='none'%3E%3Cpath d='M0 10C40 52 94 13 163 72M0 6C41 31 74 56 111 72M57 34C81 21 104 40 112 58C86 58 68 50 57 34Z' stroke='%23d4a283' stroke-width='1'/%3E%3C/svg%3E") bottom left / contain no-repeat;
+  opacity: .6;
+}
+.cat-card__category-icon {
+  position: absolute; top: -26px; left: 28px; width: clamp(74px, 6.2vw, 104px); aspect-ratio: 1;
+  display: grid; place-items: center; border: 3px solid #fffaf6; border-radius: 50%;
+  background: #f3e3d6; color: #765340;
+}
+.cat-card__category-icon svg { width: 52%; height: 52%; }
+.cat-card__summary { min-width: 0; margin-left: clamp(96px, 8vw, 130px); }
+.cat-card--editorial .cat-card__nome { font: 650 clamp(24px, 2vw, 34px) / 1.15 Inter, Arial, sans-serif; margin: 0 0 4px; color: #765340; overflow-wrap: anywhere; }
+.cat-card--editorial .cat-card__desc { font: 400 clamp(15px, 1.15vw, 19px) / 1.4 Inter, Arial, sans-serif; margin: 0; color: #76665b; max-width: none; }
+.cat-card--editorial .cat-card__link {
+  justify-self: end; align-self: end; display: inline-flex; align-items: center; justify-content: center; gap: 16px;
+  min-height: 48px; padding: 9px 12px 9px 26px; margin-top: 16px;
+  border: 0; border-radius: 999px; background: #765340; color: #fff;
+  font: 400 15px / 1.4 Inter, Arial, sans-serif;
+  transition: background-color 200ms ease, box-shadow 200ms ease;
+}
+.cat-card__arrow { display: grid; place-items: center; width: 29px; height: 29px; border-radius: 50%; background: #ffffff20; }
+.cat-card--editorial .cat-card__link svg { width: 20px; height: 20px; }
+.cat-card--editorial:hover .cat-card__link { background: #61412f; box-shadow: 0 4px 10px #7653401c; }
+.cat-card--editorial:focus-visible { outline: 3px solid #a98168; outline-offset: 5px; }
+@media (min-width: 761px) and (max-width: 1000px) {
+  .cat-card--editorial .cat-card__body { padding-inline: 16px; }
+  .cat-card__category-icon { left: 16px; width: 64px; }
+  .cat-card__summary { margin-left: 76px; }
+  .cat-card--editorial .cat-card__nome { font-size: 22px; }
+  .cat-card--editorial .cat-card__link { gap: 8px; padding-left: 16px; font-size: 14px; }
+}
+@media (max-width: 760px) {
+  .cat-grid.cat-grid--editorial { grid-template-columns: minmax(0, 1fr); gap: 28px; }
+  .cat-card--editorial .cat-card__img { height: auto; aspect-ratio: .9 / 1; }
+  .cat-card--editorial .cat-card__body { min-height: 128px; padding: 14px 22px 16px; }
+  .cat-card__category-icon { left: 22px; width: 74px; }
+  .cat-card__summary { margin-left: 94px; }
+  .cat-card--editorial .cat-card__nome { font-size: 27px; }
+  .cat-card--editorial .cat-card__link { min-height: 44px; margin-top: 10px; padding-block: 7px; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .cat-card--editorial, .cat-card--editorial .cat-card__img img, .cat-card--editorial .cat-card__link, .cat-card--editorial .cat-card__link svg { transition: none; }
+  .cat-card--editorial:hover, .cat-card--editorial:hover .cat-card__img img, .cat-card--editorial:hover .cat-card__link svg { transform: none; }
+}
