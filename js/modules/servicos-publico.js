@@ -5,6 +5,7 @@
 // agendar/tirar dúvida pelo WhatsApp.
 import { escHtml, formatBRL, imgPos } from "../utils/utils.js";
 import { icon } from "../utils/icons.js";
+import { apresentacaoCategoriaServico } from "./categorias-servicos-visual.js";
 import { linkWhatsApp } from "../utils/whatsapp.js";
 import { servicoTemImagem, ordenarServicos, normalizarTexto } from "../services/servicos.js";
 
@@ -71,32 +72,11 @@ export function textoPrecoServico(servico) {
 }
 
 export function cartaoServico(servico, favoritos = null) {
-  const favoritado = favoritos instanceof Set ? favoritos.has(servico.id) : obterIdsFavoritosServicos().includes(servico.id);
-  const primeira = servico.imagem || (Array.isArray(servico.imagens) ? servico.imagens.find(Boolean) : "") || "";
-  const imagem = imgPos(primeira, 480).src || "/assets/images/placeholder.svg";
-  const rotulo = [servico.categoriaNome, servico.subcategoriaNome].filter(Boolean).join(" · ");
-
-  return `
-    <div class="product-card" data-id="${servico.id}">
-      <button class="product-card__fav ${favoritado ? "is-active" : ""}" data-fav-id="${servico.id}" aria-label="Favoritar serviço" aria-pressed="${favoritado}">${icon("heart")}</button>
-      <a class="product-card__link" href="/pages/servico.html?id=${servico.id}">
-        <div class="product-card__image">
-          <img src="${imagem}" style="object-position:center center" alt="${escHtml(servico.nome)}" loading="lazy" decoding="async" width="411" height="732">
-          ${servico.duracao ? `<div class="product-card__tags"><span class="tag-badge">${escHtml(servico.duracao)}</span></div>` : ""}
-        </div>
-        <div class="product-card__body">
-          ${rotulo ? `<span class="product-card__brand">${escHtml(rotulo)}</span>` : ""}
-          <h3 class="product-card__name">${escHtml(servico.nome)}</h3>
-          <span class="product-card__price">${textoPrecoServico(servico)}</span>
-        </div>
-      </a>
-      <div class="product-card__actions">
-        <button class="btn-whatsapp product-card__ask" data-ask-id="${servico.id}" aria-label="Agendar este serviço pelo WhatsApp">${icon("whatsapp")}<span>Agendar</span></button>
-      </div>
-    </div>`;
+  return cartaoServicoCatalogo(servico, { favoritos: favoritos instanceof Set ? favoritos : new Set(obterIdsFavoritosServicos()) });
 }
 
 export function renderizarGradeServicos(container, servicos) {
+  container.classList.add('svc-grid');
   // Serviços sem foto também aparecem (o cartão usa a imagem padrão).
   const comFoto = Array.isArray(servicos) ? servicos : [];
   if (!comFoto.length) {
@@ -167,30 +147,41 @@ function resumoServico(servico) {
   const curta = String(servico.descricaoCurta || "").trim();
   if (curta) return curta;
   const longa = String(servico.descricao || "").trim();
-  return longa.length > 130 ? `${longa.slice(0, 127).trimEnd()}...` : longa;
+  return longa;
 }
 
-export function cartaoServicoCatalogo(servico) {
-  const primeira = servico.imagem || (Array.isArray(servico.imagens) ? servico.imagens.find(Boolean) : "") || "";
-  const { src, pos } = imgPos(primeira, 640);
-  const imagem = src || "/assets/images/placeholder.svg";
-  const resumo = resumoServico(servico);
+const ICONE_SETA_SERVICO = `<span class="svc-card__action-arrow" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none"><path d="m9 5 7 7-7 7" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg></span>`;
 
+export function cartaoServicoCatalogo(servico, { favoritos = null } = {}) {
+  const primeira = [servico.imagem, ...(Array.isArray(servico.imagens) ? servico.imagens : [])]
+    .find(valor => typeof valor === 'string' && valor.trim()) || '';
+  const visual = apresentacaoCategoriaServico(servico.categoriaNome);
+  const { src, pos } = imgPos(primeira, 960);
+  const imagem = src || visual?.imagem || '/assets/images/servicos-categoria-estetica.webp';
+  const posicao = src ? pos : (visual?.posicao || '50% 48%');
+  const resumo = resumoServico(servico);
+  const detalhes = `/pages/servico.html?id=${encodeURIComponent(servico.id)}`;
+  const favoritado = favoritos instanceof Set && favoritos.has(servico.id);
+  const rotulo = favoritos instanceof Set ? [servico.categoriaNome, servico.subcategoriaNome].filter(Boolean).join(' · ') : '';
   return `
     <article class="svc-card" data-id="${escHtml(servico.id)}">
-      <a class="svc-card__img" href="/pages/servico.html?id=${encodeURIComponent(servico.id)}" aria-label="Ver detalhes de ${escHtml(servico.nome)}">
-        <img src="${escHtml(imagem)}" style="object-position:${pos}" alt="${escHtml(servico.nome)}" loading="lazy" decoding="async">
+      ${favoritos instanceof Set ? `<button type="button" class="product-card__fav svc-card__fav ${favoritado ? 'is-active' : ''}" data-fav-id="${escHtml(servico.id)}" aria-label="Favoritar serviço" aria-pressed="${favoritado}">${icon('heart')}</button>` : ''}
+      <a class="svc-card__img" href="${detalhes}" aria-label="Ver detalhes de ${escHtml(servico.nome)}">
+        <img src="${escHtml(imagem)}" style="object-position:${escHtml(posicao)}" alt="${escHtml(src ? servico.nome : (visual?.alt || 'Imagem ilustrativa de cuidados de beleza'))}" loading="lazy" decoding="async" width="960" height="608">
+        ${!src ? '<span class="svc-card__illustrative">Imagem ilustrativa</span>' : ''}
       </a>
       <div class="svc-card__body">
+        <span class="svc-card__ornament" aria-hidden="true">${visual?.icone || apresentacaoCategoriaServico('Estética').icone}</span>
+        ${rotulo ? `<p class="svc-card__categoria">${escHtml(rotulo)}</p>` : ''}
         <h3 class="svc-card__nome">${escHtml(servico.nome)}</h3>
-        ${resumo ? `<p class="svc-card__desc">${escHtml(resumo)}</p>` : ""}
+        ${resumo ? `<p class="svc-card__desc">${escHtml(resumo)}</p>` : '<div class="svc-card__desc"></div>'}
         <div class="svc-card__meta">
-          ${servico.duracao ? `<span class="svc-card__duracao">${ICONE_RELOGIO}${escHtml(servico.duracao)}</span>` : "<span></span>"}
+          ${servico.duracao ? `<span class="svc-card__duracao">${ICONE_RELOGIO}${escHtml(servico.duracao)}</span>` : '<span></span>'}
           <span class="svc-card__preco">${escHtml(textoPrecoServico(servico))}</span>
         </div>
         <div class="svc-card__acoes">
-          <button type="button" class="btn-whatsapp svc-card__agendar" data-ask-id="${escHtml(servico.id)}">${icon("whatsapp")}<span>Agendar pelo WhatsApp</span></button>
-          <a class="svc-card__detalhes" href="/pages/servico.html?id=${encodeURIComponent(servico.id)}">Ver detalhes</a>
+          <button type="button" class="btn-whatsapp svc-card__agendar" data-ask-id="${escHtml(servico.id)}">${icon('whatsapp')}<span>Agendar pelo WhatsApp</span>${ICONE_SETA_SERVICO}</button>
+          <a class="svc-card__detalhes" href="${detalhes}"><span>Ver detalhes</span>${ICONE_SETA_SERVICO}</a>
         </div>
       </div>
     </article>`;

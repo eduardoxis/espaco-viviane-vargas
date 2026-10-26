@@ -1,0 +1,43 @@
+/* Visual compartilhado dos cards de serviço; não altera cards de produto ou categoria. */
+.svc-grid, .products-grid.svc-grid { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); grid-auto-rows: 1fr; gap: 22px; margin-top: 30px; align-items: stretch; }
+.svc-card {
+  position: relative; display: flex; flex-direction: column; min-width: 0; height: 100%; overflow: hidden;
+  border: 1px solid #f1e5df; border-radius: 24px; background: #fff;
+  box-shadow: 0 9px 28px #985c5910; transition: box-shadow 200ms ease, transform 200ms ease;
+}
+.svc-card:hover { box-shadow: 0 13px 32px #985c591c; transform: translateY(-3px); }
+.svc-card__img { position: relative; display: block; flex: 0 0 auto; width: 100%; aspect-ratio: 1.58 / 1; background: #f5e8df; overflow: hidden; }
+.svc-card__img img { width: 100%; height: 100%; object-fit: cover; display: block; }
+.svc-card__illustrative { position: absolute; top: 10px; left: 10px; max-width: calc(100% - 64px); padding: 3px 8px; border-radius: 999px; background: #fff9f0e8; color: #705443; font: 400 10px / 1.4 Inter, Arial, sans-serif; }
+.svc-card__body { position: relative; display: flex; flex-direction: column; gap: 10px; flex: 1; padding: 20px 20px 22px; background: linear-gradient(150deg, #fff, #fdf8f6); }
+.svc-card__ornament { position: absolute; top: -42px; left: 18px; display: grid; place-items: center; width: 62px; height: 62px; border: 3px solid #fffaf7; border-radius: 50%; background: #f7e7df; color: #985c59; pointer-events: none; }
+.svc-card__ornament svg { width: 30px; height: 30px; }
+.svc-card__categoria { margin: 4px 0 0; font: 400 11px / 1.4 Inter, Arial, sans-serif; color: #89736b; }
+.svc-card__nome { margin: 3px 0 0; color: #59372e; font: 400 clamp(25px, 2.1vw, 32px) / 1.12 Georgia, 'Times New Roman', serif; letter-spacing: -.025em; overflow-wrap: anywhere; }
+.svc-card__desc { margin: 0; font: 400 clamp(14px, 1.05vw, 18px) / 1.5 Inter, Arial, sans-serif; color: #7e6861; white-space: pre-line; overflow-wrap: anywhere; flex: 1; max-width: none; }
+.svc-card__meta { display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 8px; padding-top: 11px; margin-top: auto; border-top: 1px solid #f0dbd5; }
+.svc-card__duracao { display: inline-flex; align-items: center; gap: 7px; min-width: 0; font: 400 13px / 1.4 Inter, Arial, sans-serif; color: #76504a; }
+.svc-card__duracao svg { width: 19px; height: 19px; flex-shrink: 0; }
+.svc-card__preco { max-width: 100%; padding: 5px 12px; border-radius: 999px; background: #f6e1db; color: #8c4e47; font: 600 12px / 1.4 Inter, Arial, sans-serif; text-align: center; overflow-wrap: anywhere; }
+.svc-card__acoes { display: grid; gap: 10px; margin-top: 3px; }
+.svc-card .svc-card__agendar, .svc-card .svc-card__detalhes {
+  display: flex; align-items: center; justify-content: center; gap: 8px; width: 100%; min-height: 46px;
+  padding: 10px 10px; border: 1px solid #985c59; border-radius: 16px;
+  font: 500 clamp(13px, .95vw, 17px) / 1.4 Inter, Arial, sans-serif; text-decoration: none; text-align: center;
+  transition: background-color 180ms ease, color 180ms ease;
+}
+.svc-card .svc-card__agendar { background: #985c59; color: #fff; }
+.svc-card .svc-card__agendar:hover { background: #824a48; border-color: #824a48; }
+.svc-card .svc-card__detalhes { background: #fcf0eb; color: #8b4d46; }
+.svc-card .svc-card__detalhes:hover { background: #f6e0d8; }
+.svc-card__agendar .icon { width: 21px; height: 21px; flex-shrink: 0; }
+.svc-card__action-arrow { display: inline-flex; align-items: center; flex-shrink: 0; }
+.svc-card__action-arrow svg { width: 16px; height: 16px; transition: transform 180ms ease; }
+.svc-card__agendar:hover .svc-card__action-arrow svg, .svc-card__detalhes:hover .svc-card__action-arrow svg { transform: translateX(3px); }
+.svc-card button:focus-visible, .svc-card a:focus-visible { outline: 3px solid #b87b71; outline-offset: -3px; }
+.svc-card .svc-card__fav { z-index: 2; }
+.catalogo:has(.svc-grid) { width: min(1840px, 92vw); }
+.catalogo:has(.svc-grid) .cat-titulo { font-family: Georgia, 'Times New Roman', serif; font-weight: 400; color: #59372e; letter-spacing: -.04em; }
+@media (min-width: 641px) and (max-width: 1100px) { .svc-grid, .products-grid.svc-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
+@media (max-width: 640px) { .svc-grid, .products-grid.svc-grid { grid-template-columns: minmax(0, 1fr); gap: 24px; } .svc-card__body { padding-inline: 22px; } .svc-card__nome { font-size: 29px; } .svc-card .svc-card__agendar, .svc-card .svc-card__detalhes { font-size: 14px; } }
+@media (prefers-reduced-motion: reduce) { .svc-card, .svc-card__action-arrow svg, .svc-card .svc-card__agendar, .svc-card .svc-card__detalhes { transition: none; } .svc-card:hover, .svc-card__agendar:hover .svc-card__action-arrow svg, .svc-card__detalhes:hover .svc-card__action-arrow svg { transform: none; } }
