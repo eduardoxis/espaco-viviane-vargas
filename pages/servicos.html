@@ -113,6 +113,14 @@
 <link rel="stylesheet" href="/css/theme.css?v=20261023-rolagem">
 <link rel="stylesheet" href="/css/header-mobile.css?v=20261023-referencia-sorriso" media="(max-width: 760px)">
 <link rel="stylesheet" href="/css/service-cards-modern.css?v=20261026-sem-ilustracao">
+<style>
+  /* As categorias principais usam a mesma largura e proporção da home. */
+  .cat-grid.cat-grid--tamanho-home { grid-template-columns: repeat(4, minmax(0, 1fr)); gap: clamp(.9rem, 1.6vw, 1.5rem); align-items: stretch; }
+  .cat-grid--tamanho-home .cat-card__img { aspect-ratio: 2 / 1; }
+  .cat-grid--tamanho-home .cat-card__body { min-height: calc(11.2567rem + clamp(1.45rem, 2vw, 1.75rem) * 1.15); }
+  @media (max-width: 1100px) { .cat-grid.cat-grid--tamanho-home { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
+  @media (max-width: 520px) { .cat-grid.cat-grid--tamanho-home { grid-template-columns: minmax(0, 1fr); } }
+</style>
 </head>
 <body>
 
@@ -328,9 +336,9 @@ function cartaoCategoria(item) {
     </a>`;
 }
 
-function desenharCards(itens) {
+function desenharCards(itens, tamanhoHome = false) {
   const grade = document.createElement("div");
-  grade.className = "cat-grid";
+  grade.className = tamanhoHome ? "cat-grid cat-grid--tamanho-home" : "cat-grid";
   grade.innerHTML = itens.map(cartaoCategoria).join("");
   grade.addEventListener("click", (e) => {
     const link = e.target.closest("[data-nav-cat]");
@@ -362,7 +370,7 @@ function renderRaiz() {
   conteudo.append(desenharCards(arvore.map(c => ({
     ...c, catId: c.id, total: servicosDe(c.id).length,
     href: `?categoria=${encodeURIComponent(c.id)}`
-  }))));
+  })), true));
 }
 
 function renderCategoria(cat) {
