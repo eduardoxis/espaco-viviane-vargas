@@ -157,19 +157,18 @@ export function cartaoServicoCatalogo(servico, { favoritos = null } = {}) {
     .find(valor => typeof valor === 'string' && valor.trim()) || '';
   const visual = apresentacaoCategoriaServico(servico.categoriaNome);
   const { src, pos } = imgPos(primeira, 960);
-  const imagem = src || visual?.imagem || '/assets/images/servicos-categoria-estetica.webp';
-  const posicao = src ? pos : (visual?.posicao || '50% 48%');
+  const imagem = src;
+  const posicao = pos;
   const resumo = resumoServico(servico);
   const detalhes = `/pages/servico.html?id=${encodeURIComponent(servico.id)}`;
   const favoritado = favoritos instanceof Set && favoritos.has(servico.id);
   const rotulo = favoritos instanceof Set ? [servico.categoriaNome, servico.subcategoriaNome].filter(Boolean).join(' · ') : '';
   return `
-    <article class="svc-card" data-id="${escHtml(servico.id)}">
+    <article class="svc-card ${imagem ? '' : 'svc-card--sem-foto'}" data-id="${escHtml(servico.id)}">
       ${favoritos instanceof Set ? `<button type="button" class="product-card__fav svc-card__fav ${favoritado ? 'is-active' : ''}" data-fav-id="${escHtml(servico.id)}" aria-label="Favoritar serviço" aria-pressed="${favoritado}">${icon('heart')}</button>` : ''}
-      <a class="svc-card__img" href="${detalhes}" aria-label="Ver detalhes de ${escHtml(servico.nome)}">
-        <img src="${escHtml(imagem)}" style="object-position:${escHtml(posicao)}" alt="${escHtml(src ? servico.nome : (visual?.alt || 'Imagem ilustrativa de cuidados de beleza'))}" loading="lazy" decoding="async" width="960" height="608">
-        ${!src ? '<span class="svc-card__illustrative">Imagem ilustrativa</span>' : ''}
-      </a>
+      ${imagem ? `<a class="svc-card__img" href="${detalhes}" aria-label="Ver detalhes de ${escHtml(servico.nome)}">
+        <img src="${escHtml(imagem)}" style="object-position:${escHtml(posicao)}" alt="${escHtml(servico.nome)}" loading="lazy" decoding="async" width="960" height="608">
+      </a>` : ''}
       <div class="svc-card__body">
         <span class="svc-card__ornament" aria-hidden="true">${visual?.icone || apresentacaoCategoriaServico('Estética').icone}</span>
         ${rotulo ? `<p class="svc-card__categoria">${escHtml(rotulo)}</p>` : ''}
