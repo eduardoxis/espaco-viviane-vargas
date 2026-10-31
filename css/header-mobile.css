@@ -3,8 +3,8 @@
   body .site-header, body.home-page .site-header { background: #fff; border: 0; border-radius: 0; box-shadow: none; position: relative; top: 0; overflow: visible; }
   body .site-header .header-top { width: 92%; min-height: 0; margin: auto; padding: 8px 0 9px; display: grid; grid-template-columns: minmax(0, 1fr) 44px; gap: clamp(6px, 2.3vw, 12px) 10px; align-items: center; }
   body .site-header .logo { grid-column: 1; grid-row: 1; width: auto; min-width: 0; margin: 0; gap: 9px; justify-content: flex-start; padding-left: 1.4vw; }
-  body .site-header .logo__mark { width: clamp(26px, 8vw, 56px); height: clamp(26px, 8vw, 56px); border-radius: 0; }
-  body .site-header .logo__text { display: grid; gap: 2px; min-width: 0; }
+  body .site-header .logo__mark { width: min(100%, 280px); max-width: calc(92vw - 62px); height: auto; max-height: 54px; border-radius: 0; object-fit: contain; }
+  body .site-header .logo__text { display: none !important; }
   body .site-header .logo__t1 { font: 500 clamp(8px, 2.1vw, 12px) / 1.1 Inter, Arial, sans-serif; letter-spacing: .25em; color: #7d172f; }
   body .site-header .logo__t2 { font: 600 clamp(13px, 3.8vw, 22px) / 1.15 "Times New Roman", Georgia, serif; letter-spacing: .01em; color: #7d172f; }
   body .site-header .logo__t3 { display: none; }

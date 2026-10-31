@@ -1,7 +1,7 @@
 // Indicador compartilhado, ligado ao estado real das operações.
 import { onLoadingChange, begin, end } from "./loadingManager.js";
 const OVERLAY_ID = "loading-global-overlay";
-const LOGO_URL = new URL("../../assets/images/logo.webp", import.meta.url).href;
+const LOGO_URL = new URL("../../assets/images/logo-abertura.svg", import.meta.url).href;
 
 function garantirElementos() {
   if (!document.getElementById("loading-global-style")) {

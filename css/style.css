@@ -1159,3 +1159,38 @@ body { background: var(--cinza-050); color: var(--cinza-900); font-size: 15px; l
   .sv-home__eyebrow { letter-spacing: 0.22em; font-size: 0.7rem; }
   .sv-home__desc { max-width: none; }
 }
+$files = @('index.html') + (Get-ChildItem pages -Filter '*.html' | ForEach-Object { $_.FullName })
+foreach($file in $files) {
+  $raw = [IO.File]::ReadAllText((Resolve-Path $file))
+  $raw = [regex]::Replace($raw, '<img src="/assets/images/logo\.webp" alt="Espaço Viviane Vargas" class="logo__mark" width="256" height="256" decoding="async">\s*<span class="logo__text">.*?</span>', '<img src="/assets/images/logo-abertura.svg" alt="Espaço Viviane Vargas — Estética e salão de beleza" class="logo__mark" width="378" height="77" decoding="async" fetchpriority="high">', [System.Text.RegularExpressions.RegexOptions]::Singleline)
+  [IO.File]::WriteAllText((Resolve-Path $file), $raw)
+}
+@'
+
+/* Logo oficial completa em todas as larguras e páginas. */
+.site-header .logo {
+  flex: 0 1 auto;
+  min-width: 0;
+  gap: 0;
+}
+.site-header .logo__mark {
+  display: block;
+  width: clamp(230px, 26vw, 378px);
+  height: auto;
+  max-height: 78px;
+  object-fit: contain;
+  filter: none;
+}
+.site-header .logo__text { display: none !important; }
+@media (max-width: 760px) {
+  body .site-header .logo {
+    width: 100%;
+    max-width: 100%;
+    overflow: visible;
+  }
+  body .site-header .logo__mark {
+    width: min(100%, 300px);
+    max-height: 58px;
+    height: auto;
+  }
+}
