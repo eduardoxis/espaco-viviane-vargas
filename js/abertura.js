@@ -2,10 +2,7 @@
 (() => {
   const root = document.documentElement;
   const intro = document.getElementById('intro');
-  if (!intro || !root.classList.contains('ev-intro-pending')) {
-    if (!window.matchMedia('(prefers-reduced-motion: reduce)').matches) document.body.classList.add('site-in');
-    return;
-  }
+  if (!intro || !root.classList.contains('ev-intro-pending')) return;
   const body = document.body;
   const skip = document.getElementById('intro-skip');
   const stage = intro.querySelector('.ev-stage');
