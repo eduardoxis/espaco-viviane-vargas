@@ -37,6 +37,12 @@ export async function exigirAdmin(req) {
   }
 
   const uid = decodificado.uid;
+  const aceite = await obterDbAdmin().collection("aceitesTermos").doc(uid).get();
+  if (!aceite.exists || aceite.data()?.versao !== "2026-10-31") {
+    const erro = new Error("Aceite os Termos de Uso vigentes antes de usar a conta.");
+    erro.status = 403;
+    throw erro;
+  }
   const emCache = cacheCargo.get(uid);
   let ehAdmin;
 

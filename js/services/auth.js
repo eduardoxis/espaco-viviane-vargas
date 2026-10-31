@@ -9,6 +9,10 @@ import { doc, getDoc, setDoc } from "https://www.gstatic.com/firebasejs/12.19.0/
 import { toast, podeExecutarPersistente } from "../utils/utils.js";
 import { withLoading, beginListener } from "../utils/loadingManager.js";
 
+import { garantirAceite } from "../privacy/terms.js";
+let cadastroAceitou = false;
+let authSequence = 0;
+
 export let usuarioAtual = null;
 export let perfilAtual = null;
 
@@ -34,9 +38,13 @@ export function ouvirEstadoAuth(callback) {
   // ou não; por isso conta como loading até a primeira resposta.
   const finalizarPrimeiroEstado = beginListener("ouvirEstadoAuth");
   onAuthStateChanged(auth, async (user) => {
-    usuarioAtual = user;
+    const sequence = ++authSequence;
+    usuarioAtual = null;
     try {
       if (user) {
+        await garantirAceite(user, cadastroAceitou);
+        if (sequence !== authSequence) return;
+        usuarioAtual = user;
         // A permissão real continua nas regras do Firestore. Este cache só
         // evita reler o mesmo perfil para redesenhar a interface durante a
         // mesma sessão/navegação entre páginas.
@@ -45,6 +53,10 @@ export function ouvirEstadoAuth(callback) {
           const ref = doc(db, "usuarios", user.uid);
           const snap = await getDoc(ref);
           perfilAtual = snap.exists() ? snap.data() : { cargos: ["cliente"] };
+          if (!snap.exists() && !cadastroAceitou) {
+            perfilAtual = { email: user.email || "", nome: user.displayName || "", cargos: ["cliente"], criadoEm: new Date().toISOString() };
+            await setDoc(ref, perfilAtual);
+          }
           salvarPerfilCache(user.uid, perfilAtual);
         }
         if (perfilAtual?.cargos?.includes("admin")) {
@@ -54,7 +66,14 @@ export function ouvirEstadoAuth(callback) {
       } else {
         perfilAtual = null;
       }
-      callback(usuarioAtual, perfilAtual);
+      if (sequence === authSequence) callback(usuarioAtual, perfilAtual);
+    } catch (erro) {
+      if (sequence !== authSequence) return;
+      usuarioAtual = null;
+      perfilAtual = null;
+      await signOut(auth).catch(() => {});
+      callback(null, null);
+      toast(erro.message || "Não foi possível liberar sua conta. Entre novamente para concluir o aceite.", "error");
     } finally {
       finalizarPrimeiroEstado();
     }
@@ -82,6 +101,7 @@ export function entrar(email, senha, manterLogin = true) {
       // (browserSessionPersistence), útil em computador compartilhado.
       await setPersistence(auth, manterLogin ? browserLocalPersistence : browserSessionPersistence);
       const { user } = await signInWithEmailAndPassword(auth, email, senha);
+      await garantirAceite(user);
       // Não consultamos o perfil aqui: o observador de autenticação já faz
       // essa única leitura (ou usa cache) ao concluir o login. Isso elimina
       // a leitura duplicada de usuarios/{uid} em todo acesso.
@@ -99,18 +119,25 @@ export function entrar(email, senha, manterLogin = true) {
 export function cadastrar(dados) {
   return withLoading("cadastrar", async () => {
     try {
-      const { email, senha, ...perfil } = dados;
+      if (dados.aceiteTermos !== true) throw new Error("Aceite os Termos de Uso para criar a conta.");
+      const { email, senha, aceiteTermos, ...perfil } = dados;
+      cadastroAceitou = true;
       const { user } = await createUserWithEmailAndPassword(auth, email, senha);
+      await garantirAceite(user, true);
       const nomeExibicao = perfil.nome || perfil.responsavel || perfil.razaoSocial || "";
       if (nomeExibicao) await updateProfile(user, { displayName: nomeExibicao });
-      await setDoc(doc(db, "usuarios", user.uid), {
+      const novoPerfil = {
         email, cargos: ["cliente"], criadoEm: new Date().toISOString(), ...perfil
-      });
+      };
+      await setDoc(doc(db, "usuarios", user.uid), novoPerfil);
+      perfilAtual = novoPerfil;
+      salvarPerfilCache(user.uid, novoPerfil);
       return user;
     } catch (err) {
-      toast(traduzErroAuth(err.code), "error");
+      await signOut(auth).catch(() => {});
+      toast(err.message || traduzErroAuth(err.code), "error");
       throw err;
-    }
+    } finally { cadastroAceitou = false; }
   });
 }
 

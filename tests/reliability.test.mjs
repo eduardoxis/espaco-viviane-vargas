@@ -32,7 +32,7 @@ async function ambiente({ bloqueado = false, janela = {}, firestore = {}, sincro
     }],
     ['firebase-admin/app', { getApps: () => apps, cert: value => value, initializeApp: opts => { const app = { opts }; apps.push(app); return app; } }],
     ['firebase-admin/auth', { getAuth: app => { assert.ok(app, 'Firebase precisa ser inicializado antes de verificar o token'); return { verifyIdToken: async () => { if (tokenInvalido) throw new Error('Token inválido'); return { uid: 'admin-teste' }; } }; } }],
-    ['firebase-admin/firestore', { getFirestore: app => { assert.ok(app); return { collection: () => ({ doc: () => ({ get: async () => ({ exists: true, data: () => ({ cargos }) }) }) }) }; } }]
+    ['firebase-admin/firestore', { getFirestore: app => { assert.ok(app); return { collection: () => ({ doc: () => ({ get: async () => ({ exists: true, data: () => ({ cargos, versao: "2026-10-31" }) }) }) }) }; } }]
   ]);
   if (!sincronizacaoReal) mocks.set(path.join(root, 'js/services/contaSync.js'), { salvarCarrinhoNuvem: async value => writes.push(value), salvarFavoritosNuvem: async () => {} });
   const cache = new Map();

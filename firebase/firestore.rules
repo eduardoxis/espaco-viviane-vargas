@@ -11,11 +11,17 @@ service cloud.firestore {
     }
 
     function ehAdmin() {
-      return autenticado() &&
+      return contaLiberada() &&
         exists(/databases/$(database)/documents/usuarios/$(request.auth.uid)) &&
         get(/databases/$(database)/documents/usuarios/$(request.auth.uid)).data.cargos.hasAny(['admin']);
     }
 
+    // Apenas o backend grava a versão vigente e o histórico de aceite.
+    function contaLiberada() {
+      return autenticado() &&
+        exists(/databases/$(database)/documents/aceitesTermos/$(request.auth.uid)) &&
+        get(/databases/$(database)/documents/aceitesTermos/$(request.auth.uid)).data.versao == '2026-10-31';
+    }
     // ---------- PRODUTOS ----------
     // Leitura pública (é um catálogo), mas produtos "ocultos" só o admin lista/edita.
     // A filtragem de "oculto" na home já é feita no client, mas a regra abaixo
@@ -88,33 +94,70 @@ service cloud.firestore {
     // cliente um pedido com campos faltando, tipos errados, total negativo
     // ou um total que não bate com a soma dos itens.
     match /pedidos/{id} {
-      allow create: if autenticado() &&
+      allow create: if contaLiberada() &&
         request.resource.data.usuarioId == request.auth.uid &&
         request.resource.data.keys().hasAll(['usuarioId', 'itens', 'total', 'criadoEm']) &&
         request.resource.data.itens is list && request.resource.data.itens.size() > 0 &&
         request.resource.data.itens.size() <= 100 &&
         request.resource.data.total is number && request.resource.data.total >= 0 &&
         (!('status' in request.resource.data) || request.resource.data.status == 'pendente');
-      allow read: if autenticado() && (resource.data.usuarioId == request.auth.uid || ehAdmin());
+      allow read: if contaLiberada() && (resource.data.usuarioId == request.auth.uid || ehAdmin());
       // O cliente pode remover apenas documentos que pertencem à própria conta.
       // Alterações continuam exclusivas do painel administrativo.
       allow update: if ehAdmin();
-      allow delete: if autenticado() && (resource.data.usuarioId == request.auth.uid || ehAdmin());
+      allow delete: if contaLiberada() && (resource.data.usuarioId == request.auth.uid || ehAdmin());
     }
 
     // Carrinho e favoritos pertencem à conta: qualquer dispositivo com a
     // mesma sessão autenticada vê e atualiza o mesmo documento.
     match /carrinhos/{uid} {
-      allow read: if autenticado() && request.auth.uid == uid;
-      allow write: if autenticado() && request.auth.uid == uid &&
+      allow read: if contaLiberada() && request.auth.uid == uid;
+      allow write: if contaLiberada() && request.auth.uid == uid &&
         request.resource.data.keys().hasOnly(['itens', 'atualizadoEm']) &&
         request.resource.data.itens is list && request.resource.data.itens.size() <= 100;
     }
     match /favoritos/{uid} {
-      allow read: if autenticado() && request.auth.uid == uid;
-      allow write: if autenticado() && request.auth.uid == uid &&
+      allow read: if contaLiberada() && request.auth.uid == uid;
+      allow write: if contaLiberada() && request.auth.uid == uid &&
         request.resource.data.keys().hasOnly(['itens', 'atualizadoEm']) &&
         request.resource.data.itens is list && request.resource.data.itens.size() <= 500;
     }
 
     // ---------- ENDEREÇOS
+    match /enderecos/{id} {
+      allow read, delete: if contaLiberada() && (resource.data.usuarioId == request.auth.uid || ehAdmin());
+      allow create: if contaLiberada() && request.resource.data.usuarioId == request.auth.uid;
+      allow update: if ehAdmin() || (contaLiberada() && resource.data.usuarioId == request.auth.uid && request.resource.data.usuarioId == request.auth.uid);
+    }
+    match /usuarios/{uid} {
+      allow get: if ehAdmin() || (contaLiberada() && request.auth.uid == uid);
+      allow list: if ehAdmin();
+      allow create: if ehAdmin() || (contaLiberada() && request.auth.uid == uid &&
+        request.resource.data.cargos == ['cliente'] &&
+        request.resource.data.keys().hasOnly(['email','cargos','criadoEm','nome','cpf','telefone','tipoConta','razaoSocial','cnpj','responsavel']));
+      allow update: if ehAdmin() || (contaLiberada() && request.auth.uid == uid &&
+        request.resource.data.diff(resource.data).affectedKeys().hasOnly(['nome','telefone','dataNascimento','formaPagamentoPreferida','notificacoesPromocoes','cpf','razaoSocial','cnpj','responsavel']));
+      allow delete: if ehAdmin();
+    }
+    match /aceitesTermos/{uid} {
+      allow get: if autenticado() && (request.auth.uid == uid || ehAdmin());
+      allow list, write: if false;
+      match /historico/{id} {
+        allow read: if autenticado() && (request.auth.uid == uid || ehAdmin());
+        allow write: if false;
+      }
+    }
+    match /desafiosTermos/{uid} { allow read, write: if false; }
+    match /logsErros/{id} {
+      allow read: if ehAdmin();
+      allow create: if contaLiberada() && request.resource.data.keys().hasOnly(['origem','mensagem','extra','criadoEm']);
+      allow update, delete: if false;
+    }
+    // Coleções operacionais já usadas pelo painel; visitantes não têm acesso.
+    match /leadsPerdidos/{id} { allow read, write: if ehAdmin(); }
+    match /historicoEstoque/{id} { allow read, write: if ehAdmin(); }
+    match /alertasEstoque/{id} { allow read, write: if ehAdmin(); }
+    match /configuracoes/{id} { allow read, write: if ehAdmin(); }
+    match /rateLimits/{id} { allow read, write: if false; }
+  }
+}

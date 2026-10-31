@@ -793,7 +793,12 @@ export function excluirCustoProduto(id) {
   return deleteDoc(doc(db, COL_CUSTOS, id));
 }
 
+function enviarMetrica(id, type) {
+  return fetch("/api/metrics", { method:"POST", headers:{ "Content-Type":"application/json" }, body:JSON.stringify({ id, type, consent:window.EVConsent.get() }) });
+}
+
 export function incrementarVisualizacao(id) {
+  if (!window.EVConsent?.allows("statistics")) return Promise.resolve();
   // Uma visualização por produto/dispositivo a cada 6 horas evita que
   // recarregamentos e navegação de ida/volta virem escritas de analytics.
   const chave = `futura:view:${id}`;
@@ -802,11 +807,12 @@ export function incrementarVisualizacao(id) {
     if (Date.now() - ultima < 6 * 60 * 60 * 1000) return Promise.resolve();
     localStorage.setItem(chave, String(Date.now()));
   } catch { /* segue sem persistência quando o storage não está disponível */ }
-  return updateDoc(doc(db, "produtos", id), { visualizacoes: increment(1) });
+  return enviarMetrica(id, "view");
 }
 
 export function incrementarCompartilhamento(id) {
-  return updateDoc(doc(db, "produtos", id), { compartilhamentos: increment(1) });
+  if (!window.EVConsent?.allows("statistics")) return Promise.resolve();
+  return enviarMetrica(id, "share");
 }
 
 export function ajustarEstoque(id, delta, motivo = "") {
@@ -1139,8 +1145,9 @@ export function excluirEtiqueta(id) {
 
 // ---------- LEADS PERDIDOS ----------
 export function salvarLeadPerdido(lead) {
+  if (!window.EVConsent?.allows("marketing")) return Promise.resolve();
   return withLoading("salvarLeadPerdido", async () => {
-    const resp = await fetch("/api/lead-perdido", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify(lead) });
+    const resp = await fetch("/api/lead-perdido", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ ...lead, consent:window.EVConsent.get() }) });
     if (!resp.ok) throw new Error((await resp.json().catch(() => ({}))).erro || "Falha ao registrar lead.");
     return resp.json();
   });

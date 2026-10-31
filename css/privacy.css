@@ -1,0 +1,22 @@
+.ev-privacy { font-family: Inter, Arial, sans-serif; color: #473129; }
+.ev-cookie-banner { position:fixed; bottom:calc(20px + env(safe-area-inset-bottom,0px)); left:50%; transform:translateX(-50%); width:min(1180px,calc(100% - 32px)); padding:24px; border:1px solid #dfccbe; border-radius:18px; background:#fffaf5; box-shadow:0 8px 35px #47312925; display:flex; gap:24px; align-items:center; z-index:100010; }
+.ev-cookie-banner h2,.ev-cookie-dialog h2 { font-size:20px; margin:0 0 10px; color:#705443; }
+.ev-cookie-banner p,.ev-cookie-dialog p { font-size:14px; line-height:1.6; margin:8px 0; }
+.ev-cookie-actions { display:flex; flex-wrap:wrap; gap:8px; flex-shrink:0; }
+.ev-cookie-actions button,.ev-cookie-link { font:inherit; cursor:pointer; }
+.ev-cookie-actions button { min-height:44px; padding:10px 16px; border:1px solid #947360; border-radius:9px; background:#fff; color:#705443; }
+.ev-cookie-actions button:first-child { background:#705443; color:white; }
+.ev-cookie-dialog { width:min(600px,calc(100% - 24px)); max-height:85dvh; overflow:auto; padding:28px; border:1px solid #dfccbe; border-radius:18px; background:#fffaf5; color:#473129; }
+.ev-cookie-dialog::backdrop { background:#38292066; }
+.ev-cookie-dialog small { display:block; margin:6px 0 18px; font-size:13px; line-height:1.5; }
+.ev-cookie-dialog input { accent-color:#705443; }
+.ev-cookie-error { color:#8d2136; }
+.ev-cookie-link { border:0; padding:0; background:none; color:inherit; text-decoration:underline; }
+.ev-legal-links { display:flex; justify-content:center; flex-wrap:wrap; gap:12px 22px; padding:20px; }
+.ev-privacy :focus-visible,.ev-cookie-link:focus-visible { outline:2px solid #705443; outline-offset:4px; }
+.ev-legal { max-width:850px; margin:auto; padding:36px 20px 70px; line-height:1.75; color:#473129; }
+.ev-legal h1 { font-size:clamp(28px,5vw,40px); line-height:1.2; }
+.ev-legal h2 { margin-top:28px; font-size:23px; }
+.ev-legal ul { padding-left:24px; }
+.ev-legal a { text-decoration:underline; }
+@media(max-width:760px) { .ev-cookie-banner { bottom:calc(80px + env(safe-area-inset-bottom,0px)); display:block; padding:18px; max-height:65dvh; overflow:auto; } .ev-cookie-actions { margin-top:14px; } .ev-cookie-actions button { flex:1 1 140px; } }

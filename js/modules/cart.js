@@ -187,6 +187,7 @@ export function falarSobreProduto(produto) {
  * opcionalmente nome/telefone se o usuário os informou em algum campo.
  */
 export async function registrarLeadPerdidoSeNecessario({ nome = "", telefone = "" } = {}) {
+  if (!window.EVConsent?.allows("marketing")) return;
   const carrinho = obterCarrinho();
   if (leadSalvo || carrinho.length === 0) return;
   const assinatura = carrinho.map(i => `${i.chave || i.id}:${i.quantidade}`).sort().join("|");

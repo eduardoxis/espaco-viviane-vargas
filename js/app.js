@@ -746,7 +746,7 @@ function configurarModalAuth() {
       return;
     }
     if (!form.aceiteTermos.checked) {
-      erroEl.textContent = "É preciso concordar com a Política de Privacidade para criar a conta.";
+      erroEl.textContent = "Aceite os Termos de Uso e declare a leitura da Política de Privacidade para criar a conta.";
       return;
     }
     const tipoConta = form.tipoConta.value;
@@ -765,11 +765,11 @@ function configurarModalAuth() {
           telefone: form.telefone.value.trim()
         };
     try {
-      await cadastrar(dados);
+      await cadastrar({ ...dados, aceiteTermos: form.aceiteTermos.checked });
       fecharModal(modal);
       form.reset();
-    } catch {
-      erroEl.textContent = "Não foi possível criar a conta.";
+    } catch (erro) {
+      erroEl.textContent = `${erro.message || "Não foi possível concluir o cadastro."} Se o e-mail já foi cadastrado, entre novamente para concluir o aceite.`;
     }
   });
 }

@@ -47,6 +47,9 @@
 <link rel="preload" as="image" href="/assets/images/logo-abertura.svg">
 <link rel="stylesheet" href="/css/abertura.css?v=20261031">
 <script defer src="/js/abertura.js?v=20261031"></script>
+<link rel="stylesheet" href="/css/privacy.css?v=20261031">
+<script src="/js/privacy/consent.js"></script>
+<script defer src="/js/privacy/ui.js"></script>
 </head>
 <body class="home-page">
 <div id="intro" role="region" aria-label="Abertura Espaço Viviane Vargas">
@@ -512,10 +515,11 @@
     </div>
     <div>
       <h4>Institucional</h4>
-      <a href="/pages/privacidade.html">Política de Privacidade</a>
+      <a href="/pages/politica-de-privacidade.html">Política de Privacidade</a>
     </div>
   </div>
   <div class="footer-bottom">© 2026 Espaço Viviane Vargas. Todos os direitos reservados.<span class="footer-credit">Desenvolvido por <a href="https://www.instagram.com/eduardo_xis" target="_blank" rel="noopener noreferrer">@eduardo_xis</a></span></div>
+<nav class="ev-legal-links" aria-label="Informações legais"><a href="/pages/politica-de-privacidade.html">Política de Privacidade</a><a href="/pages/termos-de-uso.html">Termos de Uso</a><button type="button" class="ev-cookie-link" data-cookie-settings>Configurações de Cookies</button></nav>
 </footer>
 
 <!-- CARRINHO -->
@@ -671,7 +675,7 @@
         <p class="auth-error" id="erro-cadastrar-modal"></p>
         <label class="campo-consentimento">
           <input type="checkbox" name="aceiteTermos" id="aceite-termos-cadastro" required>
-          <span>Li e concordo com a <a href="/pages/privacidade.html" target="_blank" rel="noopener">Política de Privacidade</a>.</span>
+          <span>Li e aceito os <a href="/pages/termos-de-uso.html" target="_blank" rel="noopener">Termos de Uso</a> e declaro ter lido a <a href="/pages/politica-de-privacidade.html" target="_blank" rel="noopener">Política de Privacidade</a>.</span>
         </label>
         <button type="submit" class="btn-primary" style="width:100%">Criar conta</button>
       </form>

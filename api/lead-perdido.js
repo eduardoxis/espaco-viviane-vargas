@@ -5,6 +5,7 @@ import { FieldValue } from "firebase-admin/firestore";
 
 export default async function handler(req, res) {
   if (req.method !== "POST") return res.status(405).json({ erro: "Método não permitido." });
+  if (req.body?.consent?.marketing !== true || req.body?.consent?.policy !== "2026-10-31") return res.status(403).json({ erro:"Recuperação de carrinho não autorizada." });
   try {
     const ip = String(req.headers["x-forwarded-for"] || req.socket?.remoteAddress || "desconhecido").split(",")[0].trim();
     await aplicarLimite(`lead:${ip}`, { maximo: 5, janelaMs: 15 * 60_000 });
