@@ -1,0 +1,43 @@
+/* Abertura exclusiva da home. Não altera os componentes compartilhados. */
+#intro { display:none; }
+html.ev-intro-pending #intro {
+  position:fixed; inset:0; z-index:100000; background:#fff;
+  display:flex; align-items:center; justify-content:center;
+  opacity:1; visibility:visible;
+  transition:opacity .8s ease, visibility 0s linear .9s;
+}
+html.ev-intro-pending #intro.out { opacity:0; visibility:hidden; pointer-events:none; }
+#intro .ev-stage {
+  position:relative; width:min(72vw,560px); aspect-ratio:1890/385;
+  transition:transform .9s cubic-bezier(.65,0,.35,1);
+}
+#intro.out .ev-stage { transform:translate(var(--ev-intro-x,0px),var(--ev-intro-y,-34vh)) scale(var(--ev-intro-scale,.4)); }
+#intro .ev-lg { position:absolute; inset:0; background:url('/assets/images/logo-abertura.svg') center/100% 100% no-repeat; }
+#intro .ev-lg-f { clip-path:inset(0 76.56% 0 0); opacity:0; transform:scale(.4) rotate(-12deg); transform-origin:10.93% 50%; }
+#intro .ev-lg-n { clip-path:inset(0 100% 0 23.44%); }
+#intro.go .ev-lg-f { animation:ev-intro-pop .9s .15s cubic-bezier(.2,1.3,.4,1) forwards; }
+#intro.go .ev-lg-n { animation:ev-intro-wipe 1.3s .75s cubic-bezier(.65,0,.25,1) forwards; }
+#intro .ev-shine { position:absolute; inset:0; overflow:hidden; pointer-events:none; opacity:0; }
+#intro .ev-shine::after {
+  content:''; position:absolute; inset:-10% auto -10% 0; width:22%;
+  background:linear-gradient(100deg,transparent,rgba(255,255,255,.95),transparent);
+  transform:translateX(-150%) skewX(-18deg);
+}
+#intro.go .ev-shine { opacity:1; }
+#intro.go .ev-shine::after { animation:ev-intro-sweep 1s 2.2s ease-in-out forwards; }
+#intro .ev-skip {
+  position:absolute; right:20px; bottom:calc(20px + env(safe-area-inset-bottom,0px));
+  background:#fff; border:1px solid #eadfd3; border-radius:99px;
+  padding:10px 18px; color:#705443; font:600 13px Inter,sans-serif; cursor:pointer;
+}
+#intro .ev-skip:focus-visible { outline:2px solid #705443; outline-offset:4px; }
+html.ev-intro-pending .ev-rv { opacity:0; transform:translateY(18px); }
+html.ev-intro-pending .site-in .ev-rv { animation:ev-intro-up .7s cubic-bezier(.2,.7,.2,1) both; animation-delay:calc(var(--ev-i,0)*90ms); }
+@keyframes ev-intro-pop { to { opacity:1; transform:none; } }
+@keyframes ev-intro-wipe { to { clip-path:inset(0 0 0 23.44%); } }
+@keyframes ev-intro-sweep { to { transform:translateX(600%) skewX(-18deg); } }
+@keyframes ev-intro-up { to { opacity:1; transform:none; } }
+@media(prefers-reduced-motion:reduce) {
+  html.ev-intro-pending #intro { display:none; transition:none; }
+  html.ev-intro-pending .ev-rv { opacity:1; transform:none; animation:none !important; }
+}

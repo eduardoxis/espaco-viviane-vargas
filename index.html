@@ -31,12 +31,34 @@
 <link rel="stylesheet" href="/css/home-mobile.css?v=20261023-referencia-sorriso" media="(max-width: 760px)">
 <link rel="stylesheet" href="/css/theme.css?v=20261023-rolagem">
 <link rel="stylesheet" href="/css/header-mobile.css?v=20261023-referencia-sorriso" media="(max-width: 760px)">
+<script>
+(() => {
+  const root = document.documentElement;
+  root.classList.add('js');
+  try { if (sessionStorage.getItem('evIntro')) { root.classList.add('intro-seen'); return; } } catch {}
+  if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) return;
+  root.classList.add('ev-intro-pending');
+  window.evIntroSafety = setTimeout(() => {
+    root.classList.remove('ev-intro-pending');
+    window.dispatchEvent(new Event('ev-intro-fallback'));
+  }, 5000);
+})();
+</script>
+<link rel="preload" as="image" href="/assets/images/logo-abertura.svg">
+<link rel="stylesheet" href="/css/abertura.css?v=20261031">
+<script defer src="/js/abertura.js?v=20261031"></script>
 </head>
 <body class="home-page">
+<div id="intro" role="region" aria-label="Abertura Espaço Viviane Vargas">
+  <div class="ev-stage" role="img" aria-label="Espaço Viviane Vargas">
+    <div class="ev-lg ev-lg-f"></div><div class="ev-lg ev-lg-n"></div><div class="ev-shine"></div>
+  </div>
+  <button class="ev-skip" id="intro-skip" type="button">Pular</button>
+</div>
 
 <a href="#conteudo" class="skip-link">Pular para o conteúdo</a>
 
-<header class="site-header">
+<header class="site-header ev-rv" style="--ev-i:0">
   <div class="container header-top">
     <a href="/" class="logo">
       <img src="/assets/images/logo.webp" alt="Espaço Viviane Vargas" class="logo__mark" width="256" height="256" decoding="async">
@@ -72,14 +94,14 @@
 
 <main id="conteudo">
   <section class="beauty-hero" aria-labelledby="beauty-hero-title">
-    <div class="beauty-hero__visual" aria-hidden="true">
+    <div class="beauty-hero__visual ev-rv" style="--ev-i:4" aria-hidden="true">
       <picture><source media="(max-width: 760px)" srcset="/assets/images/beauty-hero-mobile-v3.png"><img src="/assets/images/beauty-hero-desktop-v3.png" alt="" width="1672" height="941" fetchpriority="high" decoding="async"></picture>
     </div>
     <div class="beauty-hero__inner">
       <div class="beauty-hero__content">
-        <p class="beauty-hero__eyebrow">SALÃO DE BELEZA E ESTÉTICA</p>
-        <h1 class="beauty-hero__title" id="beauty-hero-title"><span>Beleza e<br class="beauty-hero__mobile-break"> cuidado</span> <span>para<br class="beauty-hero__mobile-break"> realçar</span><em>sua essência.</em></h1>
-        <p class="beauty-hero__description">Cabelo, unhas, maquiagem, estética e bem-estar<br class="beauty-hero__break"> em um só lugar, pensado para você se sentir ainda mais única.</p>
+        <p class="beauty-hero__eyebrow ev-rv" style="--ev-i:1">SALÃO DE BELEZA E ESTÉTICA</p>
+        <h1 class="beauty-hero__title ev-rv" style="--ev-i:2" id="beauty-hero-title"><span>Beleza e<br class="beauty-hero__mobile-break"> cuidado</span> <span>para<br class="beauty-hero__mobile-break"> realçar</span><em>sua essência.</em></h1>
+        <p class="beauty-hero__description ev-rv" style="--ev-i:3">Cabelo, unhas, maquiagem, estética e bem-estar<br class="beauty-hero__break"> em um só lugar, pensado para você se sentir ainda mais única.</p>
       </div>
     </div>
   </section>
